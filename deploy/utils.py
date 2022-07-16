@@ -5,6 +5,10 @@ import numpy as np
 def approximate_float(M):
     significand, shift = np.frexp(M)
     significand_q31 = np.round(significand * (1 << 31))
+    if (type(significand_q31) == np.float64):
+        significand_q31 = int(significand_q31)
+    if (type(shift) == np.float64):
+        shift = int(shift)
     return significand_q31, shift
 
 
@@ -34,7 +38,7 @@ def conv_data_to_sparse_encode_1(input):
                                 filter_list.extend([127, 0])
                             filter_list.extend([col_dis-128, input[i][j][k][l]])
                             info_list = [i, j, k, l]
-    elif (len(input.shape) == 4):
+    elif (len(input.shape) == 2):
         info_list = [0, 0]
         for i in range(input.shape[0]):
             for j in range(input.shape[1]):
@@ -48,7 +52,7 @@ def conv_data_to_sparse_encode_1(input):
                     info_list = [i, j]
     else:
         print('wrong filter shape! ' + str(input.shape))
-    return filter_list
+    return np.array(filter_list)
 
 
 # decode using algorithm 1

@@ -2,3 +2,6 @@ model_config_path: '../TinySPOS/configs/xq7o5c62_OzyWp/zi1u3wh0_249/quant_dmtp_s
 func_path: 'inference/Core/Src/quantization_inference.c' 
 data_path: 'inference/Core/Inc/data.h'
 tensor_path: '../TinySPOS/tensor'
+memory_list: '../TinySPOS/statistic.yml'
+func_init: 'init/func_init.txt'
+data_init: 'init/data_init.txt'
