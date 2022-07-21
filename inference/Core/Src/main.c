@@ -19,11 +19,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "func.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "arm_nnfunctions.h"
 
 /* USER CODE END Includes */
+#include "stdio.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
@@ -32,6 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+int stdout_putchar (int ch);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -101,14 +104,16 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  sparse_inference();
   while (1)
   {
-    /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
-		HAL_UART_Transmit(&huart1, data, sizeof(data), 100);
-		HAL_Delay(100);
+		// relu demo
+//		q7_t in_vec[] = {-1, 0, 1, 2};
+		
+		
+//		HAL_UART_Transmit(&huart1, (uint8_t*)&data, sizeof(data), 100);
+		quantization_inference();
+		HAL_Delay(10000);
   }
   /* USER CODE END 3 */
 }
@@ -220,6 +225,11 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+int stdout_putchar(int ch)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+    return ch;
+}
 
 /* USER CODE END 4 */
 

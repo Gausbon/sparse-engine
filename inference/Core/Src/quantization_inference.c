@@ -1,8 +1,8 @@
-#include <Arduino.h>
-#include <arm_nnfunctions.h> /* CMSIS-NN */
+#include "arm_nnfunctions.h"
 #include "data.h"
+#include "func.h"
 
-void quantization_inference() {
+int quantization_inference(void) {
     q7_t section[332*1024] = {0};
     q7_t buf[4*32*32] = {0};
     cmsis_nn_dims input_dims, output_dims, filter_dims, bias_dims;
@@ -11,6 +11,7 @@ void quantization_inference() {
     cmsis_nn_conv_params  conv_params;
     cmsis_nn_fc_params fc_params;
 	  cmsis_nn_pool_params pool_params;
+    cmsis_nn_layernorm_params norm_params;
     
     cmsis_nn_per_tensor_quant_params t_quant_params;
     cmsis_nn_per_channel_quant_params c_quant_params;
@@ -18,6 +19,8 @@ void quantization_inference() {
     cmsis_nn_context ctx;
   	ctx.size = sizeof(buf);
     ctx.buf = buf;
+
+    memcpy(&section,&image,3072);
 	  input_dims.n=1;
 	  input_dims.h=32;
 	  input_dims.w=32;
@@ -206,8 +209,13 @@ void quantization_inference() {
 
 	  memcpy(&section[315392],&section,24576);
 
-	  t_quant_params.multiplier=2097581621;
-	  t_quant_params.shift=-7;
+	  norm_params.activation.max=127;
+	  norm_params.activation.min=-128;
+	  norm_params.input_offset=128;
+	  norm_params.output_offset=-74;
+
+	  t_quant_params.multiplier=1376040192;
+	  t_quant_params.shift=-8;
 
 	  arm_layernorm_s8(&ctx,&t_quant_params,256,64,&weight_11,&bias_11,&section,&section[282624]);
 
@@ -219,7 +227,6 @@ void quantization_inference() {
 	  fc_params.output_offset=-5;
 
 	  t_quant_params.multiplier=1488163072;
-	  t_quant_params.shift=-8;
 
 	  arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section,&filter_dims,&weight_12,&bias_dims,&bias_12,&output_dims,&section[315392],24194);
 
@@ -229,7 +236,7 @@ void quantization_inference() {
 
 	  arm_softmax_s8_outquant(&section,1024,256,2001747328,-4,1,1073741824,-7,-128,&section);
 
-	  arm_nn_batch_mat_mult_s8(&section,&section[315392.0],0,&section[24576],1400183945,-6,256,256,16,128,5,-4,4,-127,128);
+	  arm_nn_batch_mat_mult_s8(&ctx,&section,&section[315392.0],0,&section[24576],1400183945,-6,256,256,16,128,5,-4,4,-127,128);
 
 	  arm_transpose_bnc_to_nbc_q7(4,4096,1,&section[24576],&section[184320]);
 
@@ -246,8 +253,10 @@ void quantization_inference() {
 
 	  memcpy(&section[315392],&section,24576);
 
-	  t_quant_params.multiplier=2039608125;
-	  t_quant_params.shift=-7;
+	  norm_params.input_offset=89;
+	  norm_params.output_offset=-45;
+
+	  t_quant_params.multiplier=1223694208;
 
 	  arm_layernorm_s8(&ctx,&t_quant_params,256,64,&weight_14,&bias_14,&section,&section[241664]);
 
@@ -330,8 +339,11 @@ void quantization_inference() {
 
 	  memcpy(&section[323584],&section,16384);
 
-	  t_quant_params.multiplier=1355797736;
-	  t_quant_params.shift=-6;
+	  norm_params.input_offset=128;
+	  norm_params.output_offset=-93;
+
+	  t_quant_params.multiplier=1123438976;
+	  t_quant_params.shift=-8;
 
 	  arm_layernorm_s8(&ctx,&t_quant_params,256,96,&weight_21,&bias_21,&section,&section[192512]);
 
@@ -341,7 +353,6 @@ void quantization_inference() {
 	  fc_params.output_offset=-5;
 
 	  t_quant_params.multiplier=1480947584;
-	  t_quant_params.shift=-8;
 
 	  arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section,&filter_dims,&weight_22,&bias_dims,&bias_22,&output_dims,&section[323584],27648);
 
@@ -351,7 +362,7 @@ void quantization_inference() {
 
 	  arm_softmax_s8_outquant(&section,512,256,1737567872,-4,4,1073741824,-7,-128,&section);
 
-	  arm_nn_batch_mat_mult_s8(&section,&section[323584.0],0,&section[16384],1359316022,-6,256,256,48,128,5,-2,2,-127,128);
+	  arm_nn_batch_mat_mult_s8(&ctx,&section,&section[323584.0],0,&section[16384],1359316022,-6,256,256,48,128,5,-2,2,-127,128);
 
 	  arm_transpose_bnc_to_nbc_q7(2,12288,1,&section[16384],&section[61440]);
 
@@ -369,8 +380,10 @@ void quantization_inference() {
 
 	  memcpy(&section[323584],&section,16384);
 
-	  t_quant_params.multiplier=1291164128;
-	  t_quant_params.shift=-6;
+	  norm_params.input_offset=95;
+	  norm_params.output_offset=-59;
+
+	  t_quant_params.multiplier=1918940544;
 
 	  arm_layernorm_s8(&ctx,&t_quant_params,256,96,&weight_24,&bias_24,&section,&section[274432]);
 
@@ -378,6 +391,7 @@ void quantization_inference() {
 	  fc_params.output_offset=-128;
 
 	  t_quant_params.multiplier=1127827712;
+	  t_quant_params.shift=-6;
 
 	  arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[274432],&filter_dims,&weight_25,&bias_dims,&bias_25,&output_dims,&section,12288);
 
@@ -446,7 +460,7 @@ void quantization_inference() {
 
 	  arm_softmax_s8_outquant(&section[225280],1,256,2020102016,-3,-108,1073741824,-7,-128,&section);
 
-	  arm_nn_batch_mat_mult_s8(&section,&section[290816],0,&section[65536],2006289064,-7,1,256,512,128,128,-128,1,-127,128);
+	  arm_nn_batch_mat_mult_s8(&ctx,&section,&section[290816],0,&section[65536],2006289064,-7,1,256,512,128,128,-128,1,-127,128);
 
 	  memcpy(&section,&section[65536],65536);
 

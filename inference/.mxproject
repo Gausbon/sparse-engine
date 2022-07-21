@@ -9,17 +9,17 @@ CDefines=USE_HAL_DRIVER;STM32F746xx;USE_HAL_DRIVER;USE_HAL_DRIVER;
 [PreviousGenFiles]
 AdvancedFolderStructure=true
 HeaderFileListSize=3
-HeaderFiles#0=D:/project/cmsis-nn/uartRev1/Core/Inc/stm32f7xx_it.h
-HeaderFiles#1=D:/project/cmsis-nn/uartRev1/Core/Inc/stm32f7xx_hal_conf.h
-HeaderFiles#2=D:/project/cmsis-nn/uartRev1/Core/Inc/main.h
+HeaderFiles#0=D:/project/cmsis-nn/mytest/Core/Inc/stm32f7xx_it.h
+HeaderFiles#1=D:/project/cmsis-nn/mytest/Core/Inc/stm32f7xx_hal_conf.h
+HeaderFiles#2=D:/project/cmsis-nn/mytest/Core/Inc/main.h
 HeaderFolderListSize=1
-HeaderPath#0=D:/project/cmsis-nn/uartRev1/Core/Inc
+HeaderPath#0=D:/project/cmsis-nn/mytest/Core/Inc
 HeaderFiles=;
 SourceFileListSize=3
-SourceFiles#0=D:/project/cmsis-nn/uartRev1/Core/Src/stm32f7xx_it.c
-SourceFiles#1=D:/project/cmsis-nn/uartRev1/Core/Src/stm32f7xx_hal_msp.c
-SourceFiles#2=D:/project/cmsis-nn/uartRev1/Core/Src/main.c
+SourceFiles#0=D:/project/cmsis-nn/mytest/Core/Src/stm32f7xx_it.c
+SourceFiles#1=D:/project/cmsis-nn/mytest/Core/Src/stm32f7xx_hal_msp.c
+SourceFiles#2=D:/project/cmsis-nn/mytest/Core/Src/main.c
 SourceFolderListSize=1
-SourcePath#0=D:/project/cmsis-nn/uartRev1/Core/Src
+SourcePath#0=D:/project/cmsis-nn/mytest/Core/Src
 SourceFiles=;
 

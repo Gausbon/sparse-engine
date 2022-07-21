@@ -1,8 +1,8 @@
-#include <Arduino.h>
-#include <arm_nnfunctions.h> /* CMSIS-NN */
+#include "arm_nnfunctions.h"
 #include "data.h"
+#include "func.h"
 
-void quantization_inference() {
+int quantization_inference(void) {
     q7_t section[332*1024] = {0};
     q7_t buf[4*32*32] = {0};
     cmsis_nn_dims input_dims, output_dims, filter_dims, bias_dims;
@@ -11,6 +11,7 @@ void quantization_inference() {
     cmsis_nn_conv_params  conv_params;
     cmsis_nn_fc_params fc_params;
 	  cmsis_nn_pool_params pool_params;
+    cmsis_nn_layernorm_params norm_params;
     
     cmsis_nn_per_tensor_quant_params t_quant_params;
     cmsis_nn_per_channel_quant_params c_quant_params;
@@ -18,3 +19,5 @@ void quantization_inference() {
     cmsis_nn_context ctx;
   	ctx.size = sizeof(buf);
     ctx.buf = buf;
+
+    memcpy(&section,&image,3072);

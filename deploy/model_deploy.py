@@ -1,11 +1,12 @@
 import os
 import numpy as np
 import yaml
+from keras.datasets import cifar10
 from utils import conv_data_to_sparse, approximate_float
 from file_write import File_writer
 
 class Model_deployment():
-    def __init__(self):
+    def __init__(self, new_image=False):
 
         # basic info
         with open('config.yml', 'r') as file:
@@ -31,13 +32,25 @@ class Model_deployment():
         self.conv_dict = {}         # conv_params
         self.fc_dict = {}           # fc_params
         self.norm_dict = {}         # norm_params
-        self.self_atten_dict = {}   # self_atten_params
+        self.pooling_dict = {}      # pool params
         self.t_quant_dict = {}      # per_tensor
         self.c_quant_dict = {}      # per_channel
 
         # block counter for conv and linear
         self.counter = 0
         
+        if (new_image):
+            _, (X_test, _) = cifar10.load_data()
+            np.random.shuffle(X_test)
+            X = X_test[0]
+            assert(X.shape == (32, 32, 3))
+            np.save('image.npy', X)
+            self.image = X
+        else:
+            self.image = np.load('image.npy')
+        self.size = self.image.shape[0]
+        self.image = self.image.astype(int) - 128
+        print(self.image.shape)
         
     def load_tensor(self):
 
@@ -98,11 +111,11 @@ class Model_deployment():
         
         # sort by the index: {blockname}_{index}
         self.downsample_list_dict = dict(sorted(self.downsample_list_dict.items(), 
-                key=lambda x: x[0].split('_')[-1]))
+                key=lambda x: int(x[0].split('_')[-1])))
         self.mv2block_list_dict = dict(sorted(self.mv2block_list_dict.items(), 
-                key=lambda x: x[0].split('_')[-1]))
+                key=lambda x: int(x[0].split('_')[-1])))
         self.transformer_list_dict = dict(sorted(self.transformer_list_dict.items(), 
-                key=lambda x: x[0].split('_')[-1]))
+                key=lambda x: int(x[0].split('_')[-1])))
 
 
     def deploy_add(self, name:str, block_dict:dict, 
@@ -303,7 +316,9 @@ class Model_deployment():
         
         # init
         param_list = ['&' + in_section_1, '&' + in_section_2, 0, '&' + out_section]
-
+        if (not is_trans):
+            param_list.insert(0, '&ctx')
+            
         # output quant
         qi1_scale = block_dict[name + 'qi1.scale']
         qi2_scale = block_dict[name + 'qi2.scale']
@@ -433,7 +448,7 @@ class Model_deployment():
         bias = block_dict[name + 'layernorm_module.bias']
         bias_name = 'bias_' + str(self.counter)
         param_list.append(('&' + bias_name))
-        self.file_writer.write_tensor(bias, bias_name, True, 'q7_t')
+        self.file_writer.write_tensor(bias, bias_name, True, 'q31_t')
 
         # output operation and parse conv params
         self.norm_dict['activation.max'] = 127
@@ -441,12 +456,10 @@ class Model_deployment():
         # notice the input offset is negative zero point
         self.norm_dict['input_offset'] = -block_dict[name + 'qi.zero_point']
         self.norm_dict['output_offset'] = block_dict[name + 'qo.zero_point']
+        self.file_writer.write_param_parser('norm_params', self.norm_dict)
 
         # parse quant params
-        qi_scale = block_dict[name + 'qi.scale']
-        qo_scale = block_dict[name + 'qo.scale']
-        qw_scale = block_dict[name + 'qw.scale']
-        M = qi_scale * qw_scale / qo_scale
+        M = block_dict[name + 'M']
         mult, shift = approximate_float(M)
         self.t_quant_dict['multiplier'] = mult
         self.t_quant_dict['shift'] = shift
@@ -782,7 +795,7 @@ class Model_deployment():
         print('Block:' + name + ' deploy completed')
 
 
-    def deploy_model(self, batch:int, size:int):
+    def deploy_model(self, batch=1):
         model_config_path = self.config['model_config_path']
         with open(model_config_path, 'r') as file:
             model_config = yaml.load(file, Loader=yaml.FullLoader)
@@ -790,23 +803,27 @@ class Model_deployment():
         last_channel = model_config['last_channel']
         section = 'section'
 
+        # init file
         with open(self.config['func_init'], 'r') as r_file:
             self.file_writer.write_file(r_file, 'func')
 
         with open(self.config['data_init'], 'r') as r_file:
             self.file_writer.write_file(r_file, 'data')
 
+        self.file_writer.write_tensor(self.image, 'image', True, 'q7_t')
+        
+        # deploy quantization inference
         for key, value in self.downsample_list_dict.items():
             key_list = key.split('_')
             if (key_list[1] == 'tokenizer'):
-                self.deploy_tokenizer(batch, value, self.size_list, size, section)
+                self.deploy_tokenizer(batch, value, self.size_list, self.size, section)
             elif (key_list[1] == 'mv2block'):
-                self.deploy_mv2block(batch, key, value, self.size_list, size, section)
-            size /= 2
+                self.deploy_mv2block(batch, key, value, self.size_list, self.size, section)
+            self.size /= 2
             print('-'*70)
 
         for key, value in self.mv2block_list_dict.items():
-            self.deploy_mv2block(batch, key, value, self.size_list, size, section)
+            self.deploy_mv2block(batch, key, value, self.size_list, self.size, section)
             print('-'*70)
 
         embedding_dim = []
@@ -818,16 +835,16 @@ class Model_deployment():
             layer_count = int(key_list[-1])
             type_index = int(key_list[-2][-1])
             self.deploy_transformer(batch, key, value, self.size_list, embedding_dim[type_index][layer_count],
-                size, section)
+                self.size, section)
             print('-'*70)
 
         self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict, self.size_list, 
-            size, section)
+            self.size, section)
         print('-'*70)
 
         for key, value in self.pooling_list_dict.items():
             self.deploy_global_pooling(batch, key, value, self.size_list, 
-                size, last_channel, section)
+                self.size, last_channel, section)
             print('-'*70)
 
         self.deploy_classifier(batch, 'classifier', self.classifier_dict, self.size_list,
@@ -895,4 +912,4 @@ if __name__ == '__main__':
     model_deployment = Model_deployment()
     model_deployment.load_tensor()
     model_deployment.print_tensor()
-    model_deployment.deploy_model(1, 32)
+    model_deployment.deploy_model()

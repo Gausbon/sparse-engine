@@ -4,8 +4,6 @@
 
 &emsp; &emsp; 该项目基于[TinySPOS](https://github.com/Roxbili/TinySPOS)，在通过NAS方法寻找可部署在Tiny设备上的稀疏神经网络后，自动生成可在Tiny设备上部署的代码
 
-&emsp; &emsp; 针对Tiny设备使用的CMSIS库文件，请参考[CMSIS_5_FOR_TINYSPOS](https://github.com/Gausbon/CMSIS_5_FOR_TINYSPOS)
-
 ## 2. 使用说明
 ### 2.1 配置环境
 &emsp; &emsp; 若要运行环境配置，请使用命令：

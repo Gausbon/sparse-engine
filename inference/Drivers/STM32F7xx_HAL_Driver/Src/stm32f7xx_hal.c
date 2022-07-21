@@ -52,6 +52,7 @@
 /**
  * @brief STM32F7xx HAL Driver version number V1.2.9
    */
+#define DEBUG_ENABLE_SEMIHOST
 #define __STM32F7xx_HAL_VERSION_MAIN   (0x01) /*!< [31:24] main version */
 #define __STM32F7xx_HAL_VERSION_SUB1   (0x02) /*!< [23:16] sub1 version */
 #define __STM32F7xx_HAL_VERSION_SUB2   (0x09) /*!< [15:8]  sub2 version */
