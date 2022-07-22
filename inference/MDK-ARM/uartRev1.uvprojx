@@ -467,6 +467,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_pool_s8_with_quantization.c</FilePath>
             </File>
+            <File>
+              <FileName>arm_nn_transpose_bnc_to_nbc_q7.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_nn_transpose_bnc_to_nbc_q7.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

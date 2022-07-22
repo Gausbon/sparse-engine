@@ -7,7 +7,7 @@ int32_t arm_fc_s8_sparse_get_buffer_size(const cmsis_nn_dims *output_dims)
     return 0;
 }
 
-arm_status arm_fc_s8_sparse (const cmsis_nn_context *ctx,
+arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
                             const cmsis_nn_fc_params *fc_params,
                             const cmsis_nn_per_tensor_quant_params *quant_params,
                             const cmsis_nn_dims *input_dims,

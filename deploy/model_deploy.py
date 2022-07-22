@@ -50,7 +50,6 @@ class Model_deployment():
             self.image = np.load('image.npy')
         self.size = self.image.shape[0]
         self.image = self.image.astype(int) - 128
-        print(self.image.shape)
         
     def load_tensor(self):
 
@@ -122,7 +121,7 @@ class Model_deployment():
             in_section_1:str, in_section_2:str, out_section:str, count:int):
         
         # init
-        param_list = [('&' + in_section_1), ('&' + in_section_2)]
+        param_list = [in_section_1, in_section_2]
 
         # quant param
         qi1_scale = block_dict[name + 'qi1.scale']
@@ -137,7 +136,7 @@ class Model_deployment():
         
         # func call
         param_list.extend([qi1_offset, qi1_mult, qi1_shift, qi2_offset, qi2_mult, qi2_shift,
-            0, ('&' + out_section), qo_offset, qo_mult, qo_shift, count])
+            0, out_section, qo_offset, qo_mult, qo_shift, -128, 127, count])
         self.file_writer.write_func_call('arm_elementwise_add_s8', param_list)
 
 
@@ -150,7 +149,7 @@ class Model_deployment():
             param_list.append('&dw_conv_params')
         else:
             param_list.append('&conv_params')
-        param_list.extend(['&c_quant_params', '&input_dims', ('&' + in_section)])
+        param_list.extend(['&c_quant_params', '&input_dims', in_section])
 
         # weight operation
         weight = block_dict[name + 'conv_module.weight'].transpose((0, 2, 3, 1))
@@ -158,8 +157,8 @@ class Model_deployment():
         if (is_sparse):
             weight = conv_data_to_sparse(weight)
         weight_name = 'weight_' + str(self.counter)
-        param_list.extend(['&filter_dims', ('&' + weight_name)])
-        self.file_writer.write_tensor(weight, weight_name, True, 'q7_t')
+        param_list.extend(['&filter_dims', weight_name])
+        self.file_writer.write_static_tensor(weight, weight_name, 'q7_t')
         
         # bias operation
         if ((name + 'conv_module.bias') in block_dict.keys()):
@@ -167,8 +166,8 @@ class Model_deployment():
         else:
             bias = np.zeros(weight_shape[-1])
         bias_name = 'bias_' + str(self.counter)
-        param_list.extend(['&bias_dims', ('&' + bias_name)])
-        self.file_writer.write_tensor(bias, bias_name, True, 'q31_t')
+        param_list.extend(['&bias_dims', bias_name])
+        self.file_writer.write_static_tensor(bias, bias_name, 'q31_t')
 
         # channel & filter dim info
         self.input_dict['c'], self.output_dict['c'] = weight_shape[3], weight_shape[0]
@@ -178,7 +177,7 @@ class Model_deployment():
         self.file_writer.write_param_parser('output_dims', self.output_dict)
 
         # output operation and parse conv params
-        param_list.extend(['&output_dims',('&' + out_section)])
+        param_list.extend(['&output_dims', out_section])
         self.conv_dict['activation.max'] = 127
         self.conv_dict['activation.min'] = -128
         # notice the input offset is negative zero point
@@ -187,6 +186,7 @@ class Model_deployment():
         if (is_depthwise):
             self.conv_dict['ch_mult'] = 1
             self.file_writer.write_param_parser('dw_conv_params', self.conv_dict)
+            self.conv_dict.pop('ch_mult')
         else:
             self.file_writer.write_param_parser('conv_params', self.conv_dict)
 
@@ -195,12 +195,12 @@ class Model_deployment():
         mult, shift = approximate_float(M)
         mult_name = 'mult_' + str(self.counter)
         shift_name = 'shift_' + str(self.counter)
-        self.file_writer.write_tensor(mult, mult_name, True, 'q31_t')
-        self.file_writer.write_tensor(shift, shift_name, True, 'q31_t')
+        self.file_writer.write_static_tensor(mult, mult_name, 'q31_t')
+        self.file_writer.write_static_tensor(shift, shift_name, 'q31_t')
         
         quant_dict = {}
-        quant_dict['multiplier'] = '&' + mult_name
-        quant_dict['shift'] = '&' + shift_name
+        quant_dict['multiplier'] = mult_name
+        quant_dict['shift'] = shift_name
         self.file_writer.write_param_parser('c_quant_params', quant_dict)
 
         if (is_sparse):
@@ -225,7 +225,7 @@ class Model_deployment():
 
         # init
         param_list = ['&ctx', '&fc_params', '&t_quant_params', '&input_dims', 
-            ('&' + in_section)]
+            in_section]
         
         # weight operation
         weight = block_dict[name + 'fc_module.weight']
@@ -233,8 +233,8 @@ class Model_deployment():
         if (is_sparse):
             weight = conv_data_to_sparse(weight)
         weight_name = 'weight_' + str(self.counter)
-        param_list.extend(['&filter_dims', ('&' + weight_name)])
-        self.file_writer.write_tensor(weight, weight_name, True, 'q7_t')
+        param_list.extend(['&filter_dims', weight_name])
+        self.file_writer.write_static_tensor(weight, weight_name, 'q7_t')
         
         self.filter_dict['n'] = weight_shape[0]
         self.output_dict['c'] = weight_shape[1]
@@ -247,11 +247,11 @@ class Model_deployment():
         else:
             bias = np.zeros(weight_shape[1])
         bias_name = 'bias_' + str(self.counter)
-        param_list.extend(['&bias_dims', ('&' + bias_name)])
-        self.file_writer.write_tensor(bias, bias_name, True, 'q31_t')
+        param_list.extend(['&bias_dims', bias_name])
+        self.file_writer.write_static_tensor(bias, bias_name, 'q31_t')
 
         # output operation and parsefc params
-        param_list.extend(['&output_dims',('&' + out_section)])
+        param_list.extend(['&output_dims', out_section])
         self.fc_dict['activation.max'] = 127
         self.fc_dict['activation.min'] = -128
         # notice the input offset is negative zero point
@@ -270,7 +270,7 @@ class Model_deployment():
 
         if (is_sparse):
             param_list.append(weight.size)
-
+            
         # function call generate
         func_name = 'arm_fully_connected_s8'
         if (is_sparse):
@@ -284,7 +284,7 @@ class Model_deployment():
             in_section:str, out_section:str):
 
         # init
-        param_list = ['&ctx', '&pool_params', '&input_dims', ('&' + in_section), 
+        param_list = ['&ctx', '&pool_params', '&input_dims', in_section, 
                 '&filter_dims', '&output_dims']
         
         self.file_writer.write_param_parser('input_dims', self.input_dict)
@@ -299,7 +299,7 @@ class Model_deployment():
         qi_scale = block_dict[name + 'qi.scale']
         qo_scale = block_dict[name + 'qo.scale']
         mult, shift = approximate_float(qi_scale / qo_scale)
-        param_list.extend([mult, shift, '&' + out_section])
+        param_list.extend([mult, shift, out_section])
 
         # func call
         func_name = 'arm_'
@@ -315,7 +315,7 @@ class Model_deployment():
             dim_rc:int, is_trans:bool, in_section_1:str, in_section_2:str, out_section:str):
         
         # init
-        param_list = ['&' + in_section_1, '&' + in_section_2, 0, '&' + out_section]
+        param_list = [in_section_1, in_section_2, 'NULL', out_section]
         if (not is_trans):
             param_list.insert(0, '&ctx')
             
@@ -333,7 +333,7 @@ class Model_deployment():
         qi1_offset = -block_dict[name + 'qi1.zero_point']
         qi2_offset = -block_dict[name + 'qi2.zero_point']
         qo_offset = block_dict[name + 'qo.zero_point']
-        param_list.extend([qi1_offset, qi2_offset, qo_offset, dim_b, -127, 128])
+        param_list.extend([qi1_offset, qi2_offset, qo_offset, dim_b, -128, 127])
         
         if (is_trans):
             func_name = 'arm_nn_batch_mat_mult_nt_t_s8'
@@ -346,7 +346,7 @@ class Model_deployment():
             in_section:str, out_section:str):
 
         # init
-        param_list = ['&' + in_section, dim_b, dim_c]
+        param_list = [in_section, dim_b, dim_c]
 
         # input quant
         qi_scale = block_dict[name + 'qi.scale']
@@ -355,9 +355,9 @@ class Model_deployment():
         qo_mult, qo_shift = approximate_float(qo_scale)
         qi_offset = -block_dict[name + 'qi.zero_point']
         qo_offset = block_dict[name + 'qo.zero_point']
-        param_list.extend([qi_mult, qi_shift, qi_offset, qo_mult, qo_shift, qo_offset, 
-                '&' + out_section])
-        self.file_writer.write_func_call('arm_softmax_s8_outquant', param_list)
+        param_list.extend([qi_mult, qi_shift, 0, 
+                out_section])
+        self.file_writer.write_func_call('arm_softmax_s8', param_list)
 
 
     def deploy_self_attn(self, name:str, block_dict:dict, size_list:list,
@@ -369,7 +369,7 @@ class Model_deployment():
         bncx3_size = size_list.pop()[1]
         self.input_dict['n'] = b * n
         self.deploy_linear(name + 'qqkv.', block_dict, True,
-                    section, section+'['+str(self.max_size-bncx3_size)+']')
+                    section, '&'+section+'['+str(self.max_size-bncx3_size)+']')
         
         # bnc transpose: tail -> head
         # from (b, n, 3, head_nums, c / head_nums) 
@@ -378,8 +378,10 @@ class Model_deployment():
         # current memory: [..... q k v | reserve]
         size_list.pop()
         self.deploy_transpose((b * n), (3 * head_nums),
-                    (c / head_nums), section,
-                    section + '[' + str(self.max_size - bncx3_size) + ']')
+                    (c / head_nums), '&'+section+'['+str(self.max_size-bncx3_size)+']',
+                    section)
+        self.file_writer.writeln('memcpy(&' + section + '[' 
+                    + str(self.max_size-bncx3_size)+'],'+section+','+str(bncx3_size) + ');', 'func')
         
         # transpose K
         # but in CMSIS no transpose there
@@ -393,8 +395,8 @@ class Model_deployment():
         self.deploy_matmul('self_attn.qmatmul_qk.', block_dict, (head_nums * b),
                     n, (c / head_nums),
                     n, True,
-                    section + '[' + str(self.max_size - bncx3_size)+ ']',  # q
-                    section + '[' + str(self.max_size - bncx3_size*2/3)+ ']',  # k
+                    '&' + section + '[' + str(self.max_size - bncx3_size)+ ']',  # q
+                    '&' + section + '[' + str(self.max_size - bncx3_size*2//3)+ ']',  # k
                     section)
 
         # in_place softmax
@@ -412,8 +414,8 @@ class Model_deployment():
         self.deploy_matmul('self_attn.qmatmul_attnv.', block_dict, (head_nums * b),
                     n, n, (c / head_nums), False,
                     section, # attn
-                    section + '[' + str(self.max_size - bncx3_size/3)+ ']',  # v
-                    section + '[' + str(attn_size)+ ']')
+                    '&' + section + '[' + str(self.max_size - bncx3_size//3)+ ']',  # v
+                    '&' + section + '[' + str(attn_size)+ ']')
 
         # bnc transpose
         # from (head_nums*b, n, c / head_nums)
@@ -421,34 +423,22 @@ class Model_deployment():
         # current memory: [(attn) attn*v ... bnc_value | reserve]
         bnc_size = size_list.pop()[1]
         self.deploy_transpose(head_nums, (b * n * c / head_nums),
-                    1, section + '[' + str(attn_size)+ ']',
-                    section + '[' + str(self.max_size - bnc_size) + ']')
+                    1, '&' + section + '[' + str(attn_size)+ ']',
+                    '&' + section + '[' + str(self.max_size - bnc_size) + ']')
 
         # self attention final linear
         # current memory: [proj ... bnc_value | reserve]
         size_list.pop()
         self.input_dict['n'] = b * n
         self.deploy_linear('self_attn.qproj.', block_dict, True,
-                    section + '[' + str(self.max_size - bnc_size) + ']', section)
+                    '&' + section + '[' + str(self.max_size - bnc_size) + ']', section)
 
 
     def deploy_norm(self, name:str, block_dict:dict, dim_b:int, dim_c:int, 
             in_section:str, out_section:str):
 
         # init
-        param_list = ['&ctx', '&t_quant_params', dim_b, dim_c]
-
-        # weight operation
-        weight = block_dict[name + 'layernorm_module.weight']
-        weight_name = 'weight_' + str(self.counter)
-        param_list.append(('&' + weight_name))
-        self.file_writer.write_tensor(weight, weight_name, True, 'q7_t')
-        
-        # bias operation
-        bias = block_dict[name + 'layernorm_module.bias']
-        bias_name = 'bias_' + str(self.counter)
-        param_list.append(('&' + bias_name))
-        self.file_writer.write_tensor(bias, bias_name, True, 'q31_t')
+        param_list = ['&ctx', '&norm_params', '&t_quant_params', dim_b, dim_c]
 
         # output operation and parse conv params
         self.norm_dict['activation.max'] = 127
@@ -458,6 +448,18 @@ class Model_deployment():
         self.norm_dict['output_offset'] = block_dict[name + 'qo.zero_point']
         self.file_writer.write_param_parser('norm_params', self.norm_dict)
 
+        # weight operation
+        weight = block_dict[name + 'layernorm_module.weight']
+        weight_name = 'weight_' + str(self.counter)
+        param_list.append(weight_name)
+        self.file_writer.write_static_tensor(weight, weight_name, 'q7_t')
+        
+        # bias operation
+        bias = block_dict[name + 'layernorm_module.bias']
+        bias_name = 'bias_' + str(self.counter)
+        param_list.append(bias_name)
+        self.file_writer.write_static_tensor(bias, bias_name, 'q31_t')
+
         # parse quant params
         M = block_dict[name + 'M']
         mult, shift = approximate_float(M)
@@ -465,8 +467,8 @@ class Model_deployment():
         self.t_quant_dict['shift'] = shift
         self.file_writer.write_param_parser('t_quant_params', self.t_quant_dict)
 
-        param_list.extend(['&' + in_section, '&' + out_section])
-        self.file_writer.write_func_call('arm_layernorm_s8', param_list)
+        param_list.extend([in_section, out_section])
+        self.file_writer.write_func_call('arm_nn_layernorm_s8', param_list)
 
         self.counter += 1
 
@@ -474,8 +476,8 @@ class Model_deployment():
     def deploy_transpose(self, dim_b:int, dim_n:int, dim_c:int,
             input_section:str, output_section:str):
 
-        param_list = [dim_b, dim_n, dim_c, '&' + input_section, '&' + output_section]
-        self.file_writer.write_func_call('arm_transpose_bnc_to_nbc_q7', param_list)
+        param_list = [dim_b, dim_n, dim_c, input_section, output_section]
+        self.file_writer.write_func_call('arm_nn_transpose_bnc_to_nbc_q7', param_list)
 
 
     def deploy_tokenizer(self, batch:int, block_dict:dict, size_list:list, 
@@ -488,7 +490,7 @@ class Model_deployment():
         self.conv_dict['stride.h'], self.conv_dict['stride.w'] = 1, 1
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
         self.deploy_conv(self, 'qconv_relu.', block_dict, False, False,
-                    section, section+'['+str(self.max_size - size_0[1])+']')
+                    section, '&'+section+'['+str(self.max_size - size_0[1])+']')
 
         # max_pool: tail -> head
         size_list.pop()
@@ -500,7 +502,7 @@ class Model_deployment():
         self.pooling_dict['padding.h'] , self.pooling_dict['padding.w'] = 1, 1
 
         self.deploy_pooling(self, 'qmaxpool.', block_dict, False,
-                section+'['+str(self.max_size - size_0[1])+']', section)
+                '&'+section+'['+str(self.max_size - size_0[1])+']', section)
 
 
     def deploy_mv2block(self, batch:int, name:str, block_dict:dict, size_list:list, 
@@ -531,7 +533,7 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv.0.', block_dict, config_list[2], False,
-                    section, section+'['+str(self.max_size - conv0_size)+']')
+                    section, '&'+section+'['+str(self.max_size - conv0_size)+']')
 
         # conv_1: tail -> head
         size_list.pop()
@@ -542,7 +544,7 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv.1.', block_dict, config_list[2], True,
-                section+'['+str(self.max_size - conv0_size)+']', section)
+                '&'+section+'['+str(self.max_size - conv0_size)+']', section)
 
         # conv_2: head -> tail
         conv2_size = size_list.pop()[1]
@@ -553,10 +555,10 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv.2.', block_dict, config_list[2], False,
-                    section, section+'['+str(self.max_size - conv2_size)+']')
+                    section, '&'+section+'['+str(self.max_size - conv2_size)+']')
 
         # copy output from tail to head
-        self.file_writer.writeln('memcpy(&' + section + ',&' + section 
+        self.file_writer.writeln('memcpy(' + section + ',&' + section 
                 + '[' + str(self.max_size - conv2_size)+'],' + str(conv2_size) + ');', 'func')
 
         print('Block:' + name + ' deploy completed')
@@ -584,7 +586,7 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv1.', block_dict, True, False,
-                    section+'['+str(self.max_size - conv1_size)+']', section)
+                    '&'+section+'['+str(self.max_size - conv1_size)+']', section)
 
         # conv_2: tail -> head
         bnc_size = size_list.pop()[1]
@@ -595,7 +597,7 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv2.', block_dict, True, False,
-                    section, section+'['+str(self.max_size - conv1_size)+']')
+                    section, '&'+section+'['+str(self.max_size - conv1_size)+']')
 
         # transpose from (B C H W) to (B N C)
         # but in CMSIS no transpose there
@@ -604,16 +606,16 @@ class Model_deployment():
         # copy shortcut data from head to tail
         norm_batch = batch * input_size * input_size
         self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - bnc_size)
-                    + '],&' + section + ',' + str(bnc_size) + ');', 'func')
+                    + '],' + section + ',' + str(bnc_size) + ');', 'func')
         self.max_size -= bnc_size
 
         # pre_norm: head -> head
         pre_norm_size = size_list.pop()[1]
         self.deploy_norm('qpre_norm.', block_dict, norm_batch, embedding_dim,
-                    section, section+'['+str(self.max_size-pre_norm_size)+']')
-        self.file_writer.writeln('memcpy(&' + section +',&' + 
+                    section, '&'+section+'['+str(self.max_size-pre_norm_size)+']')
+        self.file_writer.writeln('memcpy(' + section +',&' + 
                     section+'['+str(self.max_size-pre_norm_size)+'],'+
-                    str(pre_norm_size), 'func')
+                    str(pre_norm_size) + ');', 'func')
 
         # self attention
         self.deploy_self_attn('self_attn.', block_dict, size_list,
@@ -623,41 +625,41 @@ class Model_deployment():
         self.max_size += bnc_size
         size_list.pop()
         self.deploy_add('qadd1.', block_dict, section, 
-            section+'['+str(self.max_size-bnc_size)+']',
-            section+'['+str(bnc_size)+']',bnc_size)
+            '&'+section+'['+str(self.max_size-bnc_size)+']',
+            '&'+section+'['+str(bnc_size)+']',bnc_size)
 
         # copy to head
-        self.file_writer.writeln('memcpy(&' + section + ',&'
+        self.file_writer.writeln('memcpy(' + section + ',&'
                     + section+'['+str(bnc_size)+'],' + str(bnc_size) + ');', 'func')
 
         # copy in to shortcut
         self.file_writer.writeln('memcpy(&' + section+'['+str(self.max_size-bnc_size)+']'
-                + ',&' + section + ',' + str(bnc_size) + ');', 'func')
+                + ',' + section + ',' + str(bnc_size) + ');', 'func')
         self.max_size -= bnc_size
 
         # norm1: head -> tail
         norm1_size = size_list.pop()[1]
         self.deploy_norm('qnorm1.', block_dict, norm_batch, 
-                    embedding_dim, section, section+'['+str(self.max_size-norm1_size)+']')
+                    embedding_dim, section, '&'+section+'['+str(self.max_size-norm1_size)+']')
         
         # linear relu1: tail -> head
         size_list.pop()
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear_relu1.', block_dict, True,
-                    section+'['+str(self.max_size-norm1_size)+']', section)
+                    '&'+section+'['+str(self.max_size-norm1_size)+']', section)
 
         # linear2: head -> tail
         linear2_size = size_list.pop()[1]
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear2.', block_dict, True,
-                    section, section+'['+str(self.max_size-linear2_size)+']')
+                    section, '&'+section+'['+str(self.max_size-linear2_size)+']')
 
         # add2: tail + tail -> head
         self.max_size += bnc_size
         size_list.pop()
         self.deploy_add('qadd2.', block_dict, 
-            section+'['+str(self.max_size-linear2_size-bnc_size)+']', 
-            section+'['+str(self.max_size-bnc_size)+']',
+            '&'+section+'['+str(self.max_size-linear2_size-bnc_size)+']', 
+            '&'+section+'['+str(self.max_size-bnc_size)+']',
             section,bnc_size)
 
         # transpose from (B N C) to (B C H W)
@@ -673,7 +675,7 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv3.', block_dict, True, False,
-                    section, section+'['+str(self.max_size-conv3_size)+']')
+                    section, '&'+section+'['+str(self.max_size-conv3_size)+']')
 
         # conv_4: tail -> head
         size_list.pop()
@@ -684,7 +686,7 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv4.', block_dict, True, False,
-                    section+'['+str(self.max_size-conv3_size)+']', section)
+                    '&'+section+'['+str(self.max_size-conv3_size)+']', section)
         
         print('Block:' + name + ' deploy completed')
 
@@ -701,10 +703,10 @@ class Model_deployment():
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('', block_dict, True, False,
-                    section, section+'['+str(self.max_size - conv_size)+']')
+                    section, '&'+section+'['+str(self.max_size - conv_size)+']')
 
         # copy output from tail to head
-        self.file_writer.writeln('memcpy(&' + section + ',&' + section + '[' 
+        self.file_writer.writeln('memcpy(' + section + ',&' + section + '[' 
                     + str(self.max_size - conv_size)+'],' + str(conv_size) + ');', 'func')
 
         print('Block:' + name + ' deploy completed')
@@ -720,7 +722,7 @@ class Model_deployment():
             in_size = linear_size[0]
             out_size = linear_size[1]
             self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - in_size)
-                + '],&' + section + ',' + str(in_size) + ');', 'func')
+                + '],' + section + ',' + str(in_size) + ');', 'func')
             self.max_size -= in_size
             
             # transpose from (B C H W) to (B H W C)
@@ -731,12 +733,12 @@ class Model_deployment():
             # shape: b (h w) c -> b (h w) 1 -> b (h w) 1
             self.input_dict['n'] = batch * input_size * input_size
             self.deploy_linear('qattention_pool.', block_dict, False,
-                        section, section+'['+str(self.max_size - out_size)+']')
+                        section, '&'+section+'['+str(self.max_size - out_size)+']')
             
             # qsoftmax: tail -> head
             size_list.pop()
             self.deploy_softmax('qsoftmax.', block_dict, batch, (input_size * input_size), 
-                        section+'['+str(self.max_size - out_size)+']', section)
+                        '&'+section+'['+str(self.max_size - out_size)+']', section)
 
             # transpose from b (h w) 1 to b 1 (h w)
             # but in CMSIS no transpose there
@@ -748,11 +750,11 @@ class Model_deployment():
             self.max_size += in_size
             self.deploy_matmul('qmatmul.', block_dict, batch, 1, (input_size * input_size),
                         channel, False, section, 
-                        section + '[' + str(self.max_size - in_size)+ ']', 
-                        section + '[' + str(out_size)+ ']')
+                        '&'+section + '[' + str(self.max_size - in_size)+ ']', 
+                        '&'+section + '[' + str(out_size)+ ']')
             
             # copy output from tail to head
-            self.file_writer.writeln('memcpy(&' + section + ',&' + section + '[' 
+            self.file_writer.writeln('memcpy(' + section + ',&' + section + '[' 
                         + str(out_size)+'],' + str(out_size) + ');', 'func')
             
         elif (name == 'qglobal_pooling'):
@@ -766,10 +768,10 @@ class Model_deployment():
             self.pooling_dict['padding.h'] , self.pooling_dict['padding.w'] = 0, 0
 
             self.deploy_pooling(self, '', block_dict, True,
-                section, section+'['+str(self.max_size - pool_size)+']')
+                section, '&'+section+'['+str(self.max_size - pool_size)+']')
             
             # copy from tail to head
-            self.file_writer.writeln('memcpy(&' + section + ',&' + section 
+            self.file_writer.writeln('memcpy(' + section + ',&' + section 
                 +'['+str(self.max_size-pool_size)+'],' + pool_size + ');', 'func')
 
         else: 
@@ -786,10 +788,10 @@ class Model_deployment():
         linear_size = size_list.pop()[1]
         self.input_dict['n'] = batch
         self.deploy_linear('', block_dict, True,
-                        section, section+'['+str(self.max_size-linear_size)+'],')
+                        section, '&'+section+'['+str(self.max_size-linear_size)+']')
 
         # copy from tail to head
-        self.file_writer.writeln('memcpy(&' + section + ',&' + section 
+        self.file_writer.writeln('memcpy(' + section + ',&' + section 
             +'['+str(self.max_size-linear_size)+'],' + str(linear_size) + ');', 'func')
 
         print('Block:' + name + ' deploy completed')
@@ -810,7 +812,7 @@ class Model_deployment():
         with open(self.config['data_init'], 'r') as r_file:
             self.file_writer.write_file(r_file, 'data')
 
-        self.file_writer.write_tensor(self.image, 'image', True, 'q7_t')
+        self.file_writer.write_static_tensor(self.image, 'image', 'q7_t')
         
         # deploy quantization inference
         for key, value in self.downsample_list_dict.items():
@@ -850,7 +852,7 @@ class Model_deployment():
         self.deploy_classifier(batch, 'classifier', self.classifier_dict, self.size_list,
             section)
     
-        self.file_writer.writeln('}\n', 'func')
+        self.file_writer.writeln('return 0;}\n', 'func')
         self.file_writer.writeln('#endif', 'data')
 
         print('Model deploy completed')
@@ -913,3 +915,4 @@ if __name__ == '__main__':
     model_deployment.load_tensor()
     model_deployment.print_tensor()
     model_deployment.deploy_model()
+    print('All static tensor size: {:.2f} KB'.format(model_deployment.file_writer.static_tensor_size / 1024))

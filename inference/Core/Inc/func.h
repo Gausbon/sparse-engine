@@ -37,8 +37,8 @@ arm_cmsis_nn_status arm_nn_batch_mat_mult_s8( const cmsis_nn_context *ctx,
                                             const q7_t *rhs,
                                             const q31_t *bias,
                                             q7_t *dst,
-                                            const int32_t *dst_multiplier,
-                                            const int32_t *dst_shift,
+                                            const int32_t dst_multiplier,
+                                            const int32_t dst_shift,
                                             const int32_t lhs_rows,
                                             const int32_t lhs_cols,
                                             const int32_t rhs_cols,
@@ -57,7 +57,8 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
                            const int32_t dim_c,
                            const q7_t *weight,
                            const q31_t *bias,
-                           q7_t *input_data);
+                           const q7_t *input_data,
+                           q7_t *output_data);
 
 
 void arm_nn_output_per_channel (   const int32_t start_channel,
@@ -101,6 +102,14 @@ void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
                                     int32_t *counter,
                                     q7_t *cur_val);
 
+
+arm_cmsis_nn_status arm_nn_transpose_bnc_to_nbc_q7(const int32_t dim_b, 
+                                            const int32_t dim_n, 
+                                            const int32_t dim_c, 
+                                            const q7_t *input_section, 
+                                            q7_t *output_section);
+
+
 // cmsis func
 int32_t arm_convolve_s8_sparse_get_buffer_size (const cmsis_nn_dims *output_dims);
 
@@ -119,7 +128,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
                            const q31_t input_count);
 
                           
-arm_status arm_depthwise_convolve_s8_sparse (const cmsis_nn_context *ctx,
+arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
                            const cmsis_nn_dw_conv_params *dw_conv_params, 
                            const cmsis_nn_per_channel_quant_params *quant_params,
                            const cmsis_nn_dims *input_dims,
@@ -135,7 +144,7 @@ arm_status arm_depthwise_convolve_s8_sparse (const cmsis_nn_context *ctx,
 int32_t arm_fc_s8_sparse_get_buffer_size(const cmsis_nn_dims *output_dims);
 
 
-arm_status arm_fc_s8_sparse (const cmsis_nn_context *ctx,
+arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
                             const cmsis_nn_fc_params *fc_params,
                             const cmsis_nn_per_tensor_quant_params *quant_params,
                             const cmsis_nn_dims *input_dims,

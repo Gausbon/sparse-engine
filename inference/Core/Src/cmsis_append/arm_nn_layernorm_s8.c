@@ -93,7 +93,8 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
                            const int32_t dim_c,
                            const q7_t *weight,
                            const q31_t *bias,
-                           q7_t *input_data)
+                           const q7_t *input_data,
+                           q7_t *output_data)
 {
     const int32_t in_offset = layernorm_params->input_offset;
     const int32_t out_offset = layernorm_params->output_offset;
@@ -109,11 +110,14 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
     q31_t avg, var_sqrt, factor;
     long long var, requant, sum;
     
-    q7_t *input_ptr = input_data;
-    q7_t *input_start = &input_data[0];
+    const q7_t *input_ptr = input_data;
+    const q7_t *input_start = input_data;
+    q7_t *output_start = output_data;
+    q7_t *output_ptr = output_start;
 
     for (i_dim_b = 0; i_dim_b < dim_b; ++i_dim_b) {
         input_ptr = input_start;
+        output_ptr = output_start;
         // calculate the avg
         sum = 0;
         double_flag = 0;
@@ -162,7 +166,7 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
 
         // norm
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
-            requant = __QADD(*input_ptr, in_offset);
+            requant = __QADD(*(input_ptr++), in_offset);
             requant = __QSUB(requant, avg);
             requant = requant * factor;
             requant = MAX(sum, -32768);
@@ -179,9 +183,10 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
             requant = __QADD(requant, out_offset);
             requant = MAX(requant, act_min);
             requant = MIN(requant, act_max);
-            *(input_ptr++) = (q7_t) requant;
+            *(output_ptr++) = (q7_t) requant;
         }
         input_start += dim_c;
+        output_start += dim_c;
     }
     return ARM_MATH_SUCCESS;
 }

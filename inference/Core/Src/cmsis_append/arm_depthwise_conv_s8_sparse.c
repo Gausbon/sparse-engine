@@ -122,7 +122,7 @@ void arm_nn_dw_convolve_s8_double_sparse( const cmsis_nn_dw_conv_params *dw_conv
 }
 
 
-arm_status arm_depthwise_convolve_s8_sparse (const cmsis_nn_context *ctx,
+arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
                            const cmsis_nn_dw_conv_params *dw_conv_params, 
                            const cmsis_nn_per_channel_quant_params *quant_params,
                            const cmsis_nn_dims *input_dims,

@@ -28,6 +28,7 @@ Section Cross References
     main.o(i.main) refers to stm32f7xx_hal.o(i.HAL_Init) for HAL_Init
     main.o(i.main) refers to main.o(i.SystemClock_Config) for SystemClock_Config
     main.o(i.main) refers to main.o(i.MX_USART1_UART_Init) for MX_USART1_UART_Init
+    main.o(i.main) refers to quantization_inference.o(i.quantization_inference) for quantization_inference
     main.o(i.main) refers to stm32f7xx_hal.o(i.HAL_Delay) for HAL_Delay
     main.o(i.stdout_putchar) refers to stm32f7xx_hal_uart.o(i.HAL_UART_Transmit) for HAL_UART_Transmit
     main.o(i.stdout_putchar) refers to main.o(.bss) for .bss
@@ -37,18 +38,34 @@ Section Cross References
     stm32f7xx_hal_msp.o(i.HAL_UART_MspDeInit) refers to stm32f7xx_hal_gpio.o(i.HAL_GPIO_DeInit) for HAL_GPIO_DeInit
     stm32f7xx_hal_msp.o(i.HAL_UART_MspInit) refers to memseta.o(.text) for __aeabi_memclr4
     stm32f7xx_hal_msp.o(i.HAL_UART_MspInit) refers to stm32f7xx_hal_gpio.o(i.HAL_GPIO_Init) for HAL_GPIO_Init
+    quantization_inference.o(i.quantization_inference) refers to memseta.o(.text) for __aeabi_memclr4
+    quantization_inference.o(i.quantization_inference) refers to memmovea.o(.text) for __aeabi_memcpy4
+    quantization_inference.o(i.quantization_inference) refers to arm_convolve_s8.o(i.arm_convolve_s8) for arm_convolve_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_depthwise_conv_s8.o(i.arm_depthwise_conv_s8) for arm_depthwise_conv_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse) for arm_convolve_s8_sparse
+    quantization_inference.o(i.quantization_inference) refers to arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) for arm_depthwise_conv_s8_sparse
+    quantization_inference.o(i.quantization_inference) refers to arm_nn_layernorm_s8.o(i.arm_nn_layernorm_s8) for arm_nn_layernorm_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse) for arm_fully_connected_s8_sparse
+    quantization_inference.o(i.quantization_inference) refers to arm_nn_transpose_bnc_to_nbc_q7.o(i.arm_nn_transpose_bnc_to_nbc_q7) for arm_nn_transpose_bnc_to_nbc_q7
+    quantization_inference.o(i.quantization_inference) refers to quantization_inference.o(.data) for .data
+    quantization_inference.o(i.quantization_inference) refers to quantization_inference.o(.bss) for .bss
+    quantization_inference.o(i.quantization_inference) refers to arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8) for arm_nn_batch_mat_mult_nt_t_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_softmax_s8.o(i.arm_softmax_s8) for arm_softmax_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8) for arm_nn_batch_mat_mult_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_elementwise_add_s8.o(i.arm_elementwise_add_s8) for arm_elementwise_add_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_fully_connected_s8.o(i.arm_fully_connected_s8) for arm_fully_connected_s8
     arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse) refers to memseta.o(.text) for __aeabi_memclr4
     arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse) refers to arm_nn_sparse_decode.o(i.arm_nn_sparse_decode_4d) for arm_nn_sparse_decode_4d
     arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse) refers to arm_convolve_s8_sparse.o(i.arm_nn_convolve_s8_single_sparse) for arm_nn_convolve_s8_single_sparse
     arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse) refers to arm_nn_output_per_channel.o(i.arm_nn_output_per_channel) for arm_nn_output_per_channel
     arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse) refers to arm_convolve_s8_sparse.o(i.arm_nn_convolve_s8_double_sparse) for arm_nn_convolve_s8_double_sparse
-    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_convolve_s8_sparse) refers to arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse_get_buffer_size) for arm_convolve_s8_sparse_get_buffer_size
-    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_convolve_s8_sparse) refers to memseta.o(.text) for __aeabi_memclr4
-    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_convolve_s8_sparse) refers to arm_nn_sparse_decode.o(i.arm_nn_sparse_decode_4d) for arm_nn_sparse_decode_4d
-    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_convolve_s8_sparse) refers to arm_depthwise_conv_s8_sparse.o(i.arm_nn_dw_convolve_s8_single_sparse) for arm_nn_dw_convolve_s8_single_sparse
-    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_convolve_s8_sparse) refers to arm_nn_output_per_channel.o(i.arm_nn_output_per_channel) for arm_nn_output_per_channel
-    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_convolve_s8_sparse) refers to arm_depthwise_conv_s8_sparse.o(i.arm_nn_dw_convolve_s8_double_sparse) for arm_nn_dw_convolve_s8_double_sparse
-    arm_fully_connected_s8_sparse.o(i.arm_fc_s8_sparse) refers to arm_nn_sparse_decode.o(i.arm_nn_sparse_decode_2d) for arm_nn_sparse_decode_2d
+    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse_get_buffer_size) for arm_convolve_s8_sparse_get_buffer_size
+    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to memseta.o(.text) for __aeabi_memclr4
+    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to arm_nn_sparse_decode.o(i.arm_nn_sparse_decode_4d) for arm_nn_sparse_decode_4d
+    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to arm_depthwise_conv_s8_sparse.o(i.arm_nn_dw_convolve_s8_single_sparse) for arm_nn_dw_convolve_s8_single_sparse
+    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to arm_nn_output_per_channel.o(i.arm_nn_output_per_channel) for arm_nn_output_per_channel
+    arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to arm_depthwise_conv_s8_sparse.o(i.arm_nn_dw_convolve_s8_double_sparse) for arm_nn_dw_convolve_s8_double_sparse
+    arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse) refers to arm_nn_sparse_decode.o(i.arm_nn_sparse_decode_2d) for arm_nn_sparse_decode_2d
     arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8) refers to memseta.o(.text) for __aeabi_memclr4
     arm_nn_layernorm_s8.o(i.arm_nn_layernorm_s8) refers to ldiv.o(.text) for __aeabi_ldivmod
     arm_nn_layernorm_s8.o(i.arm_nn_layernorm_s8) refers to arm_nn_layernorm_s8.o(i.fred_sqrt) for fred_sqrt
@@ -58,6 +75,7 @@ Section Cross References
     arm_pool_s8_with_quantization.o(i.arm_avgpool_s8_with_quantization) refers to arm_pool_s8_with_quantization.o(i.scale_q31_to_q7_with_quantization) for scale_q31_to_q7_with_quantization
     arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization) refers to arm_avgpool_s8.o(i.arm_avgpool_s8_get_buffer_size) for arm_avgpool_s8_get_buffer_size
     arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization) refers to arm_pool_s8_with_quantization.o(i.scale_q31_to_q7_with_quantization) for scale_q31_to_q7_with_quantization
+    arm_nn_transpose_bnc_to_nbc_q7.o(i.arm_nn_transpose_bnc_to_nbc_q7) refers to memmovea.o(.text) for __aeabi_memcpy
     stm32f7xx_hal_cortex.o(i.HAL_NVIC_SetPriority) refers to stm32f7xx_hal_cortex.o(i.__NVIC_SetPriority) for __NVIC_SetPriority
     stm32f7xx_hal_cortex.o(i.HAL_SYSTICK_Config) refers to stm32f7xx_hal_cortex.o(i.__NVIC_SetPriority) for __NVIC_SetPriority
     stm32f7xx_hal_cortex.o(i.HAL_SYSTICK_IRQHandler) refers to stm32f7xx_hal_cortex.o(i.HAL_SYSTICK_Callback) for HAL_SYSTICK_Callback
@@ -1584,57 +1602,46 @@ Removing Unused input sections from the image.
     Removing stm32f7xx_hal_msp.o(.revsh_text), (4 bytes).
     Removing stm32f7xx_hal_msp.o(.rrx_text), (6 bytes).
     Removing stm32f7xx_hal_msp.o(i.HAL_UART_MspDeInit), (60 bytes).
+    Removing quantization_inference.o(.rev16_text), (4 bytes).
+    Removing quantization_inference.o(.revsh_text), (4 bytes).
+    Removing quantization_inference.o(.rrx_text), (6 bytes).
     Removing arm_convolve_s8_sparse.o(.rev16_text), (4 bytes).
     Removing arm_convolve_s8_sparse.o(.revsh_text), (4 bytes).
     Removing arm_convolve_s8_sparse.o(.rrx_text), (6 bytes).
-    Removing arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse), (632 bytes).
-    Removing arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse_get_buffer_size), (10 bytes).
-    Removing arm_convolve_s8_sparse.o(i.arm_nn_convolve_s8_double_sparse), (284 bytes).
-    Removing arm_convolve_s8_sparse.o(i.arm_nn_convolve_s8_single_sparse), (166 bytes).
     Removing arm_depthwise_conv_s8_sparse.o(.rev16_text), (4 bytes).
     Removing arm_depthwise_conv_s8_sparse.o(.revsh_text), (4 bytes).
     Removing arm_depthwise_conv_s8_sparse.o(.rrx_text), (6 bytes).
-    Removing arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_convolve_s8_sparse), (646 bytes).
-    Removing arm_depthwise_conv_s8_sparse.o(i.arm_nn_dw_convolve_s8_double_sparse), (284 bytes).
-    Removing arm_depthwise_conv_s8_sparse.o(i.arm_nn_dw_convolve_s8_single_sparse), (166 bytes).
     Removing arm_fully_connected_s8_sparse.o(.rev16_text), (4 bytes).
     Removing arm_fully_connected_s8_sparse.o(.revsh_text), (4 bytes).
     Removing arm_fully_connected_s8_sparse.o(.rrx_text), (6 bytes).
-    Removing arm_fully_connected_s8_sparse.o(i.arm_fc_s8_sparse), (798 bytes).
     Removing arm_fully_connected_s8_sparse.o(i.arm_fc_s8_sparse_get_buffer_size), (4 bytes).
     Removing arm_nn_batch_mat_mult_nt_t_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_batch_mat_mult_nt_t_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_batch_mat_mult_nt_t_s8.o(.rrx_text), (6 bytes).
-    Removing arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8), (1908 bytes).
     Removing arm_nn_batch_mat_mult_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_batch_mat_mult_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_batch_mat_mult_s8.o(.rrx_text), (6 bytes).
-    Removing arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8), (418 bytes).
     Removing arm_nn_layernorm_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_layernorm_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_layernorm_s8.o(.rrx_text), (6 bytes).
-    Removing arm_nn_layernorm_s8.o(i.arm_nn_layernorm_s8), (592 bytes).
-    Removing arm_nn_layernorm_s8.o(i.fred_sqrt), (260 bytes).
-    Removing arm_nn_layernorm_s8.o(.constdata), (256 bytes).
     Removing arm_nn_output_per_channel.o(.rev16_text), (4 bytes).
     Removing arm_nn_output_per_channel.o(.revsh_text), (4 bytes).
     Removing arm_nn_output_per_channel.o(.rrx_text), (6 bytes).
-    Removing arm_nn_output_per_channel.o(i.arm_nn_output_per_channel), (330 bytes).
     Removing arm_nn_softmax_common_s8_1.o(.rev16_text), (4 bytes).
     Removing arm_nn_softmax_common_s8_1.o(.revsh_text), (4 bytes).
     Removing arm_nn_softmax_common_s8_1.o(.rrx_text), (6 bytes).
-    Removing arm_nn_softmax_common_s8_1.o(i.arm_nn_softmax_common_s8), (3672 bytes).
     Removing arm_nn_sparse_decode.o(.rev16_text), (4 bytes).
     Removing arm_nn_sparse_decode.o(.revsh_text), (4 bytes).
     Removing arm_nn_sparse_decode.o(.rrx_text), (6 bytes).
-    Removing arm_nn_sparse_decode.o(i.arm_nn_sparse_decode_2d), (80 bytes).
-    Removing arm_nn_sparse_decode.o(i.arm_nn_sparse_decode_4d), (184 bytes).
     Removing arm_pool_s8_with_quantization.o(.rev16_text), (4 bytes).
     Removing arm_pool_s8_with_quantization.o(.revsh_text), (4 bytes).
     Removing arm_pool_s8_with_quantization.o(.rrx_text), (6 bytes).
     Removing arm_pool_s8_with_quantization.o(i.arm_avgpool_s8_with_quantization), (340 bytes).
     Removing arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization), (340 bytes).
     Removing arm_pool_s8_with_quantization.o(i.scale_q31_to_q7_with_quantization), (174 bytes).
+    Removing arm_nn_transpose_bnc_to_nbc_q7.o(.rev16_text), (4 bytes).
+    Removing arm_nn_transpose_bnc_to_nbc_q7.o(.revsh_text), (4 bytes).
+    Removing arm_nn_transpose_bnc_to_nbc_q7.o(.rrx_text), (6 bytes).
     Removing stm32f7xx_hal_cortex.o(.rev16_text), (4 bytes).
     Removing stm32f7xx_hal_cortex.o(.revsh_text), (4 bytes).
     Removing stm32f7xx_hal_cortex.o(.rrx_text), (6 bytes).
@@ -2801,7 +2808,6 @@ Removing Unused input sections from the image.
     Removing arm_elementwise_add_s8.o(.rev16_text), (4 bytes).
     Removing arm_elementwise_add_s8.o(.revsh_text), (4 bytes).
     Removing arm_elementwise_add_s8.o(.rrx_text), (6 bytes).
-    Removing arm_elementwise_add_s8.o(i.arm_elementwise_add_s8), (1672 bytes).
     Removing arm_elementwise_mul_s16.o(.rev16_text), (4 bytes).
     Removing arm_elementwise_mul_s16.o(.revsh_text), (4 bytes).
     Removing arm_elementwise_mul_s16.o(.rrx_text), (6 bytes).
@@ -2885,8 +2891,6 @@ Removing Unused input sections from the image.
     Removing arm_convolve_s8.o(.rev16_text), (4 bytes).
     Removing arm_convolve_s8.o(.revsh_text), (4 bytes).
     Removing arm_convolve_s8.o(.rrx_text), (6 bytes).
-    Removing arm_convolve_s8.o(i.arm_convolve_s8), (708 bytes).
-    Removing arm_convolve_s8.o(i.arm_convolve_s8_get_buffer_size), (16 bytes).
     Removing arm_convolve_wrapper_s16.o(.rev16_text), (4 bytes).
     Removing arm_convolve_wrapper_s16.o(.revsh_text), (4 bytes).
     Removing arm_convolve_wrapper_s16.o(.rrx_text), (6 bytes).
@@ -2909,9 +2913,6 @@ Removing Unused input sections from the image.
     Removing arm_depthwise_conv_s8.o(.rev16_text), (4 bytes).
     Removing arm_depthwise_conv_s8.o(.revsh_text), (4 bytes).
     Removing arm_depthwise_conv_s8.o(.rrx_text), (6 bytes).
-    Removing arm_depthwise_conv_s8.o(i.arm_depthwise_conv_s8), (312 bytes).
-    Removing arm_depthwise_conv_s8.o(i.depthwise_conv_s8_generic), (544 bytes).
-    Removing arm_depthwise_conv_s8.o(i.depthwise_conv_s8_mult_4), (924 bytes).
     Removing arm_depthwise_conv_s8_opt.o(.rev16_text), (4 bytes).
     Removing arm_depthwise_conv_s8_opt.o(.revsh_text), (4 bytes).
     Removing arm_depthwise_conv_s8_opt.o(.rrx_text), (6 bytes).
@@ -2951,7 +2952,6 @@ Removing Unused input sections from the image.
     Removing arm_nn_mat_mult_kernel_s8_s16.o(.rev16_text), (4 bytes).
     Removing arm_nn_mat_mult_kernel_s8_s16.o(.revsh_text), (4 bytes).
     Removing arm_nn_mat_mult_kernel_s8_s16.o(.rrx_text), (6 bytes).
-    Removing arm_nn_mat_mult_kernel_s8_s16.o(i.arm_nn_mat_mult_kernel_s8_s16), (1202 bytes).
     Removing arm_nn_mat_mult_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_mat_mult_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_mat_mult_s8.o(.rrx_text), (6 bytes).
@@ -2988,7 +2988,6 @@ Removing Unused input sections from the image.
     Removing arm_fully_connected_s8.o(.rev16_text), (4 bytes).
     Removing arm_fully_connected_s8.o(.revsh_text), (4 bytes).
     Removing arm_fully_connected_s8.o(.rrx_text), (6 bytes).
-    Removing arm_fully_connected_s8.o(i.arm_fully_connected_s8), (110 bytes).
     Removing arm_fully_connected_s8.o(i.arm_fully_connected_s8_get_buffer_size), (4 bytes).
     Removing arm_nn_accumulate_q7_to_q15.o(.rev16_text), (4 bytes).
     Removing arm_nn_accumulate_q7_to_q15.o(.revsh_text), (4 bytes).
@@ -3037,7 +3036,6 @@ Removing Unused input sections from the image.
     Removing arm_nn_vec_mat_mult_t_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_vec_mat_mult_t_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_vec_mat_mult_t_s8.o(.rrx_text), (6 bytes).
-    Removing arm_nn_vec_mat_mult_t_s8.o(i.arm_nn_vec_mat_mult_t_s8), (632 bytes).
     Removing arm_nn_vec_mat_mult_t_svdf_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_vec_mat_mult_t_svdf_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_vec_mat_mult_t_svdf_s8.o(.rrx_text), (6 bytes).
@@ -3068,7 +3066,6 @@ Removing Unused input sections from the image.
     Removing arm_q7_to_q15_with_offset.o(.rev16_text), (4 bytes).
     Removing arm_q7_to_q15_with_offset.o(.revsh_text), (4 bytes).
     Removing arm_q7_to_q15_with_offset.o(.rrx_text), (6 bytes).
-    Removing arm_q7_to_q15_with_offset.o(i.arm_q7_to_q15_with_offset), (70 bytes).
     Removing arm_avgpool_s16.o(.rev16_text), (4 bytes).
     Removing arm_avgpool_s16.o(.revsh_text), (4 bytes).
     Removing arm_avgpool_s16.o(.rrx_text), (6 bytes).
@@ -3124,7 +3121,6 @@ Removing Unused input sections from the image.
     Removing arm_softmax_s8.o(.rev16_text), (4 bytes).
     Removing arm_softmax_s8.o(.revsh_text), (4 bytes).
     Removing arm_softmax_s8.o(.rrx_text), (6 bytes).
-    Removing arm_softmax_s8.o(i.arm_softmax_s8), (26 bytes).
     Removing arm_softmax_s8_s16.o(.rev16_text), (4 bytes).
     Removing arm_softmax_s8_s16.o(.revsh_text), (4 bytes).
     Removing arm_softmax_s8_s16.o(.rrx_text), (6 bytes).
@@ -3158,4 +3154,4 @@ Removing Unused input sections from the image.
     Removing dfixi.o(.text), (62 bytes).
     Removing fpstat.o(.text), (4 bytes).
 
-1586 unused section(s) (total 1084296 bytes) removed from the image.
+1564 unused section(s) (total 1067422 bytes) removed from the image.

@@ -5,6 +5,7 @@ class File_writer():
         self.func_file = open(self.func_path,'w')
         self.data_file = open(self.data_path,'w')
         self.var_dict = {}
+        self.static_tensor_size = 0
 
 
     def __del__(self):
@@ -36,10 +37,8 @@ class File_writer():
             w_file.write(item)
 
 
-    def write_tensor(self, tensor, name, is_static, data_type):
-        if (is_static):
-            self.data_file.write("static ")
-        self.data_file.write(data_type + ' ' + name + '[' + str(tensor.size+1) + '] = {')
+    def write_static_tensor(self, tensor, name, data_type):
+        self.data_file.write("static " + data_type + ' ' + name + '[' + str(tensor.size) + '] = {')
         tensor_flatten = tensor.flatten()
         for i in range(0, tensor_flatten.size):
             # tensor must be int
@@ -47,6 +46,7 @@ class File_writer():
             if (i != tensor_flatten.size - 1):
                 self.data_file.write(',')
         self.data_file.write('};\n\n')
+        self.static_tensor_size += tensor.size
 
 
     def write_func_call(self, name, param_list):
