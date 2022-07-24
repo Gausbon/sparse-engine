@@ -11,11 +11,11 @@ class Model_deployment():
         # basic info
         with open('config.yml', 'r') as file:
             self.config = yaml.load(file, Loader=yaml.FullLoader)
-        self.tensor_path = self.config['tensor_path']
+        self.tensor_path = '../TinySPOS/' + self.config['tensor_path']
         self.file_writer = File_writer(self.config['func_path'], self.config['data_path'])
-        with open(self.config['memory_list'], 'r') as file:
+        with open('../TinySPOS/' + self.config['memory_list'], 'r') as file:
             self.size_list = yaml.load(file, Loader=yaml.FullLoader)
-        self.max_size = 332 * 1024  # 332kb
+        self.max_size = self.config['ram_size'] * 1024  # kb
 
         # dict list
         self.downsample_list_dict = {}
@@ -25,7 +25,7 @@ class Model_deployment():
         self.pooling_list_dict = {}
         self.classifier_dict = {}
         
-        # static dict
+        # const dict
         self.input_dict = {}        # input_dims
         self.filter_dict = {}       # filter_dims
         self.output_dict = {}       # filter_dims
@@ -155,10 +155,10 @@ class Model_deployment():
         weight = block_dict[name + 'conv_module.weight'].transpose((0, 2, 3, 1))
         weight_shape = weight.shape
         if (is_sparse):
-            weight = conv_data_to_sparse(weight)
+            weight, is_sparse = conv_data_to_sparse(weight)
         weight_name = 'weight_' + str(self.counter)
         param_list.extend(['&filter_dims', weight_name])
-        self.file_writer.write_static_tensor(weight, weight_name, 'q7_t')
+        self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
         
         # bias operation
         if ((name + 'conv_module.bias') in block_dict.keys()):
@@ -167,7 +167,7 @@ class Model_deployment():
             bias = np.zeros(weight_shape[-1])
         bias_name = 'bias_' + str(self.counter)
         param_list.extend(['&bias_dims', bias_name])
-        self.file_writer.write_static_tensor(bias, bias_name, 'q31_t')
+        self.file_writer.write_const_tensor(bias, bias_name, 'q31_t')
 
         # channel & filter dim info
         self.input_dict['c'], self.output_dict['c'] = weight_shape[3], weight_shape[0]
@@ -195,13 +195,11 @@ class Model_deployment():
         mult, shift = approximate_float(M)
         mult_name = 'mult_' + str(self.counter)
         shift_name = 'shift_' + str(self.counter)
-        self.file_writer.write_static_tensor(mult, mult_name, 'q31_t')
-        self.file_writer.write_static_tensor(shift, shift_name, 'q31_t')
+        self.file_writer.write_const_tensor(mult, mult_name, 'q31_t')
+        self.file_writer.write_const_tensor(shift, shift_name, 'q31_t')
         
-        quant_dict = {}
-        quant_dict['multiplier'] = mult_name
-        quant_dict['shift'] = shift_name
-        self.file_writer.write_param_parser('c_quant_params', quant_dict)
+        self.file_writer.writeln('memcpy(conv_mult_use,' + mult_name + ',' + str(4*mult.size) + ');','func')
+        self.file_writer.writeln('memcpy(conv_shift_use,' + shift_name + ',' + str(4*shift.size) + ');','func')
 
         if (is_sparse):
             param_list.append(weight.size)
@@ -231,10 +229,10 @@ class Model_deployment():
         weight = block_dict[name + 'fc_module.weight']
         weight_shape = weight.shape
         if (is_sparse):
-            weight = conv_data_to_sparse(weight)
+            weight, is_sparse = conv_data_to_sparse(weight)
         weight_name = 'weight_' + str(self.counter)
         param_list.extend(['&filter_dims', weight_name])
-        self.file_writer.write_static_tensor(weight, weight_name, 'q7_t')
+        self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
         
         self.filter_dict['n'] = weight_shape[0]
         self.output_dict['c'] = weight_shape[1]
@@ -248,7 +246,7 @@ class Model_deployment():
             bias = np.zeros(weight_shape[1])
         bias_name = 'bias_' + str(self.counter)
         param_list.extend(['&bias_dims', bias_name])
-        self.file_writer.write_static_tensor(bias, bias_name, 'q31_t')
+        self.file_writer.write_const_tensor(bias, bias_name, 'q31_t')
 
         # output operation and parsefc params
         param_list.extend(['&output_dims', out_section])
@@ -304,9 +302,9 @@ class Model_deployment():
         # func call
         func_name = 'arm_'
         if (is_avg):
-            func_name = func_name + 'avgpool_s8__with_quantization'
+            func_name = func_name + 'avgpool_s8_with_quantization'
         else:
-            func_name = func_name + 'maxpool_s8__with_quantization'
+            func_name = func_name + 'maxpool_s8_with_quantization'
 
         self.file_writer.write_func_call(func_name, param_list)
 
@@ -452,13 +450,13 @@ class Model_deployment():
         weight = block_dict[name + 'layernorm_module.weight']
         weight_name = 'weight_' + str(self.counter)
         param_list.append(weight_name)
-        self.file_writer.write_static_tensor(weight, weight_name, 'q7_t')
+        self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
         
         # bias operation
         bias = block_dict[name + 'layernorm_module.bias']
         bias_name = 'bias_' + str(self.counter)
         param_list.append(bias_name)
-        self.file_writer.write_static_tensor(bias, bias_name, 'q31_t')
+        self.file_writer.write_const_tensor(bias, bias_name, 'q31_t')
 
         # parse quant params
         M = block_dict[name + 'M']
@@ -501,7 +499,7 @@ class Model_deployment():
         self.pooling_dict['stride.h'] , self.pooling_dict['stride.w'] = 2, 2
         self.pooling_dict['padding.h'] , self.pooling_dict['padding.w'] = 1, 1
 
-        self.deploy_pooling(self, 'qmaxpool.', block_dict, False,
+        self.deploy_pooling('qmaxpool.', block_dict, False,
                 '&'+section+'['+str(self.max_size - size_0[1])+']', section)
 
 
@@ -767,12 +765,12 @@ class Model_deployment():
             self.pooling_dict['stride.h'] , self.pooling_dict['stride.w'] = input_size, input_size
             self.pooling_dict['padding.h'] , self.pooling_dict['padding.w'] = 0, 0
 
-            self.deploy_pooling(self, '', block_dict, True,
+            self.deploy_pooling('', block_dict, True,
                 section, '&'+section+'['+str(self.max_size - pool_size)+']')
             
             # copy from tail to head
             self.file_writer.writeln('memcpy(' + section + ',&' + section 
-                +'['+str(self.max_size-pool_size)+'],' + pool_size + ');', 'func')
+                +'['+str(self.max_size-pool_size)+'],' + str(pool_size) + ');', 'func')
 
         else: 
             print('Cannot parse block as global_pooling: ' + name)
@@ -798,10 +796,12 @@ class Model_deployment():
 
 
     def deploy_model(self, batch=1):
-        model_config_path = self.config['model_config_path']
+        model_config_path = '../TinySPOS/configs/' + self.config['model_config_path'] + \
+                            '/quant_dmtp_single.yml'
         with open(model_config_path, 'r') as file:
             model_config = yaml.load(file, Loader=yaml.FullLoader)
         
+
         last_channel = model_config['last_channel']
         section = 'section'
 
@@ -812,7 +812,14 @@ class Model_deployment():
         with open(self.config['data_init'], 'r') as r_file:
             self.file_writer.write_file(r_file, 'data')
 
-        self.file_writer.write_static_tensor(self.image, 'image', 'q7_t')
+        self.file_writer.writeln('static int32_t conv_mult_use[' + str(last_channel) + ']={0};', 'func')
+        self.file_writer.writeln('static int32_t conv_shift_use[' + str(last_channel) + ']={0};', 'func')
+        self.file_writer.writeln('c_quant_params.multiplier=conv_mult_use;', 'func')
+        self.file_writer.writeln('c_quant_params.shift=conv_shift_use;', 'func')
+
+        self.file_writer.writeln('static q7_t ' + section + '[' + str(self.max_size) + ']={0};', 'func')
+        self.file_writer.write_const_tensor(self.image, 'image', 'q7_t')
+        self.file_writer.writeln('memcpy(&section,&image,3072);', 'func')
         
         # deploy quantization inference
         for key, value in self.downsample_list_dict.items():
@@ -915,4 +922,4 @@ if __name__ == '__main__':
     model_deployment.load_tensor()
     model_deployment.print_tensor()
     model_deployment.deploy_model()
-    print('All static tensor size: {:.2f} KB'.format(model_deployment.file_writer.static_tensor_size / 1024))
+    print('All const tensor size: {:.2f} KB'.format(model_deployment.file_writer.const_tensor_size / 1024))

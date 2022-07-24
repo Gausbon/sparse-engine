@@ -3,8 +3,7 @@
 #include "func.h"
 
 int quantization_inference(void) {
-    q7_t section[332*1024] = {0};
-    q7_t buf[4*32*32] = {0};
+    static q7_t buf[4*32*32]={0};
     cmsis_nn_dims input_dims, output_dims, filter_dims, bias_dims;
     
     cmsis_nn_dw_conv_params dw_conv_params;
@@ -19,5 +18,3 @@ int quantization_inference(void) {
     cmsis_nn_context ctx;
   	ctx.size = sizeof(buf);
     ctx.buf = buf;
-
-    memcpy(&section,&image,3072);
