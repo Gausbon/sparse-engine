@@ -103,6 +103,24 @@ void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
                                     q7_t *cur_val);
 
 
+arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
+                                           const int8_t *input_2_vect,
+                                           const int32_t input_1_offset,
+                                           const int32_t input_1_mult,
+                                           const int32_t input_1_shift,
+                                           const int32_t input_2_offset,
+                                           const int32_t input_2_mult,
+                                           const int32_t input_2_shift,
+                                           const int32_t left_shift,
+                                           int8_t *output,
+                                           const int32_t out_offset,
+                                           const int32_t out_mult,
+                                           const int32_t out_shift,
+                                           const int32_t out_activation_min,
+                                           const int32_t out_activation_max,
+                                           const int32_t block_size);
+
+
 arm_cmsis_nn_status arm_nn_transpose_bnc_to_nbc_q7(const int32_t dim_b, 
                                             const int32_t dim_n, 
                                             const int32_t dim_c, 

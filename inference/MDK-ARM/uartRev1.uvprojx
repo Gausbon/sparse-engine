@@ -52,8 +52,8 @@
           <OutputName>uartRev1</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>1</CreateHexFile>
-          <DebugInformation>1</DebugInformation>
+          <CreateHexFile>0</CreateHexFile>
+          <DebugInformation>0</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath></ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
@@ -472,11 +472,21 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_nn_transpose_bnc_to_nbc_q7.c</FilePath>
             </File>
+            <File>
+              <FileName>arm_elementwise_add_s8_with_neg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_elementwise_add_s8_with_neg.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>Drivers/STM32F7xx_HAL_Driver</GroupName>
           <Files>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Core/Src/system_stm32f7xx.c</FilePath>
+            </File>
             <File>
               <FileName>stm32f7xx_hal_cortex.c</FileName>
               <FileType>1</FileType>
@@ -566,16 +576,6 @@
               <FileName>stm32f7xx_hal_exti.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_exti.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Drivers/CMSIS</GroupName>
-          <Files>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>

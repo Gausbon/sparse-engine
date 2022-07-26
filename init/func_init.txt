@@ -1,6 +1,7 @@
 #include "arm_nnfunctions.h"
 #include "data.h"
 #include "func.h"
+#include "stdio.h"
 
 int quantization_inference(void) {
     static q7_t buf[4*32*32]={0};
@@ -9,7 +10,7 @@ int quantization_inference(void) {
     cmsis_nn_dw_conv_params dw_conv_params;
     cmsis_nn_conv_params  conv_params;
     cmsis_nn_fc_params fc_params;
-	  cmsis_nn_pool_params pool_params;
+    cmsis_nn_pool_params pool_params;
     cmsis_nn_layernorm_params norm_params;
     
     cmsis_nn_per_tensor_quant_params t_quant_params;
@@ -18,3 +19,4 @@ int quantization_inference(void) {
     cmsis_nn_context ctx;
   	ctx.size = sizeof(buf);
     ctx.buf = buf;
+

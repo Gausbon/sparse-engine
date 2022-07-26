@@ -112,6 +112,7 @@ int main(void)
 		
 		
 //		HAL_UART_Transmit(&huart1, (uint8_t*)&data, sizeof(data), 100);
+		printf("start\r\n");
 		quantization_inference();
 		HAL_Delay(10000);
   }

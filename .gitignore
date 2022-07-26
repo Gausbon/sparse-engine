@@ -6,6 +6,7 @@ model
 data
 
 # Keil Generated output files in the sub-directories .\Listings and .\Objects
+*._2i
 *.lst
 *.o
 *.d

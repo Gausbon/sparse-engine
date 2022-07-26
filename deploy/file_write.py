@@ -21,7 +21,7 @@ class File_writer():
         else:
             return
 
-        w_file.write('	  ' + str + '\n\n')
+        w_file.write('    ' + str + '\n\n')
 
 
     def write_file(self, r_file, file_str):
@@ -52,7 +52,7 @@ class File_writer():
             self.const_tensor_size += tensor.size
 
     def write_func_call(self, name, param_list):
-        self.func_file.write('	  ' + name + '(')
+        self.func_file.write('    ' + name + '(')
         for i in range(0, len(param_list)):
             if (type(param_list[i]) != float):
                 self.func_file.write(str(param_list[i]))
@@ -71,5 +71,5 @@ class File_writer():
             new_key = name + '.' + key
             if (new_key not in self.var_dict or value != self.var_dict[new_key]):
                 self.var_dict[new_key] = value
-                self.func_file.write('	  ' + name + '.' + key + '=' + str(value) + ';\n')
+                self.func_file.write('    ' + name + '.' + key + '=' + str(value) + ';\n')
         self.func_file.write('\n')
