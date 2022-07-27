@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Tue Jul 26 22:04:16 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Wed Jul 27 21:37:59 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -237,7 +237,6 @@ arm_fully_connected_s16_get_buffer_size <= USED 0
 __asm___24_arm_fully_connected_s8_c_e470842f____REV16 <= USED 0
 __asm___24_arm_fully_connected_s8_c_e470842f____REVSH <= USED 0
 __asm___24_arm_fully_connected_s8_c_e470842f____RRX <= USED 0
-arm_fully_connected_s8 <= USED 0
 arm_fully_connected_s8_get_buffer_size <= USED 0
 ;FILE arm_fully_connected_s8_sparse.o
 __asm___31_arm_fully_connected_s8_sparse_c_c2a51a64____REV16 <= USED 0
@@ -373,7 +372,6 @@ arm_nn_sparse_decode_4d <= USED 0
 __asm___32_arm_nn_transpose_bnc_to_nbc_q7_c_59928ecd____REV16 <= USED 0
 __asm___32_arm_nn_transpose_bnc_to_nbc_q7_c_59928ecd____REVSH <= USED 0
 __asm___32_arm_nn_transpose_bnc_to_nbc_q7_c_59928ecd____RRX <= USED 0
-arm_nn_transpose_bnc_to_nbc_q7 <= USED 0
 ;FILE arm_nn_vec_mat_mult_t_s16.o
 __asm___27_arm_nn_vec_mat_mult_t_s16_c_133d0361____REV16 <= USED 0
 __asm___27_arm_nn_vec_mat_mult_t_s16_c_133d0361____REVSH <= USED 0
@@ -383,7 +381,6 @@ arm_nn_vec_mat_mult_t_s16 <= USED 0
 __asm___26_arm_nn_vec_mat_mult_t_s8_c_272dffac____REV16 <= USED 0
 __asm___26_arm_nn_vec_mat_mult_t_s8_c_272dffac____REVSH <= USED 0
 __asm___26_arm_nn_vec_mat_mult_t_s8_c_272dffac____RRX <= USED 0
-arm_nn_vec_mat_mult_t_s8 <= USED 0
 ;FILE arm_nn_vec_mat_mult_t_svdf_s8.o
 __asm___31_arm_nn_vec_mat_mult_t_svdf_s8_c_4bfd0dc5____REV16 <= USED 0
 __asm___31_arm_nn_vec_mat_mult_t_svdf_s8_c_4bfd0dc5____REVSH <= USED 0

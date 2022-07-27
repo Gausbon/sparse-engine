@@ -237,7 +237,7 @@ int quantization_inference(void) {
 
     arm_convolve_s8(&ctx,&conv_params,&c_quant_params,&input_dims,&section[290816],&filter_dims,weight_10,&bias_dims,bias_10,&output_dims,section);
 
-    memcpy(&section[290816],section,16384);
+    memcpy(&section[282624],section,24576);
 
     norm_params.activation.max=127;
     norm_params.activation.min=-128;
@@ -246,14 +246,13 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=1237536512;
     t_quant_params.shift=-8;
-
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_11,bias_11,section,&section[266240]);
-    for (int i = 0; i < 96; i++) {
-      printf("%d ",section[266240+i]);
-    }
-    printf("\r\n");/*
-    memcpy(section,&section[266240],24576);
-
+    
+    
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_11,bias_11,section,&section[258048]);
+    
+    
+    memcpy(section,&section[258048],24576);
+    
     fc_params.activation.max=127;
     fc_params.activation.min=-128;
     fc_params.input_offset=81;
@@ -261,19 +260,44 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=1294720384;
 
-    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_12,&bias_dims,bias_12,&output_dims,&section[290816]);
+    input_dims.n=256;
 
-    arm_nn_transpose_bnc_to_nbc_q7(256,6,48,&section[290816],section);
+    filter_dims.n=96;
 
-    memcpy(&section[290816],section,0);
+    output_dims.c=288;
 
-    arm_nn_batch_mat_mult_nt_t_s8(&section[290816],&section[290816],NULL,section,1911858614,-6,256,48,256,3,3,-2,2,-128,127);
+    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_12,&bias_dims,bias_12,&output_dims,&section[208896]);
+    
+    arm_nn_transpose_bnc_to_nbc_q7(256,6,48,&section[208896],section);
+    
+    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,section,&section[208896]);
+    for (int j = 0; j < 48; j++) {
+        printf("%d ",section[208896+j]);
+    }
+    printf("\r\n");
+    for (int j = 0; j < 48; j++) {
+        printf("%d ",section[208896+48+j]);
+    }
+    printf("\r\n");
+    for (int j = 0; j < 48; j++) {
+        printf("%d ",section[208896+96+j]);
+    }
+    printf("\r\n");
+    for (int j = 0; j < 48; j++) {
+        printf("%d ",section[208896+144+j]);
+    }
+    printf("\r\n");/*
+    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[24576],&section[233472]);
+
+    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[49152],&section[258048]);
+
+    arm_nn_batch_mat_mult_nt_t_s8(&section[208896],&section[233472],NULL,section,1911858614,-6,256,48,256,3,3,-2,2,-128,127);
 
     arm_softmax_s8(section,512,256,2044218880,-4,0,section);
 
-    arm_nn_batch_mat_mult_s8(&ctx,section,&section[290816],NULL,&section[24576],1118498490,-6,256,256,48,128,3,-1,2,-128,127);
+    arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1118498490,-6,256,256,48,128,3,-1,2,-128,127);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[24576],&section[266240]);
+    arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[131072],&section[258048]);
 
     fc_params.input_offset=1;
     fc_params.output_offset=-20;
@@ -281,20 +305,24 @@ int quantization_inference(void) {
     t_quant_params.multiplier=2040644608;
     t_quant_params.shift=-9;
 
-    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,&section[266240],&filter_dims,weight_13,&bias_dims,bias_13,&output_dims,section);
 
-    arm_elementwise_add_s8_with_neg(section,&section[290816],20,1975085824,-1,128,1859176576,0,0,&section[16384],-85,2147483647,0,-128,127,16384);
 
-    memcpy(section,&section[16384],16384);
+    output_dims.c=96;
 
-    memcpy(&section[290816],section,16384);
+    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,&section[258048],&filter_dims,weight_13,&bias_dims,bias_13,&output_dims,section);
+
+    arm_elementwise_add_s8_with_neg(section,&section[282624],20,1975085824,-1,128,1859176576,0,0,&section[24576],-85,2147483647,0,-128,127,24576);
+
+    memcpy(section,&section[24576],24576);
+
+    memcpy(&section[282624],section,24576);
 
     norm_params.input_offset=85;
     norm_params.output_offset=-34;
 
     t_quant_params.multiplier=2111477760;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_14,bias_14,section,&section[266240]);
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_14,bias_14,section,&section[282624]);
 
     fc_params.input_offset=34;
     fc_params.output_offset=-128;
@@ -302,7 +330,11 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1742290816;
     t_quant_params.shift=-7;
 
-    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,&section[266240],&filter_dims,weight_15,&bias_dims,bias_15,&output_dims,section);
+
+
+    output_dims.c=128;
+
+    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,&section[282624],&filter_dims,weight_15,&bias_dims,bias_15,&output_dims,section);
 
     fc_params.input_offset=128;
     fc_params.output_offset=0;
@@ -310,15 +342,20 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1919606272;
     t_quant_params.shift=-9;
 
+
+    filter_dims.n=128;
+
+    output_dims.c=96;
+
     arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_16,&bias_dims,bias_16,&output_dims,&section[258048]);
 
-    arm_elementwise_add_s8_with_neg(&section[258048],&section[290816],0,1846320512,-1,34,1982880640,0,0,section,-29,2147483647,0,-128,127,16384);
+    arm_elementwise_add_s8_with_neg(&section[258048],&section[282624],0,1846320512,-1,34,1982880640,0,0,section,-29,2147483647,0,-128,127,24576);
 
+    input_dims.n=1;
     input_dims.c=96;
 
     filter_dims.h=3;
     filter_dims.w=3;
-    filter_dims.n=96;
 
 
     conv_params.padding.h=1;
@@ -379,16 +416,16 @@ int quantization_inference(void) {
 
     arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,&section[274432],&filter_dims,weight_20,&bias_dims,bias_20,&output_dims,section,9780);
 
-    memcpy(&section[274432],section,32768);
+    memcpy(&section[282624],section,24576);
 
     norm_params.input_offset=128;
     norm_params.output_offset=-87;
 
     t_quant_params.multiplier=2146633600;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_21,bias_21,section,&section[249856]);
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_21,bias_21,section,&section[258048]);
 
-    memcpy(section,&section[249856],24576);
+    memcpy(section,&section[258048],24576);
 
     fc_params.input_offset=87;
     fc_params.output_offset=-5;
@@ -396,19 +433,29 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1438111872;
     t_quant_params.shift=-8;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_22,&bias_dims,bias_22,&output_dims,&section[274432],21978);
+    input_dims.n=256;
 
-    arm_nn_transpose_bnc_to_nbc_q7(256,6,48,&section[274432],section);
+    filter_dims.n=96;
 
-    memcpy(&section[274432],section,0);
+    output_dims.c=288;
 
-    arm_nn_batch_mat_mult_nt_t_s8(&section[274432],&section[274432],NULL,section,1532397482,-5,256,48,256,5,5,-7,2,-128,127);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_22,&bias_dims,bias_22,&output_dims,&section[208896],21978);
+
+    arm_nn_transpose_bnc_to_nbc_q7(256,6,48,&section[208896],section);
+
+    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,section,&section[208896]);
+
+    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[24576],&section[233472]);
+
+    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[49152],&section[258048]);
+
+    arm_nn_batch_mat_mult_nt_t_s8(&section[208896],&section[233472],NULL,section,1532397482,-5,256,48,256,5,5,-7,2,-128,127);
 
     arm_softmax_s8(section,512,256,1801219200,-4,0,section);
 
-    arm_nn_batch_mat_mult_s8(&ctx,section,&section[274432],NULL,&section[24576],1347038839,-6,256,256,48,128,5,-13,2,-128,127);
+    arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1347038839,-6,256,256,48,128,5,-13,2,-128,127);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[24576],&section[249856]);
+    arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[131072],&section[258048]);
 
     fc_params.input_offset=13;
     fc_params.output_offset=-17;
@@ -416,20 +463,24 @@ int quantization_inference(void) {
     t_quant_params.multiplier=2105830784;
     t_quant_params.shift=-9;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[249856],&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,section,7332);
 
-    arm_elementwise_add_s8_with_neg(section,&section[274432],17,2136739840,-1,128,1533058688,0,0,&section[32768],-75,2147483647,0,-128,127,32768);
 
-    memcpy(section,&section[32768],32768);
+    output_dims.c=96;
 
-    memcpy(&section[274432],section,32768);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[258048],&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,section,7332);
+
+    arm_elementwise_add_s8_with_neg(section,&section[282624],17,2136739840,-1,128,1533058688,0,0,&section[24576],-75,2147483647,0,-128,127,24576);
+
+    memcpy(section,&section[24576],24576);
+
+    memcpy(&section[282624],section,24576);
 
     norm_params.input_offset=75;
     norm_params.output_offset=-40;
 
     t_quant_params.multiplier=1899635328;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_24,bias_24,section,&section[249856]);
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_24,bias_24,section,&section[282624]);
 
     fc_params.input_offset=40;
     fc_params.output_offset=-128;
@@ -437,7 +488,11 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1996709632;
     t_quant_params.shift=-7;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[249856],&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,section,9716);
+
+
+    output_dims.c=128;
+
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[282624],&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,section,9716);
 
     fc_params.input_offset=128;
     fc_params.output_offset=4;
@@ -445,10 +500,16 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1943961600;
     t_quant_params.shift=-8;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,&section[241664],9706);
 
-    arm_elementwise_add_s8_with_neg(&section[241664],&section[274432],-4,1082566272,0,40,1828365312,0,0,section,-32,2147483647,0,-128,127,32768);
+    filter_dims.n=128;
 
+    output_dims.c=96;
+
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,&section[258048],9706);
+
+    arm_elementwise_add_s8_with_neg(&section[258048],&section[282624],-4,1082566272,0,40,1828365312,0,0,section,-32,2147483647,0,-128,127,24576);
+
+    input_dims.n=1;
     input_dims.c=96;
 
     filter_dims.h=3;
@@ -493,9 +554,9 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_29,2048);
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_29,&bias_dims,bias_29,&output_dims,&section[241664],104138);
+    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_29,&bias_dims,bias_29,&output_dims,&section[176128],104138);
 
-    memcpy(section,&section[241664],65536);
+    memcpy(section,&section[176128],131072);
 
     // block: qglobal_pooling
 
@@ -506,9 +567,9 @@ int quantization_inference(void) {
     output_dims.h=1;
     output_dims.w=1;
 
-    arm_avgpool_s8_with_quantization(&ctx,&pool_params,&input_dims,section,&filter_dims,&output_dims,128,-128,1105721945,3,&section[176128]);
+    arm_avgpool_s8_with_quantization(&ctx,&pool_params,&input_dims,section,&filter_dims,&output_dims,128,-128,1105721945,3,&section[306688]);
 
-    memcpy(section,&section[176128],131072);
+    memcpy(section,&section[306688],512);
 
     // block: classifier
 
@@ -517,10 +578,15 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1330214144;
     t_quant_params.shift=-9;
 
+
+    filter_dims.n=512;
+
+    output_dims.c=10;
+
     arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_30,&bias_dims,bias_30,&output_dims,&section[307190]);
 
     memcpy(section,&section[307190],10);
-    */
+*/
     return 0;}
 
 

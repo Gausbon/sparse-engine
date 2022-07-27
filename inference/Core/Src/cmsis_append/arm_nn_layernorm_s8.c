@@ -103,7 +103,8 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
     int32_t i_dim_b, i_dim_c;
     int32_t double_flag;
     q31_t diff, diff_last, diff_15x2;
-    q31_t avg, var_sqrt, factor, requant, var, sum;
+    q31_t avg, var_sqrt, factor, requant, var_int;
+    int64_t var, sum;
     
     const q7_t *input_ptr = input_data;
     const q7_t *input_start = input_data;
@@ -117,18 +118,22 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
         sum = 0;
         double_flag = 0;
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
-            sum = __QADD(sum, *(input_ptr++));
+            sum = sum + *(input_ptr++);
         }
+        sum += (in_offset * dim_c);
+        avg = ((int32_t)sum + (dim_c / 2)) / dim_c;
         // clamp to int16
-        sum = MAX(sum, -32768);
-        sum = MIN(sum, 32767);
-        avg = sum / dim_c;
+        avg = MAX(avg, -32768);
+        avg = MIN(avg, 32767);
+        
         input_ptr = input_start;
 
         var = 0;
         // calculate the std
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
             diff = __QSUB(*(input_ptr++), avg);
+            diff = __QADD(diff, in_offset);
+
             if (diff > 32767 || diff < -32768) {
                 // the difference is out of int16 bound
                 var += (diff * diff);
@@ -147,20 +152,21 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
             var += (diff_last * diff_last);
         }
 
-        var = MAX(var, -2147483648);
-        var = MIN(var, 2147483647);
-        var = var / dim_c;
-        var_sqrt = (q31_t)fred_sqrt(var);
+        // var = MAX(var, -2147483648);
+        var_int = MIN(var, 2147483647);
+        var_int = var_int / dim_c;
+        var_sqrt = (q31_t)fred_sqrt(var_int);
         if (var_sqrt == 0) {
             var_sqrt = 1;
         }
         
-        factor = 0x7f / var_sqrt;
+        factor = 128 / var_sqrt;
         input_ptr = input_start;
 
         // norm
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
             requant = __QSUB(*(input_ptr++), avg);
+            requant = __QADD(requant, in_offset);
             requant = requant * factor;
             requant = MAX(requant, -32768);
             requant = MIN(requant, 32767);

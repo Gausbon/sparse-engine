@@ -265,8 +265,8 @@ class Model_deployment():
         param_list.extend(['&filter_dims', weight_name])
         self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
         
-        self.filter_dict['n'] = weight_shape[0]
-        self.output_dict['c'] = weight_shape[1]
+        self.filter_dict['n'] = weight_shape[1]
+        self.output_dict['c'] = weight_shape[0]
         
         # bias operation
         if ((name + 'fc_module.bias') in block_dict.keys()):
@@ -296,6 +296,9 @@ class Model_deployment():
         quant_dict['multiplier'] = mult
         quant_dict['shift'] = shift
         self.file_writer.write_param_parser('t_quant_params', quant_dict)
+        self.file_writer.write_param_parser('input_dims', self.input_dict)
+        self.file_writer.write_param_parser('filter_dims', self.filter_dict)
+        self.file_writer.write_param_parser('output_dims', self.output_dict)
 
         if (is_sparse):
             param_list.append(weight.size)
@@ -389,7 +392,7 @@ class Model_deployment():
         self.file_writer.write_func_call('arm_softmax_s8', param_list)
 
 
-    def deploy_self_attn(self, name:str, block_dict:dict, size_list:list,
+    def deploy_self_attn(self, name:str, block_dict:dict,
             b:int, n:int, c:int, head_nums:int, section:str):
         
         # self_attention start
@@ -409,8 +412,22 @@ class Model_deployment():
         self.deploy_transpose((b * n), (3 * head_nums),
                     (c / head_nums), '&'+section+'['+str(self.max_size-bncx3_size)+']',
                     section)
-        self.file_writer.writeln('memcpy(&' + section + '[' 
-                    + str(self.max_size-bncx3_size)+'],'+section+','+str(bncx3_size) + ');', 'func')
+
+        # q k v transpose from (head_nums, b, n, c / head_nums)
+        # to (b, head_nums, n, c / head_nums)
+        bnc_size = bncx3_size // 3
+        # q
+        self.deploy_transpose(head_nums, b,
+                    (n * c / head_nums), section,
+                    '&'+section+'['+str(self.max_size-3*bnc_size)+']')
+        # k
+        self.deploy_transpose(head_nums, b,
+                    (n * c / head_nums),  '&'+section+'[' + str(bnc_size) + ']',
+                    '&'+section+'['+str(self.max_size-2*bnc_size)+']')
+        # v
+        self.deploy_transpose(head_nums, b,
+                    (n * c / head_nums),  '&'+section+'[' + str(2*bnc_size) + ']',
+                    '&'+section+'['+str(self.max_size-bnc_size)+']')
         
         # transpose K
         # but in CMSIS no transpose there
@@ -509,7 +526,7 @@ class Model_deployment():
         self.file_writer.write_func_call('arm_nn_transpose_bnc_to_nbc_q7', param_list)
 
 
-    def deploy_tokenizer(self, batch:int, block_dict:dict, size_list:list, 
+    def deploy_tokenizer(self, batch:int, block_dict:dict,
             input_size:int, section:str):
         # qconv_relu: head -> tail
         size_0 = self.get_size_output()
@@ -534,7 +551,7 @@ class Model_deployment():
                 '&'+section+'['+str(self.max_size - size_0[1])+']', section)
 
 
-    def deploy_mv2block(self, batch:int, name:str, block_dict:dict, size_list:list, 
+    def deploy_mv2block(self, batch:int, name:str, block_dict:dict, 
             input_size:int, section:str):
 
         # config_list: expansion, stride, is_sparse, output_size
@@ -600,6 +617,7 @@ class Model_deployment():
                     section, '&'+section+'['+str(self.max_size - conv2_size)+']')
 
         if (res):
+            self.get_size_output()
             self.max_size += feature_size
             self.deploy_add('qadd.', block_dict,
                 '&'+section+'['+str(self.max_size-feature_size*2)+']', 
@@ -613,7 +631,7 @@ class Model_deployment():
         print('Block:' + name + ' deploy completed')
 
 
-    def deploy_transformer(self, batch:int, name:str, block_dict:dict, size_list:list,
+    def deploy_transformer(self, batch:int, name:str, block_dict:dict,
             embedding_dim:int, input_size:int, section:str):
 
         # name: {*}transformer{type}_{index}
@@ -659,15 +677,15 @@ class Model_deployment():
         self.max_size -= bnc_size
 
         # pre_norm: head -> head
-        pre_norm_size = self.get_size_output()
+        self.get_size_output()
         self.deploy_norm('qpre_norm.', block_dict, norm_batch, embedding_dim,
-                    section, '&'+section+'['+str(self.max_size-pre_norm_size)+']')
+                    section, '&'+section+'['+str(self.max_size-bnc_size)+']')
         self.file_writer.writeln('memcpy(' + section +',&' + 
-                    section+'['+str(self.max_size-pre_norm_size)+'],'+
-                    str(pre_norm_size) + ');', 'func')
+                    section+'['+str(self.max_size-bnc_size)+'],'+
+                    str(bnc_size) + ');', 'func')
 
         # self attention
-        self.deploy_self_attn('self_attn.', block_dict, size_list,
+        self.deploy_self_attn('self_attn.', block_dict,
             batch, (input_size * input_size), embedding_dim, head_nums, section)
         
         # add1: head + tail -> mid
@@ -740,7 +758,7 @@ class Model_deployment():
         print('Block:' + name + ' deploy completed')
 
 
-    def deploy_last_conv(self, batch:int, name:str, block_dict:dict, size_list:list,
+    def deploy_last_conv(self, batch:int, name:str, block_dict:dict,
             input_size:int, section:str):
 
         # just one conv, head -> tail
@@ -761,7 +779,7 @@ class Model_deployment():
         print('Block:' + name + ' deploy completed')
 
 
-    def deploy_global_pooling(self, batch:int, name:str, block_dict:dict, size_list:list,
+    def deploy_global_pooling(self, batch:int, name:str, block_dict:dict,
             input_size:int, channel:int, section:str):
 
         if (name == 'global_pooling'):
@@ -808,7 +826,6 @@ class Model_deployment():
             
         elif (name == 'qglobal_pooling'):
             # global_pooling, avgpooling: head -> tail
-            pool_size = self.get_size_output()
             self.input_dict['n'] = batch
             self.input_dict['h'], self.input_dict['w'] = input_size, input_size
             self.filter_dict['h'], self.filter_dict['w'] = input_size, input_size
@@ -816,6 +833,7 @@ class Model_deployment():
             self.pooling_dict['stride.h'] , self.pooling_dict['stride.w'] = input_size, input_size
             self.pooling_dict['padding.h'] , self.pooling_dict['padding.w'] = 0, 0
 
+            pool_size = batch * channel
             self.deploy_pooling('', block_dict, True,
                 section, '&'+section+'['+str(self.max_size - pool_size)+']')
             
@@ -830,7 +848,7 @@ class Model_deployment():
         print('Block:' + name + ' deploy completed')
 
 
-    def deploy_classifier(self, batch:int, name:str, block_dict:dict, size_list:list,
+    def deploy_classifier(self, batch:int, name:str, block_dict:dict,
             section:str):
 
         # just one linear
@@ -877,15 +895,17 @@ class Model_deployment():
             self.file_writer.writeln('// block: ' + key, 'func')
             key_list = key.split('_')
             if (key_list[1] == 'tokenizer'):
-                self.deploy_tokenizer(batch, value, self.size_list, self.size, section)
+                self.deploy_tokenizer(batch, value, self.size, section)
             elif (key_list[1] == 'mv2block'):
-                self.deploy_mv2block(batch, key, value, self.size_list, self.size, section)
+                self.deploy_mv2block(batch, key, value, self.size, section)
             self.size /= 2
+            print(len(self.size_list))
             print('-'*70)
 
         for key, value in self.mv2block_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
-            self.deploy_mv2block(batch, key, value, self.size_list, self.size, section)
+            self.deploy_mv2block(batch, key, value, self.size, section)
+            print(len(self.size_list))
             print('-'*70)
 
         embedding_dim = []
@@ -897,23 +917,25 @@ class Model_deployment():
             key_list = key.split('_')
             layer_count = int(key_list[-1])
             type_index = int(key_list[-2][-1])
-            self.deploy_transformer(batch, key, value, self.size_list, embedding_dim[type_index][layer_count],
+            self.deploy_transformer(batch, key, value, embedding_dim[type_index][layer_count],
                 self.size, section)
+            print(len(self.size_list))
             print('-'*70)
 
         self.file_writer.writeln('// block: last conv', 'func')
-        self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict, self.size_list, 
+        self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict,
             self.size, section)
+        print(len(self.size_list))
         print('-'*70)
 
         for key, value in self.pooling_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
-            self.deploy_global_pooling(batch, key, value, self.size_list, 
+            self.deploy_global_pooling(batch, key, value,
                 self.size, last_channel, section)
             print('-'*70)
 
         self.file_writer.writeln('// block: classifier', 'func')
-        self.deploy_classifier(batch, 'classifier', self.classifier_dict, self.size_list,
+        self.deploy_classifier(batch, 'classifier', self.classifier_dict,
             section)
     
         self.file_writer.writeln('return 0;}\n', 'func')
@@ -922,7 +944,7 @@ class Model_deployment():
         print('Model deploy completed')
         if (len(self.size_list) != 0):
             print('Warning! Size list may not be set properly!')
-        print('Remaining size list count: ' + str(len(self.size_list)) + ' (0 is correct)')
+            print('Remaining size list count: ' + str(len(self.size_list)) + ' (0 is correct)')
 
 
     def print_tensor(self):
@@ -979,6 +1001,6 @@ if __name__ == '__main__':
     print("start")
     model_deployment = Model_deployment()
     model_deployment.load_tensor()
-    model_deployment.print_tensor()
+    # model_deployment.print_tensor()
     model_deployment.deploy_model()
     print('All const tensor size: {:.2f} KB'.format(model_deployment.file_writer.const_tensor_size / 1024))
