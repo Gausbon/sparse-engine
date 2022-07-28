@@ -103,11 +103,12 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
     int32_t i_dim_b, i_dim_c;
     int32_t double_flag;
     q31_t diff, diff_last, diff_15x2;
-    q31_t avg, var_sqrt, factor, requant, var_int;
+    q31_t avg, var_sqrt, factor, requant, var_int, avg_offset;
     int64_t var, sum;
     
     const q7_t *input_ptr = input_data;
     const q7_t *input_start = input_data;
+    const int32_t offset_sum = in_offset * dim_c;
     q7_t *output_start = output_data;
     q7_t *output_ptr = output_start;
 
@@ -120,19 +121,18 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
             sum = sum + *(input_ptr++);
         }
-        sum += (in_offset * dim_c);
-        avg = ((int32_t)sum + (dim_c / 2)) / dim_c;
+        sum += offset_sum;
+        avg = (sum + (dim_c / 2)) / dim_c;
         // clamp to int16
         avg = MAX(avg, -32768);
         avg = MIN(avg, 32767);
-        
+        avg_offset = avg - in_offset;
         input_ptr = input_start;
 
         var = 0;
         // calculate the std
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
-            diff = __QSUB(*(input_ptr++), avg);
-            diff = __QADD(diff, in_offset);
+            diff = __QSUB(*(input_ptr++), avg_offset);
 
             if (diff > 32767 || diff < -32768) {
                 // the difference is out of int16 bound
@@ -165,15 +165,14 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
 
         // norm
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
-            requant = __QSUB(*(input_ptr++), avg);
-            requant = __QADD(requant, in_offset);
+            requant = __QSUB(*(input_ptr++), avg_offset);
             requant = requant * factor;
             requant = MAX(requant, -32768);
             requant = MIN(requant, 32767);
             if (weight) {
-                requant *= ((int32_t)weight[i_dim_c]);
+                requant *= weight[i_dim_c];
                 if (bias) {
-                    requant += ((int32_t)bias[i_dim_c]);
+                    requant += bias[i_dim_c];
                 }
             }
             requant = MAX(requant, -2147483648);

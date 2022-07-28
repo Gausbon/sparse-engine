@@ -181,11 +181,12 @@ class Model_deployment():
         # bias operation
         if ((name + 'conv_module.bias') in block_dict.keys()):
             bias = block_dict[name + 'conv_module.bias']
+            bias_name = 'bias_' + str(self.counter)
+            param_list.extend(['&bias_dims', bias_name])
+            self.file_writer.write_const_tensor(bias, bias_name, 'q31_t')
         else:
-            bias = np.zeros(weight_shape[-1])
-        bias_name = 'bias_' + str(self.counter)
-        param_list.extend(['&bias_dims', bias_name])
-        self.file_writer.write_const_tensor(bias, bias_name, 'q31_t')
+            param_list.extend(['&bias_dims', 'NULL'])
+        
 
         # channel & filter dim info
         self.input_dict['c'] = weight_shape[3]
@@ -273,11 +274,12 @@ class Model_deployment():
             bias = block_dict[name + 'fc_module.bias']
             if (type(bias) == float):
                 bias = np.array([int(bias)])
+            bias_name = 'bias_' + str(self.counter)
+            param_list.extend(['&bias_dims', bias_name])
+            self.file_writer.write_const_tensor(bias, bias_name, 'q31_t')
         else:
-            bias = np.zeros(weight_shape[1])
-        bias_name = 'bias_' + str(self.counter)
-        param_list.extend(['&bias_dims', bias_name])
-        self.file_writer.write_const_tensor(bias, bias_name, 'q31_t')
+            param_list.extend(['&bias_dims', 'NULL'])
+        
 
         # output operation and parsefc params
         param_list.extend(['&output_dims', out_section])
@@ -352,10 +354,8 @@ class Model_deployment():
             param_list.insert(0, '&ctx')
             
         # output quant
-        qi1_scale = block_dict[name + 'qi1.scale']
-        qi2_scale = block_dict[name + 'qi2.scale']
-        qo_scale = block_dict[name + 'qo.scale']
-        qo_mult, qo_shift = approximate_float(qi1_scale * qi2_scale / qo_scale)
+        M = block_dict[name + 'M']
+        qo_mult, qo_shift = approximate_float(M)
         param_list.extend([qo_mult, qo_shift])
 
         # dim info
@@ -382,12 +382,12 @@ class Model_deployment():
 
         # input quant
         qi_scale = block_dict[name + 'qi.scale']
+        softmax_input_integer_bits = 5
+        qi_scale = min(qi_scale * (1 << (31 - softmax_input_integer_bits)),
+                                   (1 << 31) - 1)
         qi_mult, qi_shift = approximate_float(qi_scale)
-        qo_scale = block_dict[name + 'qo.scale']
-        qo_mult, qo_shift = approximate_float(qo_scale)
-        qi_offset = -block_dict[name + 'qi.zero_point']
-        qo_offset = block_dict[name + 'qo.zero_point']
-        param_list.extend([qi_mult, qi_shift, 0, 
+
+        param_list.extend([qi_mult, qi_shift, -248, 
                 out_section])
         self.file_writer.write_func_call('arm_softmax_s8', param_list)
 
@@ -412,22 +412,8 @@ class Model_deployment():
         self.deploy_transpose((b * n), (3 * head_nums),
                     (c / head_nums), '&'+section+'['+str(self.max_size-bncx3_size)+']',
                     section)
-
-        # q k v transpose from (head_nums, b, n, c / head_nums)
-        # to (b, head_nums, n, c / head_nums)
-        bnc_size = bncx3_size // 3
-        # q
-        self.deploy_transpose(head_nums, b,
-                    (n * c / head_nums), section,
-                    '&'+section+'['+str(self.max_size-3*bnc_size)+']')
-        # k
-        self.deploy_transpose(head_nums, b,
-                    (n * c / head_nums),  '&'+section+'[' + str(bnc_size) + ']',
-                    '&'+section+'['+str(self.max_size-2*bnc_size)+']')
-        # v
-        self.deploy_transpose(head_nums, b,
-                    (n * c / head_nums),  '&'+section+'[' + str(2*bnc_size) + ']',
-                    '&'+section+'['+str(self.max_size-bnc_size)+']')
+        self.file_writer.writeln('memcpy(&' + section + '['  + str(self.max_size-bncx3_size)
+                    + '],' + section + ',' + str(bncx3_size) + ');', 'func')
         
         # transpose K
         # but in CMSIS no transpose there
@@ -699,35 +685,39 @@ class Model_deployment():
         self.file_writer.writeln('memcpy(' + section + ',&'
                     + section+'['+str(bnc_size)+'],' + str(bnc_size) + ');', 'func')
 
-        # copy in to shortcut
-        self.file_writer.writeln('memcpy(&' + section+'['+str(self.max_size-bnc_size)+']'
-                + ',' + section + ',' + str(bnc_size) + ');', 'func')
-        self.max_size -= bnc_size
-
         # norm1: head -> tail
-        norm1_size = self.get_size_output()
-        self.deploy_norm('qnorm1.', block_dict, norm_batch, 
-                    embedding_dim, section, '&'+section+'['+str(self.max_size-norm1_size)+']')
-        
-        # linear relu1: tail -> head
         self.get_size_output()
+        self.deploy_norm('qnorm1.', block_dict, norm_batch, 
+                    embedding_dim, section, '&'+section+'['+str(self.max_size-bnc_size)+']')
+
+        # copy shortcut to head
+        self.file_writer.writeln('memcpy(' + section + ',&' + section +
+                '[' + str(self.max_size-bnc_size) + '],' + str(bnc_size) + ');', 'func')
+        self.max_size -= bnc_size
+        
+        # linear relu1: head -> tail
+        linear_size = self.get_size_output()
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear_relu1.', block_dict, True,
-                    '&'+section+'['+str(self.max_size-norm1_size)+']', section)
+                    section, '&'+section+'['+str(self.max_size-linear_size)+']')
 
-        # linear2: head -> tail
+        # linear2: tail -> head
         linear2_size = self.get_size_output()
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear2.', block_dict, True,
-                    section, '&'+section+'['+str(self.max_size-linear2_size)+']')
+                    '&'+section+'['+str(self.max_size-linear_size)+']', section)
 
-        # add2: tail + tail -> head
+        # add2: head + tail -> mid
         self.max_size += bnc_size
         self.get_size_output()
-        self.deploy_add('qadd2.', block_dict, 
-            '&'+section+'['+str(self.max_size-linear2_size-bnc_size)+']', 
-            '&'+section+'['+str(self.max_size-bnc_size)+']',
-            section,bnc_size)
+        self.deploy_add('qadd2.', block_dict,
+            section,
+            '&'+section+'['+str(self.max_size-bnc_size)+']', 
+            '&'+section+'['+str(linear2_size)+']',linear2_size)
+
+        # copy add2 to head
+        self.file_writer.writeln('memcpy(' + section + ',&' + section +
+                '[' + str(linear2_size) + '],' + str(linear2_size) + ');', 'func')
 
         # transpose from (B N C) to (B C H W)
         # but in CMSIS no transpose there

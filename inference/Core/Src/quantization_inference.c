@@ -246,13 +246,11 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=1237536512;
     t_quant_params.shift=-8;
-    
-    
+
     arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_11,bias_11,section,&section[258048]);
-    
-    
+
     memcpy(section,&section[258048],24576);
-    
+
     fc_params.activation.max=127;
     fc_params.activation.min=-128;
     fc_params.input_offset=81;
@@ -266,36 +264,17 @@ int quantization_inference(void) {
 
     output_dims.c=288;
 
-    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_12,&bias_dims,bias_12,&output_dims,&section[208896]);
-    
+    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_12,&bias_dims,NULL,&output_dims,&section[208896]);
+
     arm_nn_transpose_bnc_to_nbc_q7(256,6,48,&section[208896],section);
-    
-    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,section,&section[208896]);
-    for (int j = 0; j < 48; j++) {
-        printf("%d ",section[208896+j]);
-    }
-    printf("\r\n");
-    for (int j = 0; j < 48; j++) {
-        printf("%d ",section[208896+48+j]);
-    }
-    printf("\r\n");
-    for (int j = 0; j < 48; j++) {
-        printf("%d ",section[208896+96+j]);
-    }
-    printf("\r\n");
-    for (int j = 0; j < 48; j++) {
-        printf("%d ",section[208896+144+j]);
-    }
-    printf("\r\n");/*
-    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[24576],&section[233472]);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[49152],&section[258048]);
+    memcpy(&section[208896],section,73728);
 
-    arm_nn_batch_mat_mult_nt_t_s8(&section[208896],&section[233472],NULL,section,1911858614,-6,256,48,256,3,3,-2,2,-128,127);
+    arm_nn_batch_mat_mult_nt_t_s8(&section[208896],&section[233472],NULL,section,1103812096,-8,256,48,256,3,3,-2,2,-128,127);
 
-    arm_softmax_s8(section,512,256,2044218880,-4,0,section);
+    arm_softmax_s8(section,512,256,2044218880,22,-248,section);
 
-    arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1118498490,-6,256,256,48,128,3,-1,2,-128,127);
+    arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1118498432,-6,256,256,48,128,3,-1,2,-128,127);
 
     arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[131072],&section[258048]);
 
@@ -315,14 +294,14 @@ int quantization_inference(void) {
 
     memcpy(section,&section[24576],24576);
 
-    memcpy(&section[282624],section,24576);
-
     norm_params.input_offset=85;
     norm_params.output_offset=-34;
 
     t_quant_params.multiplier=2111477760;
 
     arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_14,bias_14,section,&section[282624]);
+
+    memcpy(section,&section[282624],24576);
 
     fc_params.input_offset=34;
     fc_params.output_offset=-128;
@@ -334,7 +313,7 @@ int quantization_inference(void) {
 
     output_dims.c=128;
 
-    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,&section[282624],&filter_dims,weight_15,&bias_dims,bias_15,&output_dims,section);
+    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_15,&bias_dims,bias_15,&output_dims,&section[249856]);
 
     fc_params.input_offset=128;
     fc_params.output_offset=0;
@@ -347,10 +326,26 @@ int quantization_inference(void) {
 
     output_dims.c=96;
 
-    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_16,&bias_dims,bias_16,&output_dims,&section[258048]);
+    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,&section[249856],&filter_dims,weight_16,&bias_dims,bias_16,&output_dims,section);
 
-    arm_elementwise_add_s8_with_neg(&section[258048],&section[282624],0,1846320512,-1,34,1982880640,0,0,section,-29,2147483647,0,-128,127,24576);
+    arm_elementwise_add_s8_with_neg(section,&section[282624],0,1846320512,-1,34,1982880640,0,0,&section[24576],-29,2147483647,0,-128,127,24576);
 
+    memcpy(section,&section[24576],24576);
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 12; j++) {
+        printf("%d ",section[i*12 + j]);
+      }
+      printf("\r\n");
+    }
+    printf("\r\n");
+    printf("\r\n");
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 12; j++) {
+        printf("%d ",section[24576-96+i*12+j]);
+      }
+      printf("\r\n");
+    }
+    /*
     input_dims.n=1;
     input_dims.c=96;
 
@@ -439,21 +434,17 @@ int quantization_inference(void) {
 
     output_dims.c=288;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_22,&bias_dims,bias_22,&output_dims,&section[208896],21978);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_22,&bias_dims,NULL,&output_dims,&section[208896],21978);
 
     arm_nn_transpose_bnc_to_nbc_q7(256,6,48,&section[208896],section);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,section,&section[208896]);
+    memcpy(&section[208896],section,73728);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[24576],&section[233472]);
+    arm_nn_batch_mat_mult_nt_t_s8(&section[208896],&section[233472],NULL,section,1769460224,-8,256,48,256,5,5,-7,2,-128,127);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,1,12288,&section[49152],&section[258048]);
+    arm_softmax_s8(section,512,256,1801219200,22,-248,section);
 
-    arm_nn_batch_mat_mult_nt_t_s8(&section[208896],&section[233472],NULL,section,1532397482,-5,256,48,256,5,5,-7,2,-128,127);
-
-    arm_softmax_s8(section,512,256,1801219200,-4,0,section);
-
-    arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1347038839,-6,256,256,48,128,5,-13,2,-128,127);
+    arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1347038848,-6,256,256,48,128,5,-13,2,-128,127);
 
     arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[131072],&section[258048]);
 
@@ -473,14 +464,14 @@ int quantization_inference(void) {
 
     memcpy(section,&section[24576],24576);
 
-    memcpy(&section[282624],section,24576);
-
     norm_params.input_offset=75;
     norm_params.output_offset=-40;
 
     t_quant_params.multiplier=1899635328;
 
     arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_24,bias_24,section,&section[282624]);
+
+    memcpy(section,&section[282624],24576);
 
     fc_params.input_offset=40;
     fc_params.output_offset=-128;
@@ -492,7 +483,7 @@ int quantization_inference(void) {
 
     output_dims.c=128;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[282624],&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,section,9716);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,&section[249856],9716);
 
     fc_params.input_offset=128;
     fc_params.output_offset=4;
@@ -505,9 +496,11 @@ int quantization_inference(void) {
 
     output_dims.c=96;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,&section[258048],9706);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[249856],&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,section,9706);
 
-    arm_elementwise_add_s8_with_neg(&section[258048],&section[282624],-4,1082566272,0,40,1828365312,0,0,section,-32,2147483647,0,-128,127,24576);
+    arm_elementwise_add_s8_with_neg(section,&section[282624],-4,1082566272,0,40,1828365312,0,0,&section[24576],-32,2147483647,0,-128,127,24576);
+
+    memcpy(section,&section[24576],24576);
 
     input_dims.n=1;
     input_dims.c=96;
@@ -583,10 +576,10 @@ int quantization_inference(void) {
 
     output_dims.c=10;
 
-    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_30,&bias_dims,bias_30,&output_dims,&section[307190]);
+    arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_30,&bias_dims,NULL,&output_dims,&section[307190]);
 
     memcpy(section,&section[307190],10);
-*/
+    */
     return 0;}
 
 

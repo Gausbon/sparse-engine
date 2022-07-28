@@ -32,7 +32,7 @@ arm_cmsis_nn_status arm_nn_batch_mat_mult_nt_t_s8(const q7_t *lhs,
                                             const int32_t activation_max);
 
 
-arm_cmsis_nn_status arm_nn_batch_mat_mult_s8( const cmsis_nn_context *ctx,
+arm_cmsis_nn_status arm_nn_batch_mat_mult_s8(const cmsis_nn_context *ctx,
                                             const q7_t *lhs,
                                             const q7_t *rhs,
                                             const q31_t *bias,

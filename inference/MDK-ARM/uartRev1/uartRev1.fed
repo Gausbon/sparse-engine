@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Wed Jul 27 21:37:59 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Thu Jul 28 22:48:55 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -275,15 +275,13 @@ __asm___15_arm_nn_add_q7_c_b145c43a____REVSH <= USED 0
 __asm___15_arm_nn_add_q7_c_b145c43a____RRX <= USED 0
 arm_nn_add_q7 <= USED 0
 ;FILE arm_nn_batch_mat_mult_nt_t_s8.o
-__asm___31_arm_nn_batch_mat_mult_nt_t_s8_c_0171350f____REV16 <= USED 0
-__asm___31_arm_nn_batch_mat_mult_nt_t_s8_c_0171350f____REVSH <= USED 0
-__asm___31_arm_nn_batch_mat_mult_nt_t_s8_c_0171350f____RRX <= USED 0
-arm_nn_batch_mat_mult_nt_t_s8 <= USED 0
+__asm___31_arm_nn_batch_mat_mult_nt_t_s8_c_10617b69____REV16 <= USED 0
+__asm___31_arm_nn_batch_mat_mult_nt_t_s8_c_10617b69____REVSH <= USED 0
+__asm___31_arm_nn_batch_mat_mult_nt_t_s8_c_10617b69____RRX <= USED 0
 ;FILE arm_nn_batch_mat_mult_s8.o
-__asm___26_arm_nn_batch_mat_mult_s8_c_69ccc66a____REV16 <= USED 0
-__asm___26_arm_nn_batch_mat_mult_s8_c_69ccc66a____REVSH <= USED 0
-__asm___26_arm_nn_batch_mat_mult_s8_c_69ccc66a____RRX <= USED 0
-arm_nn_batch_mat_mult_s8 <= USED 0
+__asm___26_arm_nn_batch_mat_mult_s8_c_aa874026____REV16 <= USED 0
+__asm___26_arm_nn_batch_mat_mult_s8_c_aa874026____REVSH <= USED 0
+__asm___26_arm_nn_batch_mat_mult_s8_c_aa874026____RRX <= USED 0
 ;FILE arm_nn_depthwise_conv_nt_t_padded_s8.o
 __asm___38_arm_nn_depthwise_conv_nt_t_padded_s8_c_723c21f9____REV16 <= USED 0
 __asm___38_arm_nn_depthwise_conv_nt_t_padded_s8_c_723c21f9____REVSH <= USED 0
@@ -361,7 +359,6 @@ arm_nn_output_per_channel <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____REV16 <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____REVSH <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____RRX <= USED 0
-arm_nn_softmax_common_s8 <= USED 0
 ;FILE arm_nn_sparse_decode.o
 __asm___22_arm_nn_sparse_decode_c_e9b65fd1____REV16 <= USED 0
 __asm___22_arm_nn_sparse_decode_c_e9b65fd1____REVSH <= USED 0
@@ -460,7 +457,6 @@ arm_softmax_s16 <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____REV16 <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____REVSH <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____RRX <= USED 0
-arm_softmax_s8 <= USED 0
 ;FILE arm_softmax_s8_s16.o
 __asm___20_arm_softmax_s8_s16_c_16f9a8f7____REV16 <= USED 0
 __asm___20_arm_softmax_s8_s16_c_16f9a8f7____REVSH <= USED 0

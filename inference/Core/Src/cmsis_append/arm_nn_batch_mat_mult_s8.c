@@ -1,6 +1,107 @@
 #include "arm_nnsupportfunctions.h"
+arm_cmsis_nn_status arm_nn_vec_mat_mult_s8_rhs_offset(
+                                             const q7_t *lhs,
+                                             const q7_t *rhs,
+                                             const q31_t *bias,
+                                             int32_t *buffer,
+                                             q7_t *dst,
+                                             const int32_t lhs_offset,
+                                             const int32_t rhs_offset,
+                                             const int32_t dst_offset,
+                                             const int32_t dst_multiplier,
+                                             const int32_t dst_shift,
+                                             const int32_t lhs_cols,
+                                             const int32_t rhs_cols,
+                                             const int32_t activation_min,
+                                             const int32_t activation_max,
+                                             const int32_t address_offset)
+{
+    // lhs_cols == rhs_rows
+    const int32_t row_col_cnt = lhs_cols / 4;
 
-arm_cmsis_nn_status arm_nn_batch_mat_mult_s8( const cmsis_nn_context *ctx,
+    const int16_t lhs_offset_s16 = (int16_t)lhs_offset;
+    const uint32_t lhs_offset_s16x2 = __PKHBT(lhs_offset_s16, lhs_offset_s16, 16);
+    const int16_t rhs_offset_s16 = (int16_t)rhs_offset;
+    const uint32_t rhs_offset_s16x2 = __PKHBT(rhs_offset_s16, rhs_offset_s16, 16);
+
+    memset(buffer, 0, sizeof(int32_t) * rhs_cols);
+    const int8_t *lhs_vec = lhs;
+    
+    for (int32_t i = row_col_cnt; i > 0; i--)
+    {
+        if (bias)
+        {
+            for (int j = 0; j < rhs_cols; j++) {
+                buffer[j] += bias[j];
+            }
+        }
+        const int8_t *rhs_0 = rhs;
+        const int8_t *rhs_1 = rhs_0 + rhs_cols;
+        const int8_t *rhs_2 = rhs_1 + rhs_cols;
+        const int8_t *rhs_3 = rhs_2 + rhs_cols;
+        rhs += 4 * rhs_cols;
+        
+        int32_t vec_0 = arm_nn_read_q7x4_ia(&lhs_vec);
+        int32_t vec_1 = __SXTAB16_RORn(lhs_offset_s16x2, (uint32_t)vec_0, 8);
+        vec_0 = __SXTAB16(lhs_offset_s16x2, vec_0);
+        
+        for (int j = 0; j < rhs_cols; j++) {
+            int32_t ker_0 = __PKHBT(*(rhs_0++), *(rhs_2++), 16);
+            int32_t ker_1 = __PKHBT(*(rhs_1++), *(rhs_3++), 16);
+            ker_0 = __SXTAB16(rhs_offset_s16x2, ker_0);
+            ker_1 = __SXTAB16(rhs_offset_s16x2, ker_1);
+            
+            buffer[j] = __SMLAD(ker_0, vec_0, buffer[j]);
+            buffer[j] = __SMLAD(ker_1, vec_1, buffer[j]);
+        }
+    }
+    
+    int32_t row_cnt = 4 * row_col_cnt;
+    if (lhs_cols - row_cnt >= 2) {
+        const int8_t *rhs_0 = rhs;
+        const int8_t *rhs_1 = rhs_0 + rhs_cols;
+        rhs += 2 * rhs_cols;
+
+        int32_t vec_0 = __PKHBT(*(lhs_vec++), *(lhs_vec++), 16);
+        vec_0 = __SXTAB16(lhs_offset_s16x2, vec_0);
+        for (int j = 0; j < rhs_cols; j++) {
+            int32_t ker_0 = __PKHBT(*(rhs_0++), *(rhs_1++), 16);
+            ker_0 = __SXTAB16(rhs_offset_s16x2, ker_0);
+            
+            buffer[j] = __SMLAD(ker_0, vec_0, buffer[j]);
+        }
+        row_cnt += 2;
+    }
+
+    if (lhs_cols > row_cnt) {
+        int32_t lhs_val = __QADD(*(lhs_vec++), lhs_offset);
+
+        for (int j = 0; j < rhs_cols; j++) {
+            int32_t rhs_val = __QADD(*(rhs++), rhs_offset);
+
+            buffer[j] += (lhs_val * rhs_val);
+        }
+        row_cnt ++;
+    }
+
+    for (int i = 0; i < rhs_cols; i++) {
+        int32_t requant = arm_nn_requantize(buffer[i], dst_multiplier, dst_shift);
+
+        // Add offset
+        requant += dst_offset;
+        // Clamp the result
+        requant = MAX(requant, activation_min);
+        requant = MIN(requant, activation_max);
+        *dst = (int8_t)requant;
+        dst += address_offset;
+    }
+
+
+    return ARM_CMSIS_NN_SUCCESS;
+}
+
+
+arm_cmsis_nn_status arm_nn_batch_mat_mult_s8(const cmsis_nn_context *ctx,
                                             const q7_t *lhs,
                                             const q7_t *rhs,
                                             const q31_t *bias,
@@ -17,80 +118,34 @@ arm_cmsis_nn_status arm_nn_batch_mat_mult_s8( const cmsis_nn_context *ctx,
                                             const int32_t activation_min,
                                             const int32_t activation_max)
 {
+    // rhs_rows == lhs_cols
     int32_t *buffer = (int32_t*) ctx->buf;
-    
-    const int32_t lhs_offset_15x2 = __PKHBT(lhs_offset, lhs_offset, 16);
-    const int32_t rhs_offset_15x2 = __PKHBT(rhs_offset, rhs_offset, 16);
-    int32_t i_batch, i_lhs_row, i_lhs_col, i_rhs_col;
+    const int32_t rhs_size = lhs_cols * rhs_cols;
 
-    for(i_batch = 0; i_batch < batch; ++i_batch) {
-        const q7_t *lhs_start = &lhs[i_batch * lhs_rows * lhs_cols];
-        const q7_t *rhs_start = &rhs[i_batch * lhs_rows * rhs_cols];
-        q7_t *dst_start = &dst[i_batch * lhs_rows * rhs_cols];
-        const q7_t *lhs_ptr = lhs_start;
-        q7_t *dst_ptr = dst_start;
-
-        for (i_lhs_row = 0;i_lhs_row < lhs_rows; ++i_lhs_row) {
-            memset(buffer, 0, sizeof(q31_t) * rhs_cols);
-            const q7_t *rhs_ptr = rhs_start;
-
-            for (i_lhs_col = 0;i_lhs_col < lhs_cols/2; ++i_lhs_col) {
-                q7_t lhs_val_0 = *(lhs_ptr++);
-                q7_t lhs_val_1 = *(lhs_ptr++);
-                q31_t lhs_15x2 = __PKHBT(lhs_val_0, lhs_val_1, 16);
-                lhs_15x2 = __QADD(lhs_15x2, lhs_offset_15x2);
-
-                const q7_t *rhs_head_0 = rhs_ptr;
-                const q7_t *rhs_head_1 = rhs_head_0 + rhs_cols;
-
-                buffer = (int32_t*) ctx->buf;
-
-                for (i_rhs_col = 0;i_rhs_col < rhs_cols; ++i_rhs_col) {
-                    q7_t rhs_val_0 = *(rhs_head_0++);
-                    q7_t rhs_val_1 = *(rhs_head_1++);
-                    q31_t rhs_15x2 = __PKHBT(rhs_val_0, rhs_val_1, 16);
-                    rhs_15x2 = __QADD(rhs_15x2, rhs_offset_15x2);
-
-                    (*buffer) = __SMLAD(lhs_15x2, rhs_15x2, (*buffer));
-                    buffer++;
-                }
-                
-                rhs_ptr += (2 * rhs_cols);
-            }
-            
-            if (lhs_cols & 1) {
-                // remain one row
-                q7_t lhs_val = lhs_offset + *(lhs_ptr++);
-                const q7_t *rhs_head = rhs_ptr;
-                buffer = (int32_t*) ctx->buf;
-
-                for (i_rhs_col = 0;i_rhs_col < rhs_cols; ++i_rhs_col) {
-                    q7_t rhs_val = rhs_offset + *(rhs_head++);
-                    (*buffer) = __QADD((*buffer), (rhs_val * lhs_val));
-                    buffer++;
-                }
-            }
-            // output
-            if (bias) {
-                int32_t cur_bias = bias[i_rhs_col];
-                for (i_rhs_col = 0;i_rhs_col < rhs_cols; ++i_rhs_col) {
-                    (*buffer) = __QADD((*buffer), cur_bias);
-                }
-            }
-            
-            for (i_rhs_col = 0;i_rhs_col < rhs_cols; ++i_rhs_col) {
-                q31_t requant = arm_nn_requantize((*buffer), dst_multiplier,
-                        dst_shift);
-                requant += dst_offset;
-                requant = MAX(requant, activation_min);
-                requant = MIN(requant, activation_max);
-                *(dst_ptr++) = (q7_t) requant;
-            }  
+    for (int i = 0; i < batch; i++) {
+        int32_t batch_cnt = lhs_rows;
+        while (batch_cnt) {
+            arm_nn_vec_mat_mult_s8_rhs_offset(lhs,
+                                    rhs,
+                                    bias,
+                                    buffer,
+                                    dst,
+                                    lhs_offset,
+                                    rhs_offset,
+                                    dst_offset,
+                                    dst_multiplier,
+                                    dst_shift,
+                                    lhs_cols, /* col_dim or accum_depth */
+                                    rhs_cols, /* row_dim or output_depth */
+                                    activation_min,
+                                    activation_max,
+                                    1L);
+            lhs += lhs_cols;
+            dst += rhs_cols;
+            batch_cnt--;
         }
+        rhs += rhs_size;
     }
+    
     return ARM_CMSIS_NN_SUCCESS;
 }
-
-/**
- * @} end of NNBasicMath group
- */
