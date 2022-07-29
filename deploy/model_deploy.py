@@ -324,6 +324,7 @@ class Model_deployment():
         self.file_writer.write_param_parser('input_dims', self.input_dict)
         self.file_writer.write_param_parser('filter_dims', self.filter_dict)
         self.file_writer.write_param_parser('output_dims', self.output_dict)
+        self.file_writer.write_param_parser('pool_params', self.pooling_dict)
 
         # get offset
         param_list.append(-block_dict[name + 'qi.zero_point'])
@@ -454,8 +455,8 @@ class Model_deployment():
         # to (b, n, c)
         # current memory: [(attn) attn*v ... bnc_value | reserve]
         bnc_size = self.get_size_output()
-        self.deploy_transpose(head_nums, (b * n * c / head_nums),
-                    1, '&' + section + '[' + str(attn_size)+ ']',
+        self.deploy_transpose(head_nums, (b * n),
+                    (c / head_nums), '&' + section + '[' + str(attn_size)+ ']',
                     '&' + section + '[' + str(self.max_size - bnc_size) + ']')
 
         # self attention final linear
@@ -818,10 +819,12 @@ class Model_deployment():
             # global_pooling, avgpooling: head -> tail
             self.input_dict['n'] = batch
             self.input_dict['h'], self.input_dict['w'] = input_size, input_size
+            self.input_dict['c'] = channel
             self.filter_dict['h'], self.filter_dict['w'] = input_size, input_size
             self.output_dict['h'], self.output_dict['w'] = 1, 1
             self.pooling_dict['stride.h'] , self.pooling_dict['stride.w'] = input_size, input_size
             self.pooling_dict['padding.h'] , self.pooling_dict['padding.w'] = 0, 0
+            self.pooling_dict['activation.min'] , self.pooling_dict['activation.max'] = -128, 127
 
             pool_size = batch * channel
             self.deploy_pooling('', block_dict, True,
@@ -889,13 +892,11 @@ class Model_deployment():
             elif (key_list[1] == 'mv2block'):
                 self.deploy_mv2block(batch, key, value, self.size, section)
             self.size /= 2
-            print(len(self.size_list))
             print('-'*70)
 
         for key, value in self.mv2block_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
             self.deploy_mv2block(batch, key, value, self.size, section)
-            print(len(self.size_list))
             print('-'*70)
 
         embedding_dim = []
@@ -909,13 +910,11 @@ class Model_deployment():
             type_index = int(key_list[-2][-1])
             self.deploy_transformer(batch, key, value, embedding_dim[type_index][layer_count],
                 self.size, section)
-            print(len(self.size_list))
             print('-'*70)
 
         self.file_writer.writeln('// block: last conv', 'func')
         self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict,
             self.size, section)
-        print(len(self.size_list))
         print('-'*70)
 
         for key, value in self.pooling_list_dict.items():
@@ -928,8 +927,11 @@ class Model_deployment():
         self.deploy_classifier(batch, 'classifier', self.classifier_dict,
             section)
     
-        self.file_writer.writeln('return 0;}\n', 'func')
-        self.file_writer.writeln('#endif', 'data')
+        self.file_writer.writeln('for(int i = 0; i < 10; i++){', 'func')
+        self.file_writer.writeln('    printf(\"%d \",section[i]);\n    }', 'func')
+        self.file_writer.writeln('printf("\\r\\n");', 'func')
+        self.file_writer.writeln('return 0;\n}\n', 'func')
+        self.file_writer.writeln('\n#endif', 'data')
 
         print('Model deploy completed')
         if (len(self.size_list) != 0):

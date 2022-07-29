@@ -77,7 +77,7 @@ Remaining size list count: 0 (0 is correct)
 
 ### 2.3 稀疏推理
 
-&emsp; &emsp; 待办事项：完成并验证稀疏推理过程
+&emsp; &emsp; 使用Keil打开inference\MDK-ARM\uartRev1.uvprojx工程文件，Build工程后Download至STM32F746NG开发板。调整串口波特率为115200，即可在对应串口查看稀疏推理输出结果。
 
 ## 3. 其他事项
 ### 3.1 稀疏层

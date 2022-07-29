@@ -276,7 +276,7 @@ int quantization_inference(void) {
 
     arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1118498432,-6,256,256,48,128,3,-1,2,-128,127);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[131072],&section[258048]);
+    arm_nn_transpose_bnc_to_nbc_q7(2,256,48,&section[131072],&section[258048]);
 
     fc_params.input_offset=1;
     fc_params.output_offset=-20;
@@ -331,21 +331,7 @@ int quantization_inference(void) {
     arm_elementwise_add_s8_with_neg(section,&section[282624],0,1846320512,-1,34,1982880640,0,0,&section[24576],-29,2147483647,0,-128,127,24576);
 
     memcpy(section,&section[24576],24576);
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 12; j++) {
-        printf("%d ",section[i*12 + j]);
-      }
-      printf("\r\n");
-    }
-    printf("\r\n");
-    printf("\r\n");
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 12; j++) {
-        printf("%d ",section[24576-96+i*12+j]);
-      }
-      printf("\r\n");
-    }
-    /*
+
     input_dims.n=1;
     input_dims.c=96;
 
@@ -446,7 +432,7 @@ int quantization_inference(void) {
 
     arm_nn_batch_mat_mult_s8(&ctx,section,&section[258048],NULL,&section[131072],1347038848,-6,256,256,48,128,5,-13,2,-128,127);
 
-    arm_nn_transpose_bnc_to_nbc_q7(2,12288,1,&section[131072],&section[258048]);
+    arm_nn_transpose_bnc_to_nbc_q7(2,256,48,&section[131072],&section[258048]);
 
     fc_params.input_offset=13;
     fc_params.output_offset=-17;
@@ -553,12 +539,20 @@ int quantization_inference(void) {
 
     // block: qglobal_pooling
 
+    input_dims.c=512;
 
     filter_dims.h=16;
     filter_dims.w=16;
 
     output_dims.h=1;
     output_dims.w=1;
+
+    pool_params.stride.h=16;
+    pool_params.stride.w=16;
+    pool_params.padding.h=0;
+    pool_params.padding.w=0;
+    pool_params.activation.min=-128;
+    pool_params.activation.max=127;
 
     arm_avgpool_s8_with_quantization(&ctx,&pool_params,&input_dims,section,&filter_dims,&output_dims,128,-128,1105721945,3,&section[306688]);
 
@@ -579,7 +573,15 @@ int quantization_inference(void) {
     arm_fully_connected_s8(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_30,&bias_dims,NULL,&output_dims,&section[307190]);
 
     memcpy(section,&section[307190],10);
-    */
-    return 0;}
+
+    for(int i = 0; i < 10; i++){
+
+        printf("%d ",section[i]);
+    }
+
+    printf("\r\n");
+
+    return 0;
+}
 
 

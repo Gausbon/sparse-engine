@@ -91,9 +91,14 @@ void arm_nn_convolve_s8_double_sparse( const cmsis_nn_conv_params *conv_params,
 
     k_y_0 = dilation_y * h_0 - pad_y;
     k_y_1 = dilation_y * h_1 - pad_y;
+    k_y_0_size = k_y_0 * input_x * input_ch;
+    k_y_1_size = k_y_1 * input_x * input_ch;
+
     for (int32_t i_out_y = 0; i_out_y < output_y; i_out_y++) {
         k_x_0 = dilation_x * w_0 - pad_x;
         k_x_1 = dilation_x * w_1 - pad_x;
+        k_x_0_size = k_x_0 * input_ch;
+        k_x_1_size = k_x_1 * input_ch;
         for (int32_t i_out_x = 0; i_out_x < output_x; i_out_x++) {
             if (k_y_0 >= 0 && k_y_0 < input_y && k_x_0 >= 0 && k_x_0 < input_x) {
                 input_0 = input_data[k_y_0_size + k_x_0_size + in_ch_0];
@@ -188,7 +193,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
     for (int32_t i_batch = 0; i_batch < batch; ++i_batch) {
         memset(buffer, 0, sizeof(q31_t) * output_count);
         
-        const q7_t *filter_ptr = &filter_data[0];
+        const q7_t *filter_ptr = filter_data;
         const q7_t *in_ptr = &input_data[i_batch * input_x * input_y * input_ch];
         q7_t *out_ptr = &output_data[i_batch * output_x * output_y * output_ch];
 
@@ -201,7 +206,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
         double_flag = 0;
         mat_flag = 0;
         counter = input_count;
-
+        
         while (counter) {
             // decode procedure
             arm_nn_sparse_decode_4d(
@@ -213,7 +218,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
                 &cur_w, &cur_out_ch,
                 &mat_flag, &counter,
                 &cur_val);
-
+            
             if (mat_flag) {   
                 // change the output channel, last output channel conv is done
                 if (double_flag == 1 && last_val != 0) {
@@ -243,6 +248,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
 
             if (double_flag && !(last_val == 0 && cur_val == 0)) {
                 // use SIMD instructions to compute two val (last and cur val)
+                
                 arm_nn_convolve_s8_double_sparse(conv_params,
                         stride_x_size, stride_y_size,
                         in_ptr,
@@ -255,7 +261,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
                         cur_w, cur_val,
                         buffer);
             }
-
+            
             double_flag = 1 - double_flag;                
             last_out_ch = cur_out_ch;
             last_h = cur_h;

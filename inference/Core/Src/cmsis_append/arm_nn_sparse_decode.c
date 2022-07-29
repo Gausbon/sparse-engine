@@ -22,8 +22,9 @@ void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
     *cur_out_ch = last_out_ch;
     *cur_h = last_h;
     *cur_w = last_w;
-    *cur_in_ch = *(filter_ptr++) + last_in_ch + 128;
-    *cur_val = *(filter_ptr++);
+    *cur_in_ch = filter_ptr[0] + last_in_ch + 128;
+    *cur_val = filter_ptr[1];
+
     while (*cur_in_ch >= input_ch) {
         *cur_w += (*cur_in_ch / input_ch);
         *cur_in_ch = *cur_in_ch % input_ch;
@@ -37,6 +38,7 @@ void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
             }
         }
     }
+    *filter_data += 2;
     *counter -= 2;
 }
 
@@ -53,12 +55,13 @@ void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
     const q7_t *filter_ptr = *filter_data;
     
     *cur_out_ch = last_out_ch;
-    *cur_in_ch = *(filter_ptr++) + last_in_ch + 128;
-    *cur_val = *(filter_ptr++);
+    *cur_in_ch = filter_ptr[0] + last_in_ch + 128;
+    *cur_val = filter_ptr[1];
     while (*cur_in_ch >= input_ch) {
         *cur_out_ch += (*cur_in_ch / input_ch);
         *cur_in_ch = *cur_in_ch % input_ch;
         *mat_flag = 1;
     }
+    *filter_data += 2;
     *counter -= 2;
 }

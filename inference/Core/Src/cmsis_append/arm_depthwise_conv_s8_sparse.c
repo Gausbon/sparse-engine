@@ -86,9 +86,15 @@ void arm_nn_dw_convolve_s8_double_sparse( const cmsis_nn_dw_conv_params *dw_conv
 
     k_y_0 = dilation_y * h_0 - pad_y;
     k_y_1 = dilation_y * h_1 - pad_y;
+    k_y_0_size = k_y_0 * input_x * input_ch;
+    k_y_1_size = k_y_1 * input_x * input_ch;
+    
     for (int32_t i_out_y = 0; i_out_y < output_y; i_out_y++) {
         k_x_0 = dilation_x * w_0 - pad_x;
         k_x_1 = dilation_x * w_1 - pad_x;
+        k_x_0_size = k_x_0 * input_ch;
+        k_x_1_size = k_x_1 * input_ch;
+
         for (int32_t i_out_x = 0; i_out_x < output_x; i_out_x++) {
             if (k_y_0 >= 0 && k_y_0 < input_y && k_x_0 >= 0 && k_x_0 < input_x) {
                 input_0 = input_data[k_y_0_size + k_x_0_size + in_ch_0];
