@@ -247,9 +247,7 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1237536512;
     t_quant_params.shift=-8;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_11,bias_11,section,&section[258048]);
-
-    memcpy(section,&section[258048],24576);
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_11,bias_11,section,section);
 
     fc_params.activation.max=127;
     fc_params.activation.min=-128;
@@ -299,9 +297,9 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=2111477760;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_14,bias_14,section,&section[282624]);
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_14,bias_14,section,section);
 
-    memcpy(section,&section[282624],24576);
+    memcpy(&section[282624],section,24576);
 
     fc_params.input_offset=34;
     fc_params.output_offset=-128;
@@ -404,9 +402,7 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=2146633600;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_21,bias_21,section,&section[258048]);
-
-    memcpy(section,&section[258048],24576);
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_21,bias_21,section,section);
 
     fc_params.input_offset=87;
     fc_params.output_offset=-5;
@@ -455,9 +451,9 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=1899635328;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_24,bias_24,section,&section[282624]);
+    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_24,bias_24,section,section);
 
-    memcpy(section,&section[282624],24576);
+    memcpy(&section[282624],section,24576);
 
     fc_params.input_offset=40;
     fc_params.output_offset=-128;
@@ -574,12 +570,7 @@ int quantization_inference(void) {
 
     memcpy(section,&section[307190],10);
 
-    for(int i = 0; i < 10; i++){
-
-        printf("%d ",section[i]);
-    }
-
-    printf("\r\n");
+    result_check(&ctx,section,9);
 
     return 0;
 }

@@ -4,6 +4,7 @@
 "uartrev1\stm32f7xx_it.o"
 "uartrev1\stm32f7xx_hal_msp.o"
 "uartrev1\quantization_inference.o"
+"uartrev1\result_check.o"
 "uartrev1\arm_convolve_s8_sparse.o"
 "uartrev1\arm_depthwise_conv_s8_sparse.o"
 "uartrev1\arm_fully_connected_s8_sparse.o"

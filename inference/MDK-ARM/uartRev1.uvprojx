@@ -412,6 +412,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\quantization_inference.c</FilePath>
             </File>
+            <File>
+              <FileName>result_check.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\result_check.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

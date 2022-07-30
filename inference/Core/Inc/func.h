@@ -201,4 +201,10 @@ arm_status arm_maxpool_s8_with_quantization (const cmsis_nn_context *ctx,
                           const int32_t shift,
                           q7_t *dst);
 
+
+int result_check(const cmsis_nn_context *ctx,
+                          const q7_t *section,
+                          const int32_t class);
+                          
+
 #endif

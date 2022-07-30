@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Fri Jul 29 23:45:59 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Sat Jul 30 22:25:15 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -865,6 +865,10 @@ arm_quaternion_normalize_f32 <= USED 0
 arm_quaternion_product_f32 <= USED 0
 arm_quaternion_product_single_f32 <= USED 0
 arm_rotation2quaternion_f32 <= USED 0
+;FILE result_check.o
+__asm___14_result_check_c_ad7afb9f____REV16 <= USED 0
+__asm___14_result_check_c_ad7afb9f____REVSH <= USED 0
+__asm___14_result_check_c_ad7afb9f____RRX <= USED 0
 ;FILE retarget_io.o
 __aeabi_assert <= USED 0
 __backspace <= USED 0

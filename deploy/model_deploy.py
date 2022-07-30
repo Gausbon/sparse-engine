@@ -1,12 +1,11 @@
 import os
 import numpy as np
 import yaml
-from keras.datasets import cifar10
 from utils import conv_data_to_sparse, approximate_float
 from file_write import File_writer
 
 class Model_deployment():
-    def __init__(self, new_image=False):
+    def __init__(self):
 
         # basic info
         with open('config.yml', 'r') as file:
@@ -41,17 +40,9 @@ class Model_deployment():
         self.counter = 0
         self.first = 1
 
-        if (new_image):
-            _, (X_test, _) = cifar10.load_data()
-            np.random.shuffle(X_test)
-            X = X_test[0]
-            assert(X.shape == (32, 32, 3))
-            np.save('image.npy', X)
-            self.image = X
-        else:
-            self.image = np.load('image.npy')
-        self.size = self.image.shape[0]
-        self.image = self.image.astype(int) - 128
+        self.image = np.load(self.config['image_path']).transpose(0, 2, 3, 1)
+        self.image_class = self.config['image_class']
+        self.size = self.image.shape[1]
     
 
     def get_size_output(self):
@@ -415,10 +406,6 @@ class Model_deployment():
                     section)
         self.file_writer.writeln('memcpy(&' + section + '['  + str(self.max_size-bncx3_size)
                     + '],' + section + ',' + str(bncx3_size) + ');', 'func')
-        
-        # transpose K
-        # but in CMSIS no transpose there
-        self.get_size_output()
 
         # q * k^T
         # from (head_nums*b, n, c / head_nums) * (head_nums*b, c / head_nums, n)
@@ -653,10 +640,6 @@ class Model_deployment():
         self.deploy_conv('qconv2.', block_dict, True, False,
                     '&'+section+'['+str(self.max_size - conv1_size)+']', section)
 
-        # transpose from (B C H W) to (B N C)
-        # but in CMSIS no transpose there
-        self.get_size_output()
-
         # copy shortcut data from head to tail
         norm_batch = batch * input_size * input_size
         self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - bnc_size)
@@ -666,10 +649,7 @@ class Model_deployment():
         # pre_norm: head -> head
         self.get_size_output()
         self.deploy_norm('qpre_norm.', block_dict, norm_batch, embedding_dim,
-                    section, '&'+section+'['+str(self.max_size-bnc_size)+']')
-        self.file_writer.writeln('memcpy(' + section +',&' + 
-                    section+'['+str(self.max_size-bnc_size)+'],'+
-                    str(bnc_size) + ');', 'func')
+                    section, section)
 
         # self attention
         self.deploy_self_attn('self_attn.', block_dict,
@@ -686,14 +666,14 @@ class Model_deployment():
         self.file_writer.writeln('memcpy(' + section + ',&'
                     + section+'['+str(bnc_size)+'],' + str(bnc_size) + ');', 'func')
 
-        # norm1: head -> tail
+        # norm1: head -> head
         self.get_size_output()
         self.deploy_norm('qnorm1.', block_dict, norm_batch, 
-                    embedding_dim, section, '&'+section+'['+str(self.max_size-bnc_size)+']')
+                    embedding_dim, section, section)
 
-        # copy shortcut to head
-        self.file_writer.writeln('memcpy(' + section + ',&' + section +
-                '[' + str(self.max_size-bnc_size) + '],' + str(bnc_size) + ');', 'func')
+        # copy head to shortcut
+        self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size-bnc_size) + '],'
+                + section + ',' + str(bnc_size) + ');', 'func')
         self.max_size -= bnc_size
         
         # linear relu1: head -> tail
@@ -719,10 +699,6 @@ class Model_deployment():
         # copy add2 to head
         self.file_writer.writeln('memcpy(' + section + ',&' + section +
                 '[' + str(linear2_size) + '],' + str(linear2_size) + ');', 'func')
-
-        # transpose from (B N C) to (B C H W)
-        # but in CMSIS no transpose there
-        self.get_size_output()
 
         # conv_3: head -> tail
         conv3_size = self.get_size_output()
@@ -782,10 +758,6 @@ class Model_deployment():
             self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - in_size)
                 + '],' + section + ',' + str(in_size) + ');', 'func')
             self.max_size -= in_size
-            
-            # transpose from (B C H W) to (B H W C)
-            # but in CMSIS no transpose there
-            self.get_size_output()
 
             # linear: head -> tail
             # shape: b (h w) c -> b (h w) 1 -> b (h w) 1
@@ -797,10 +769,6 @@ class Model_deployment():
             self.get_size_output()
             self.deploy_softmax('qsoftmax.', block_dict, batch, (input_size * input_size), 
                         '&'+section+'['+str(self.max_size - out_size)+']', section)
-
-            # transpose from b (h w) 1 to b 1 (h w)
-            # but in CMSIS no transpose there
-            self.get_size_output()
 
             # matmul: head * tail -> mid
             # shape: b 1 (h w) * b (h w) c -> b 1 c -> b c
@@ -927,9 +895,7 @@ class Model_deployment():
         self.deploy_classifier(batch, 'classifier', self.classifier_dict,
             section)
     
-        self.file_writer.writeln('for(int i = 0; i < 10; i++){', 'func')
-        self.file_writer.writeln('    printf(\"%d \",section[i]);\n    }', 'func')
-        self.file_writer.writeln('printf("\\r\\n");', 'func')
+        self.file_writer.writeln('result_check(&ctx,section,' + str(self.image_class) + ');', 'func')
         self.file_writer.writeln('return 0;\n}\n', 'func')
         self.file_writer.writeln('\n#endif', 'data')
 

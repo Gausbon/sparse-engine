@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "func.h"
+#include "time.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "arm_nnfunctions.h"
@@ -112,8 +113,10 @@ int main(void)
 		
 		
 //		HAL_UART_Transmit(&huart1, (uint8_t*)&data, sizeof(data), 100);
-		printf("start\r\n");
-		quantization_inference();
+    uint32_t start = HAL_GetTick();
+    quantization_inference();
+		uint32_t end = HAL_GetTick();
+    printf("Inference time(ms): %d\r\n",end - start);
 		HAL_Delay(1000);
   }
   /* USER CODE END 3 */
