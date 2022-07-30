@@ -14,6 +14,7 @@ ram_size: 300
 image_path: 'input/9.npy'
 image_class: 9
 
+# constant
 func_path: 'inference/Core/Src/quantization_inference.c' 
 data_path: 'inference/Core/Inc/data.h'
 func_init: 'init/func_init.txt'

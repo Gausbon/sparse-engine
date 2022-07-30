@@ -158,13 +158,46 @@ class Model_deployment():
 
         # weight operation
         weight = block_dict[name + 'conv_module.weight']
-        if (is_depthwise):
+        # channel & filter dim info
+
+        # conv: (out_ch, in_ch, h, w)->(out_ch, h, w, in_ch)
+        # transpose: (0, 2, 3, 1)
+        # out ch = out_ch(ori dim 0), in ch = in_ch(ori dim 1)
+
+        # dw conv without sparse: (out_ch(in_ch), 1, h, w)->(1, h, w, out_ch(in_ch))
+        # transpose: (1, 2, 3, 0)
+        # out ch = out_ch(ori dim 0), in ch = out_ch(ori dim 0)
+
+        # dw conv with sparse: (out_ch(in_ch), 1, h, w)->(out_ch(in_ch), h, w, 1)
+        # transpose: (0, 2, 3, 1)
+        # out ch = out_ch(ori dim 0), in ch = 1(ori dim 1)
+
+        ori_shape = weight.shape
+        self.output_dict['c'] = ori_shape[0]
+        if (is_depthwise and not is_sparse):
+            self.input_dict['c'] = ori_shape[0]
+        else:
+            self.input_dict['c'] = ori_shape[1]
+        self.filter_dict['h'], self.filter_dict['w'] = ori_shape[2], ori_shape[3]
+
+        # sparse encode
+        if (is_depthwise and not is_sparse):
             weight = weight.transpose((1, 2, 3, 0))
         else:
             weight = weight.transpose((0, 2, 3, 1))
-        weight_shape = weight.shape
+
         if (is_sparse):
             weight, is_sparse = conv_data_to_sparse(weight)
+            # this branch goes to dwconv:
+            # should be sparse, but after sparse encode the tensor got larger
+            if (is_depthwise and not is_sparse):
+                weight = weight.transpose((1, 2, 3, 0))
+                self.input_dict['c'] = ori_shape[0]
+
+        self.file_writer.write_param_parser('input_dims', self.input_dict)
+        self.file_writer.write_param_parser('filter_dims', self.filter_dict)
+        self.file_writer.write_param_parser('output_dims', self.output_dict)
+
         weight_name = 'weight_' + str(self.counter)
         param_list.extend(['&filter_dims', weight_name])
         self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
@@ -178,17 +211,6 @@ class Model_deployment():
         else:
             param_list.extend(['&bias_dims', 'NULL'])
         
-
-        # channel & filter dim info
-        self.input_dict['c'] = weight_shape[3]
-        if (is_depthwise):
-            self.output_dict['c'] = weight_shape[3]
-        else:
-            self.output_dict['c'] = weight_shape[0]
-        self.filter_dict['h'], self.filter_dict['w'] = weight_shape[1], weight_shape[2]
-        self.file_writer.write_param_parser('input_dims', self.input_dict)
-        self.file_writer.write_param_parser('filter_dims', self.filter_dict)
-        self.file_writer.write_param_parser('output_dims', self.output_dict)
 
         # output operation and parse conv params
         param_list.extend(['&output_dims', out_section])
