@@ -14,6 +14,10 @@ ram_size: 300
 image_path: 'input/9.npy'
 image_class: 9
 
+# if force_sparse is true, conv will be sparse 
+# even when sparse tensor is larger than the origin
+force_sparse: false
+
 # constant
 func_path: 'inference/Core/Src/quantization_inference.c' 
 data_path: 'inference/Core/Inc/data.h'

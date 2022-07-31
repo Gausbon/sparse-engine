@@ -132,7 +132,7 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
         var = 0;
         // calculate the std
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
-            diff = __QSUB(*(input_ptr++), avg_offset);
+            diff = *(input_ptr++) - avg_offset;
 
             if (diff > 32767 || diff < -32768) {
                 // the difference is out of int16 bound
@@ -165,7 +165,7 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
 
         // norm
         for (i_dim_c = 0; i_dim_c < dim_c; ++i_dim_c) {
-            requant = __QSUB(*(input_ptr++), avg_offset);
+            requant = *(input_ptr++) - avg_offset;
             requant = requant * factor;
             requant = MAX(requant, -32768);
             requant = MIN(requant, 32767);
@@ -178,7 +178,7 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
             requant = MAX(requant, -2147483648);
             requant = MIN(requant, 2147483647);
             requant = arm_nn_requantize(requant, mult, shift);
-            requant = requant + out_offset;
+            requant += out_offset;
             requant = MAX(requant, act_min);
             requant = MIN(requant, act_max);
             *(output_ptr++) = (q7_t) requant;

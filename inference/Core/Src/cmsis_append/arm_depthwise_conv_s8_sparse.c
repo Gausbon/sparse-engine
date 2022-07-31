@@ -9,7 +9,7 @@ void arm_nn_dw_convolve_s8_single_sparse( const cmsis_nn_dw_conv_params *dw_conv
                                     const int32_t input_y,
                                     const int32_t output_x,
                                     const int32_t output_y,
-                                    const int32_t input_ch,
+                                    const int32_t output_ch,
                                     const int32_t in_ch,
                                     const int32_t h,
                                     const int32_t w,
@@ -29,16 +29,16 @@ void arm_nn_dw_convolve_s8_single_sparse( const cmsis_nn_dw_conv_params *dw_conv
     q7_t input_val;
 
     k_y = dilation_y * h - pad_y;
-    k_y_size = k_y * input_x * input_ch;
+    k_y_size = k_y * input_x * output_ch;
     
     for (int32_t i_out_y = 0; i_out_y < output_y; i_out_y++) {
         k_x = dilation_x * w - pad_x;
-        k_x_size = k_x * input_ch;
+        k_x_size = k_x * output_ch;
         for (int32_t i_out_x = 0; i_out_x < output_x; i_out_x++) {
             if (k_y >= 0 && k_y < input_y && k_x >= 0 && k_x < input_x) {
                 // not padding
                 input_val = input_data[k_y_size + k_x_size + in_ch];
-                (*buffer) = __QADD((__QADD(input_val, in_offset) * ker_val), (*buffer));
+                (*buffer) += ((input_val + in_offset) * ker_val);
             }
             buffer++;
             k_x += stride_x;
@@ -58,7 +58,7 @@ void arm_nn_dw_convolve_s8_double_sparse( const cmsis_nn_dw_conv_params *dw_conv
                                     const int32_t input_y,
                                     const int32_t output_x,
                                     const int32_t output_y,
-                                    const int32_t input_ch,
+                                    const int32_t output_ch,
                                     const int32_t in_ch_0,
                                     const int32_t h_0,
                                     const int32_t w_0,
@@ -86,14 +86,14 @@ void arm_nn_dw_convolve_s8_double_sparse( const cmsis_nn_dw_conv_params *dw_conv
 
     k_y_0 = dilation_y * h_0 - pad_y;
     k_y_1 = dilation_y * h_1 - pad_y;
-    k_y_0_size = k_y_0 * input_x * input_ch;
-    k_y_1_size = k_y_1 * input_x * input_ch;
+    k_y_0_size = k_y_0 * input_x * output_ch;
+    k_y_1_size = k_y_1 * input_x * output_ch;
     
     for (int32_t i_out_y = 0; i_out_y < output_y; i_out_y++) {
         k_x_0 = dilation_x * w_0 - pad_x;
         k_x_1 = dilation_x * w_1 - pad_x;
-        k_x_0_size = k_x_0 * input_ch;
-        k_x_1_size = k_x_1 * input_ch;
+        k_x_0_size = k_x_0 * output_ch;
+        k_x_1_size = k_x_1 * output_ch;
 
         for (int32_t i_out_x = 0; i_out_x < output_x; i_out_x++) {
             if (k_y_0 >= 0 && k_y_0 < input_y && k_x_0 >= 0 && k_x_0 < input_x) {
@@ -150,7 +150,6 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
     // conv information
     
     const int32_t batch = input_dims->n;
-    const int32_t input_ch = input_dims->c;
     const int32_t input_x = input_dims->w;
     const int32_t input_y = input_dims->h;
     const int32_t kernel_x = filter_dims->w;
@@ -179,16 +178,16 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
     q31_t *shift_ptr = quant_params->shift;
 
     int32_t output_count = output_x * output_y;
-    int32_t stride_y_size = stride_y * input_x * input_ch;
-    int32_t stride_x_size = stride_x * input_ch;
+    int32_t stride_y_size = stride_y * input_x * output_ch;
+    int32_t stride_x_size = stride_x * output_ch;
     
     int32_t counter;
 
     for (int32_t i_batch = 0; i_batch < batch; ++i_batch) {
         memset(buffer, 0, sizeof(q31_t) * output_count);
         
-        const q7_t *filter_ptr = &filter_data[0];
-        const q7_t *in_ptr = &input_data[i_batch * input_x * input_y * input_ch];
+        const q7_t *filter_ptr = filter_data;
+        const q7_t *in_ptr = &input_data[i_batch * input_x * input_y * output_ch];
         q7_t *out_ptr = &output_data[i_batch * output_x * output_y * output_ch];
 
         last_val = 0;
@@ -206,7 +205,7 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
             arm_nn_sparse_decode_4d(
                 last_in_ch, last_h,
                 last_w, last_out_ch,
-                input_ch, kernel_x,
+                1, kernel_x,
                 kernel_y, &filter_ptr,
                 &cur_in_ch, &cur_h,
                 &cur_w, &cur_out_ch,
@@ -223,7 +222,7 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
                         in_ptr,
                         input_x, input_y,
                         output_x, output_y,
-                        input_ch,
+                        output_ch,
                         last_out_ch, last_h,
                         last_w, last_val,
                         buffer);
@@ -249,7 +248,7 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
                         in_ptr,
                         input_x, input_y,
                         output_x, output_y,
-                        input_ch,
+                        output_ch,
                         last_out_ch, last_h,
                         last_w, last_val,
                         cur_out_ch, cur_h,
@@ -273,7 +272,7 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
                         in_ptr,
                         input_x, input_y,
                         output_x, output_y,
-                        input_ch,
+                        output_ch,
                         cur_out_ch, cur_h,
                         cur_w, cur_val,
                         buffer);
@@ -282,7 +281,7 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
         double_flag = 0;
 
         // start to output finally  
-        arm_nn_output_per_channel ( cur_out_ch, output_ch, out_offset, output_count,
+        arm_nn_output_per_channel (cur_out_ch, output_ch, out_offset, output_count,
                     output_ch, act_min, act_max, bias_data, mult_ptr, shift_ptr, buffer,
                     out_ptr);
 

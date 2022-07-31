@@ -56,7 +56,7 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
     for (i_batch = 0; i_batch < batch; i_batch++) {
         buffer = 0;
 
-        const q7_t *filter_ptr = &filter_data[0];
+        const q7_t *filter_ptr = filter_data;
         const q7_t *in_ptr = &input_data[i_batch * input_ch];
         q7_t *out_ptr = &output_data[i_batch * output_ch];
         
@@ -89,18 +89,15 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
                 // output step 1: output last out_channel (conv is done)
                 if (bias_data) {
                     bias = bias_data[last_out_ch];
-                    requant = arm_nn_requantize(__QADD(buffer, bias), mult, shift);
+                    requant = arm_nn_requantize(buffer + bias, mult, shift);
                     requant += out_offset;
-                    requant = MAX(requant, act_min);
-                    requant = MIN(requant, act_max);
-                    out_ptr[last_out_ch] = (q7_t)requant;
                 } else {
                     requant = arm_nn_requantize(buffer, mult, shift);
                     requant += out_offset;
-                    requant = MAX(requant, act_min);
-                    requant = MIN(requant, act_max);
-                    out_ptr[last_out_ch] = (q7_t)requant;
                 }
+                requant = MAX(requant, act_min);
+                requant = MIN(requant, act_max);
+                out_ptr[last_out_ch] = (q7_t)requant;
 
                 // output step 2: output remaining empty channels (from last_out_ch to cur_out_ch)
                 if (bias_data) {
@@ -122,6 +119,7 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
                         out_ptr[i_out_ch] = (q7_t)requant;
                     }
                 }
+
                 // output step 3: reset the buffer and flag
                 buffer = 0;
                 mat_flag = 0;
@@ -153,10 +151,11 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
         // output step 1: output current out_channel
         if (bias_data) {
             bias = bias_data[cur_out_ch];
-            requant = arm_nn_requantize(__QADD(buffer, bias), mult, shift);
+            requant = arm_nn_requantize(buffer + bias, mult, shift);
             requant += out_offset;
         } else {
-            requant = out_offset;
+            requant = arm_nn_requantize(buffer, mult, shift);
+            requant += out_offset;
         }
         
         requant = MAX(requant, act_min);

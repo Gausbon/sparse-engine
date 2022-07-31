@@ -12,13 +12,14 @@ def approximate_float(M):
     return significand_q31, shift
 
 
-def conv_data_to_sparse(input):
-    output =  conv_data_to_sparse_encode_1(input)
-    if (output.size < input.size):
+def conv_data_to_sparse(input, force_sparse):
+    output = conv_data_to_sparse_encode_1(input)
+    if (force_sparse or output.size < input.size):
         return output, True
     else:
         return input, False
     
+
 # encode using algorithm 1
 def conv_data_to_sparse_encode_1(input):
     filter_list = []

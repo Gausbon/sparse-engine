@@ -43,7 +43,7 @@ void arm_nn_convolve_s8_single_sparse( const cmsis_nn_conv_params *conv_params,
             if (k_y >= 0 && k_y < input_y && k_x >= 0 && k_x < input_x) {
                 // not padding
                 input_val = input_data[k_y_size + k_x_size + in_ch];
-                (*buffer) = __QADD((__QADD(input_val, in_offset) * ker_val), (*buffer));
+                (*buffer) += ((input_val + in_offset) * ker_val);
             }
             buffer++;
             k_x += stride_x;
@@ -187,8 +187,6 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
     int32_t stride_x_size = stride_x * input_ch;
     
     int32_t counter;
-
-    memset(buffer, 0, sizeof(q31_t) * output_count);
 
     for (int32_t i_batch = 0; i_batch < batch; ++i_batch) {
         memset(buffer, 0, sizeof(q31_t) * output_count);

@@ -43,6 +43,16 @@ class Model_deployment():
         self.image = np.load(self.config['image_path']).transpose(0, 2, 3, 1)
         self.image_class = self.config['image_class']
         self.size = self.image.shape[1]
+
+        print('-'*70)
+        print('basic info')
+        print('model config path: ' + str(self.config['model_config_path']))
+        print('ram size: ' + str(self.max_size))
+        print('image input path: ' + str(self.config['image_path']))
+        print('image class: ' + str(self.image_class))
+        print('force sparse: ' + str(self.config['force_sparse']))
+        print('-'*70)
+
     
 
     def get_size_output(self):
@@ -187,7 +197,7 @@ class Model_deployment():
             weight = weight.transpose((0, 2, 3, 1))
 
         if (is_sparse):
-            weight, is_sparse = conv_data_to_sparse(weight)
+            weight, is_sparse = conv_data_to_sparse(weight, self.config['force_sparse'])
             # this branch goes to dwconv:
             # should be sparse, but after sparse encode the tensor got larger
             if (is_depthwise and not is_sparse):
@@ -274,7 +284,7 @@ class Model_deployment():
         weight = block_dict[name + 'fc_module.weight']
         weight_shape = weight.shape
         if (is_sparse):
-            weight, is_sparse = conv_data_to_sparse(weight)
+            weight, is_sparse = conv_data_to_sparse(weight, self.config['force_sparse'])
         weight_name = 'weight_' + str(self.counter)
         param_list.extend(['&filter_dims', weight_name])
         self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
@@ -975,6 +985,7 @@ class Model_deployment():
 
 
 if __name__ == '__main__':
+    print('-'*70)
     print("start")
     model_deployment = Model_deployment()
     model_deployment.load_tensor()
