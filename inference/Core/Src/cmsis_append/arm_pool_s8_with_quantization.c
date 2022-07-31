@@ -198,14 +198,16 @@ arm_status arm_maxpool_s8_with_quantization (const cmsis_nn_context *ctx,
                 }
             }
 
-            // Prevent static code issue DIVIDE_BY_ZERO.
-            if (count == 0)
-            {
-                return ARM_MATH_ARGUMENT_ERROR;
+            for (int i = 0; i < ch_src; i++) {
+                buffer[i] += input_offset;
+                buffer[i] = arm_nn_requantize(buffer[i], multiplier, shift);
+                buffer[i] += output_offset;
+                buffer[i] = MAX(buffer[i], act_min);
+                buffer[i] = MIN(buffer[i], act_max);
+
+                dst[i] = (q7_t)buffer[i];
             }
 
-            scale_q31_to_q7_with_quantization(buffer, dst, ch_src, count, 
-					input_offset, output_offset, multiplier, shift, act_min, act_max);
             dst += ch_src;
         }
     }

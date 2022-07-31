@@ -54,7 +54,7 @@ class Model_deployment():
         if (sum > self.ori_max_size):
             print('Warning! The max ram usage ' + str(sum) + ' may be out of the ' 
                 + str(self.ori_max_size) + ' bound!')
-        return cur_layer_size[1]
+        return cur_layer_size[0], cur_layer_size[1]
 
 
     def load_tensor(self):
@@ -412,7 +412,7 @@ class Model_deployment():
         # self_attention start
         # qkv linear: head -> tail
         # from (b n c) to (b n 3c)
-        bncx3_size = self.get_size_output()
+        _, bncx3_size = self.get_size_output()
         self.input_dict['n'] = b * n
         self.deploy_linear(name + 'qqkv.', block_dict, True,
                     section, '&'+section+'['+str(self.max_size-bncx3_size)+']')
@@ -433,7 +433,7 @@ class Model_deployment():
         # from (head_nums*b, n, c / head_nums) * (head_nums*b, c / head_nums, n)
         # to (head_nums*b, n, n)
         # current memory: [q*k ... q k v | reserve]
-        attn_size = self.get_size_output()
+        _, attn_size = self.get_size_output()
         self.deploy_matmul('self_attn.qmatmul_qk.', block_dict, (head_nums * b),
                     n, (c / head_nums),
                     n, True,
@@ -463,7 +463,7 @@ class Model_deployment():
         # from (head_nums*b, n, c / head_nums)
         # to (b, n, c)
         # current memory: [(attn) attn*v ... bnc_value | reserve]
-        bnc_size = self.get_size_output()
+        _, bnc_size = self.get_size_output()
         self.deploy_transpose(head_nums, (b * n),
                     (c / head_nums), '&' + section + '[' + str(attn_size)+ ']',
                     '&' + section + '[' + str(self.max_size - bnc_size) + ']')
@@ -525,7 +525,7 @@ class Model_deployment():
     def deploy_tokenizer(self, batch:int, block_dict:dict,
             input_size:int, section:str):
         # qconv_relu: head -> tail
-        size_0 = self.get_size_output()
+        _, size_0 = self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = input_size, input_size
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
@@ -538,10 +538,12 @@ class Model_deployment():
         self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = input_size, input_size
+        self.input_dict['c'] = self.output_dict['c']
         self.filter_dict['h'], self.filter_dict['w'] = 3, 3
         self.output_dict['h'], self.output_dict['w'] = input_size/2, input_size/2
         self.pooling_dict['stride.h'] , self.pooling_dict['stride.w'] = 2, 2
         self.pooling_dict['padding.h'] , self.pooling_dict['padding.w'] = 1, 1
+        self.pooling_dict['activation.min'] , self.pooling_dict['activation.max'] = -128, 127
 
         self.deploy_pooling('qmaxpool.', block_dict, False,
                 '&'+section+'['+str(self.max_size - size_0[1])+']', section)
@@ -580,7 +582,7 @@ class Model_deployment():
             self.max_size -= feature_size
 
         # conv_0: head -> tail
-        conv0_size = self.get_size_output()
+        _, conv0_size = self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = input_size, input_size
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
@@ -602,7 +604,7 @@ class Model_deployment():
                 '&'+section+'['+str(self.max_size - conv0_size)+']', section)
 
         # conv_2: head -> tail
-        conv2_size = self.get_size_output()
+        _, conv2_size = self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = config_list[3], config_list[3]
         self.output_dict['h'], self.output_dict['w'] = config_list[3], config_list[3]
@@ -628,7 +630,7 @@ class Model_deployment():
 
 
     def deploy_transformer(self, batch:int, name:str, block_dict:dict,
-            embedding_dim:int, input_size:int, section:str):
+            input_size:int, section:str):
 
         # name: {*}transformer{type}_{index}
         type_name = name.split('_')[-2]
@@ -641,7 +643,7 @@ class Model_deployment():
             return
 
         # conv_1: head -> tail
-        conv1_size = self.get_size_output()
+        _, conv1_size = self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = input_size, input_size
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
@@ -652,7 +654,7 @@ class Model_deployment():
                     section, '&'+section+'['+str(self.max_size - conv1_size)+']')
 
         # conv_2: tail -> head
-        bnc_size = self.get_size_output()
+        _, bnc_size = self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = input_size, input_size
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
@@ -661,6 +663,8 @@ class Model_deployment():
 
         self.deploy_conv('qconv2.', block_dict, True, False,
                     '&'+section+'['+str(self.max_size - conv1_size)+']', section)
+
+        embedding_dim = self.output_dict['c']
 
         # copy shortcut data from head to tail
         norm_batch = batch * input_size * input_size
@@ -699,13 +703,13 @@ class Model_deployment():
         self.max_size -= bnc_size
         
         # linear relu1: head -> tail
-        linear_size = self.get_size_output()
+        _, linear_size = self.get_size_output()
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear_relu1.', block_dict, True,
                     section, '&'+section+'['+str(self.max_size-linear_size)+']')
 
         # linear2: tail -> head
-        linear2_size = self.get_size_output()
+        _, linear2_size = self.get_size_output()
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear2.', block_dict, True,
                     '&'+section+'['+str(self.max_size-linear_size)+']', section)
@@ -723,7 +727,7 @@ class Model_deployment():
                 '[' + str(linear2_size) + '],' + str(linear2_size) + ');', 'func')
 
         # conv_3: head -> tail
-        conv3_size = self.get_size_output()
+        _, conv3_size = self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = input_size, input_size
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
@@ -751,7 +755,7 @@ class Model_deployment():
             input_size:int, section:str):
 
         # just one conv, head -> tail
-        conv_size = self.get_size_output()
+        _, conv_size = self.get_size_output()
         self.input_dict['n'] = batch
         self.input_dict['h'], self.input_dict['w'] = input_size, input_size
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
@@ -774,9 +778,7 @@ class Model_deployment():
         if (name == 'global_pooling'):
             # qglobal_pooling
             # shortcut storage: head -> tail
-            linear_size = self.get_size_output()
-            in_size = linear_size[0]
-            out_size = linear_size[1]
+            in_size, out_size = self.get_size_output()
             self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - in_size)
                 + '],' + section + ',' + str(in_size) + ');', 'func')
             self.max_size -= in_size
@@ -787,23 +789,22 @@ class Model_deployment():
             self.deploy_linear('qattention_pool.', block_dict, False,
                         section, '&'+section+'['+str(self.max_size - out_size)+']')
             
-            # qsoftmax: tail -> head
+            # qsoftmax: tail -> tail
             self.get_size_output()
             self.deploy_softmax('qsoftmax.', block_dict, batch, (input_size * input_size), 
-                        '&'+section+'['+str(self.max_size - out_size)+']', section)
+                        '&'+section+'['+str(self.max_size - out_size)+']', 
+                        '&'+section+'['+str(self.max_size - out_size)+']')
 
-            # matmul: head * tail -> mid
+            # matmul: tail * tail -> mid
             # shape: b 1 (h w) * b (h w) c -> b 1 c -> b c
             self.get_size_output()
             self.max_size += in_size
             self.deploy_matmul('qmatmul.', block_dict, batch, 1, (input_size * input_size),
-                        channel, False, section, 
+                        channel, False, 
+                        '&'+section + '[' + str(self.max_size - in_size - out_size)+ ']', 
                         '&'+section + '[' + str(self.max_size - in_size)+ ']', 
-                        '&'+section + '[' + str(out_size)+ ']')
-            
-            # copy output from tail to head
-            self.file_writer.writeln('memcpy(' + section + ',&' + section + '[' 
-                        + str(out_size)+'],' + str(out_size) + ');', 'func')
+                        section)
+
             
         elif (name == 'qglobal_pooling'):
             # global_pooling, avgpooling: head -> tail
@@ -835,7 +836,7 @@ class Model_deployment():
             section:str):
 
         # just one linear
-        linear_size = self.get_size_output()
+        _, linear_size = self.get_size_output()
         self.input_dict['n'] = batch
         self.deploy_linear('', block_dict, True,
                         section, '&'+section+'['+str(self.max_size-linear_size)+']')
@@ -895,11 +896,7 @@ class Model_deployment():
 
         for key, value in self.transformer_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
-            key_list = key.split('_')
-            layer_count = int(key_list[-1])
-            type_index = int(key_list[-2][-1])
-            self.deploy_transformer(batch, key, value, embedding_dim[type_index][layer_count],
-                self.size, section)
+            self.deploy_transformer(batch, key, value, self.size, section)
             print('-'*70)
 
         self.file_writer.writeln('// block: last conv', 'func')

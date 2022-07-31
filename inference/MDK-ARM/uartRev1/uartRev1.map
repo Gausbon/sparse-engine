@@ -79,7 +79,6 @@ Section Cross References
     arm_pool_s8_with_quantization.o(i.arm_avgpool_s8_with_quantization) refers to arm_avgpool_s8.o(i.arm_avgpool_s8_get_buffer_size) for arm_avgpool_s8_get_buffer_size
     arm_pool_s8_with_quantization.o(i.arm_avgpool_s8_with_quantization) refers to arm_pool_s8_with_quantization.o(i.scale_q31_to_q7_with_quantization) for scale_q31_to_q7_with_quantization
     arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization) refers to arm_avgpool_s8.o(i.arm_avgpool_s8_get_buffer_size) for arm_avgpool_s8_get_buffer_size
-    arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization) refers to arm_pool_s8_with_quantization.o(i.scale_q31_to_q7_with_quantization) for scale_q31_to_q7_with_quantization
     arm_nn_transpose_bnc_to_nbc_q7.o(i.arm_nn_transpose_bnc_to_nbc_q7) refers to memmovea.o(.text) for __aeabi_memcpy
     system_stm32f7xx.o(i.SystemCoreClockUpdate) refers to system_stm32f7xx.o(.data) for .data
     system_stm32f7xx.o(i.SystemCoreClockUpdate) refers to system_stm32f7xx.o(.constdata) for .constdata
@@ -1885,7 +1884,7 @@ Removing Unused input sections from the image.
     Removing arm_pool_s8_with_quantization.o(.rev16_text), (4 bytes).
     Removing arm_pool_s8_with_quantization.o(.revsh_text), (4 bytes).
     Removing arm_pool_s8_with_quantization.o(.rrx_text), (6 bytes).
-    Removing arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization), (340 bytes).
+    Removing arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization), (436 bytes).
     Removing arm_nn_transpose_bnc_to_nbc_q7.o(.rev16_text), (4 bytes).
     Removing arm_nn_transpose_bnc_to_nbc_q7.o(.revsh_text), (4 bytes).
     Removing arm_nn_transpose_bnc_to_nbc_q7.o(.rrx_text), (6 bytes).
@@ -3403,7 +3402,7 @@ Removing Unused input sections from the image.
     Removing dfixul.o(.text), (48 bytes).
     Removing fpstat.o(.text), (4 bytes).
 
-1570 unused section(s) (total 1069556 bytes) removed from the image.
+1570 unused section(s) (total 1069652 bytes) removed from the image.
 
 ==============================================================================
 
