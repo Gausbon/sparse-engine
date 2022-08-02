@@ -38,7 +38,6 @@ class Model_deployment():
 
         # block counter for conv and linear
         self.counter = 0
-        self.first = 1
 
         self.image = np.load(self.config['image_path']).transpose(0, 2, 3, 1)
         self.image_class = self.config['image_class']
@@ -229,10 +228,6 @@ class Model_deployment():
         # notice the input offset is negative zero point
         self.conv_dict['input_offset'] = -block_dict[name + 'qi.zero_point']
         self.conv_dict['output_offset'] = block_dict[name + 'qo.zero_point']
-        # if first conv, transform from int8 to uint
-        if (self.first == 1):
-            self.conv_dict['input_offset'] += 128
-            self.first = 0
         
         # dilation
         self.conv_dict['dilation.h'] = 1

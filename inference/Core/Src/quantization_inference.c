@@ -52,7 +52,7 @@ int quantization_inference(void) {
     conv_params.padding.w=0;
     conv_params.activation.max=127;
     conv_params.activation.min=-128;
-    conv_params.input_offset=133;
+    conv_params.input_offset=5;
     conv_params.output_offset=-128;
     conv_params.dilation.h=1;
     conv_params.dilation.w=1;
