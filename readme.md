@@ -103,4 +103,4 @@ Inference time(ms): 44489
 ### 3.2稀疏编码
 &emsp; &emsp; 参考：https://github.com/Roxbili/TinySPOS/blob/main/doc/sparse_encode.md
 
-&emsp; &emsp; 待办事项：压缩格式2，block稀疏化的压缩格式实现
+&emsp; &emsp; 待办事项：压缩格式2
