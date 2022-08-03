@@ -42,6 +42,8 @@ class Model_deployment():
         self.image = np.load(self.config['image_path']).transpose(0, 2, 3, 1)
         self.image_class = self.config['image_class']
         self.size = self.image.shape[1]
+        self.force_sparse = self.config['force_sparse']
+        self.block = self.config['block']
 
         print('-'*70)
         print('basic info')
@@ -196,7 +198,7 @@ class Model_deployment():
             weight = weight.transpose((0, 2, 3, 1))
 
         if (is_sparse):
-            weight, is_sparse = conv_data_to_sparse(weight, self.config['force_sparse'])
+            weight, is_sparse = conv_data_to_sparse(weight, self.block, self.force_sparse)
             # this branch goes to dwconv:
             # should be sparse, but after sparse encode the tensor got larger
             if (is_depthwise and not is_sparse):
@@ -279,7 +281,7 @@ class Model_deployment():
         weight = block_dict[name + 'fc_module.weight']
         weight_shape = weight.shape
         if (is_sparse):
-            weight, is_sparse = conv_data_to_sparse(weight, self.config['force_sparse'])
+            weight, is_sparse = conv_data_to_sparse(weight, self.block, self.force_sparse)
         weight_name = 'weight_' + str(self.counter)
         param_list.extend(['&filter_dims', weight_name])
         self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
@@ -843,7 +845,7 @@ class Model_deployment():
         # just one linear
         _, linear_size = self.get_size_output()
         self.input_dict['n'] = batch
-        self.deploy_linear('', block_dict, True,
+        self.deploy_linear('', block_dict, False,
                         section, '&'+section+'['+str(self.max_size-linear_size)+']')
 
         # copy from tail to head
@@ -874,6 +876,7 @@ class Model_deployment():
         self.file_writer.writeln('static int32_t conv_shift_use[' + str(last_channel) + ']={0};', 'func')
         self.file_writer.writeln('c_quant_params.multiplier=conv_mult_use;', 'func')
         self.file_writer.writeln('c_quant_params.shift=conv_shift_use;', 'func')
+        self.file_writer.writeln('# define BLOCK ' + str(self.block), 'data')
 
         self.file_writer.writeln('static q7_t ' + section + '[' + str(self.max_size) + ']={0};', 'func')
         self.file_writer.write_const_tensor(self.image, 'image', 'q7_t')

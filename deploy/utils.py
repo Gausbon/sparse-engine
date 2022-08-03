@@ -12,8 +12,8 @@ def approximate_float(M):
     return significand_q31, shift
 
 
-def conv_data_to_sparse(input, force_sparse):
-    output = conv_data_to_sparse_encode_1(input)
+def conv_data_to_sparse(input, block, force_sparse):
+    output = conv_data_to_sparse_encode_1(input, block)
     if (force_sparse or output.size < input.size):
         return output, True
     else:
@@ -21,17 +21,21 @@ def conv_data_to_sparse(input, force_sparse):
     
 
 # encode using algorithm 1
-def conv_data_to_sparse_encode_1(input):
+def conv_data_to_sparse_encode_1(input, block):
     filter_list = []
     if (len(input.shape) == 4):
         info_list = [0, 0, 0, 0]
         third_dim_count = input.shape[3]
         second_dim_count = third_dim_count * input.shape[2]
         first_dim_count = second_dim_count * input.shape[1]
-        for i in range(input.shape[0]):
-            for j in range(input.shape[1]):
-                for k in range(input.shape[2]):
-                    for l in range(input.shape[3]):
+        i = 0
+        while i < input.shape[0]:
+            j = 0
+            while j < input.shape[1]:
+                k = 0
+                while k < input.shape[2]:
+                    l = 0
+                    while l < input.shape[3]:
                         if (input[i][j][k][l] != 0):
                             col_dis = (i - info_list[0]) * first_dim_count \
                                         + (j - info_list[1]) * second_dim_count \
@@ -41,11 +45,33 @@ def conv_data_to_sparse_encode_1(input):
                                 col_dis -= 255
                                 filter_list.extend([127, 0])
                             filter_list.extend([col_dis-128, input[i][j][k][l]])
+                            for _ in range(0, block-1):
+                                l += 1
+                                if (l >= input.shape[3]):
+                                    k += (l // input.shape[3])
+                                    l = l % input.shape[3]
+                                    if (k >= input.shape[2]):
+                                        j += (k // input.shape[2])
+                                        k = k % input.shape[2]
+                                        if (j >= input.shape[1]):
+                                            i += (j // input.shape[1])
+                                            j = j % input.shape[1]
+                                            if (i >= input.shape[0]):
+                                                return np.array(filter_list)
+                                filter_list.append(input[i][j][k][l])
+
                             info_list = [i, j, k, l]
+                        l += 1
+                    k += 1
+                j += 1
+            i += 1
+        
     elif (len(input.shape) == 2):
         info_list = [0, 0]
-        for i in range(input.shape[0]):
-            for j in range(input.shape[1]):
+        i = 0
+        while i < input.shape[0]:
+            j = 0
+            while j < input.shape[1]:
                 if (input[i][j] != 0):
                     col_dis = + (i - info_list[0]) * input.shape[1] \
                                 + (j - info_list[1])
@@ -53,41 +79,24 @@ def conv_data_to_sparse_encode_1(input):
                         col_dis -= 255
                         filter_list.extend([127, 0])
                     filter_list.extend([col_dis-128, input[i][j]])
+                    for _ in range(0, block-1):
+                        j += 1
+                        if (j >= input.shape[1]):
+                            i += (j // input.shape[1])
+                            j = j % input.shape[1]
+                            if (i >= input.shape[0]):
+                                return np.array(filter_list)
+                        filter_list.append(input[i][j])
+
                     info_list = [i, j]
+                j += 1
+            i += 1
+
     else:
         print('wrong filter shape! ' + str(input.shape))
     return np.array(filter_list)
 
 
-# decode using algorithm 1
-def conv_data_to_sparse_decode_1(encode_list, zero_list):
-    for i in range(0, len(encode_list)):
-        encode_matrix = encode_list[i]
-        zero_matrix = zero_list[i]
-        shape = zero_matrix.shape
-        pos = [0, 0, 0, 0]
-
-        for j in range(0, len(encode_matrix) // 2):
-            pos[3] += (encode_matrix[2*j] + 128)
-            while (pos[3] >= shape[3]):
-                pos[3] -= shape[3]
-                pos[2] += 1
-                while (pos[2] >= shape[2]):
-                    pos[2] -= shape[2]
-                    pos[1] += 1
-                    while (pos[1] >= shape[1]):
-                        pos[1] -= shape[1]
-                        pos[0] += 1
-                        if (pos[0] >= shape[0]):
-                            raise Exception("out of bound error, pos:" + str(pos))
-            zero_matrix[pos[0]][pos[1]][pos[2]][pos[3]] = encode_matrix[2*j+1]
-
-
 # todo: encode using algorithm 2
 def conv_data_to_sparse_encode_2(list):
     raise Exception("Currently does not support algorithm 2 encode")
-
-
-# todo: decode using algorithm 2
-def conv_data_to_sparse_decode_2(encode_list, zero_list):
-    raise Exception("Currently does not support algorithm 2 decode")

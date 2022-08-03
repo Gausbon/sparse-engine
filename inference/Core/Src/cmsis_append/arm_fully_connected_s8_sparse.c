@@ -49,7 +49,8 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
     int32_t mult = quant_params->multiplier;
     int32_t shift = quant_params->shift;
     int32_t requant, bias = 0, buffer = 0;
-    int32_t counter;
+    int32_t cnt;
+    int32_t block_cnt = 0;
 
     // temporarily use
     int32_t i_batch, i_out_ch;
@@ -66,15 +67,15 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
 
         two_count = 0;
         mat_flag = 0;
-        counter = input_count;
+        cnt = input_count;
 
-        while (counter) {
+        while (cnt) {
             // decode procedure
             arm_nn_sparse_decode_2d(last_in_ch, last_out_ch,
                 input_ch, &filter_ptr,
                 &cur_in_ch, &cur_out_ch,
-                &mat_flag, &counter,
-                &cur_val);
+                &mat_flag, &cnt,
+                &block_cnt, &cur_val);
             
             if (mat_flag) {   
                 // change the output channel, last output channel conv is done

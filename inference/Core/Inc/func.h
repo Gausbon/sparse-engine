@@ -88,7 +88,8 @@ void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
                                     int32_t *cur_w,
                                     int32_t *cur_out_ch,
                                     int32_t *mat_flag,
-                                    int32_t *counter,
+                                    int32_t *cnt,
+                                    int32_t *block_cnt,
                                     q7_t *cur_val);
 
 
@@ -99,7 +100,8 @@ void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
                                     int32_t *cur_in_ch,
                                     int32_t *cur_out_ch,
                                     int32_t *mat_flag,
-                                    int32_t *counter,
+                                    int32_t *cnt,
+                                    int32_t *block_cnt,
                                     q7_t *cur_val);
 
 

@@ -1,24 +1,27 @@
 # full model_config_path: ../TinySPOS/configs/{model_config_path}/quant_dmtp_single.yml
 model_config_path: 'toy_dmtp_config_/level_'
 
-# full tensor path: ../TinySPOS/{tensor_path}
-tensor_path: 'tensor/'
-
-# full memory_list path: ../TinySPOS/{memory_list}
-memory_list: 'statistic.yml'
-
 # ram section size for calculation
 ram_size: 300
 
 # input image info
-image_path: 'input/9.npy'
-image_class: 9
+image_path: 'input/5.npy'
+image_class: 5
+
+# block size
+block: 4
 
 # if force_sparse is true, conv will be sparse 
 # even when sparse tensor is larger than the origin
 force_sparse: false
 
-# constant
+# constant part
+
+# full tensor path: ../TinySPOS/{tensor_path}
+tensor_path: 'tensor/'
+# full memory_list path: ../TinySPOS/{memory_list}
+memory_list: 'statistic.yml'
+
 func_path: 'inference/Core/Src/quantization_inference.c' 
 data_path: 'inference/Core/Inc/data.h'
 func_init: 'init/func_init.txt'

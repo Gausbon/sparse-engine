@@ -181,7 +181,8 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
     int32_t stride_y_size = stride_y * input_x * output_ch;
     int32_t stride_x_size = stride_x * output_ch;
     
-    int32_t counter;
+    int32_t cnt;
+    int32_t block_cnt = 0;
 
     for (int32_t i_batch = 0; i_batch < batch; ++i_batch) {
         memset(buffer, 0, sizeof(q31_t) * output_count);
@@ -198,9 +199,9 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
 
         double_flag = 0;
         mat_flag = 0;
-        counter = input_count;
+        cnt = input_count;
 
-        while (counter) {
+        while (cnt) {
             // decode procedure
             arm_nn_sparse_decode_4d(
                 last_in_ch, last_h,
@@ -209,8 +210,8 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
                 kernel_y, &filter_ptr,
                 &cur_in_ch, &cur_h,
                 &cur_w, &cur_out_ch,
-                &mat_flag, &counter,
-                &cur_val);
+                &mat_flag, &cnt,
+                &block_cnt, &cur_val);
 
             if (mat_flag) {   
                 // change the output channel, last output channel conv is done

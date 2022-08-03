@@ -378,7 +378,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_19,512);
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_19,&bias_dims,bias_19,&output_dims,&section[274432],117158);
+    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_19,&bias_dims,bias_19,&output_dims,&section[274432],73730);
 
 
     filter_dims.h=1;
@@ -393,7 +393,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_20,384);
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,&section[274432],&filter_dims,weight_20,&bias_dims,bias_20,&output_dims,section,9780);
+    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,&section[274432],&filter_dims,weight_20,&bias_dims,bias_20,&output_dims,section,6145);
 
     memcpy(&section[282624],section,24576);
 
@@ -416,7 +416,7 @@ int quantization_inference(void) {
 
     output_dims.c=288;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_22,&bias_dims,NULL,&output_dims,&section[208896],21978);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_22,&bias_dims,NULL,&output_dims,&section[208896],13825);
 
     arm_nn_transpose_bnc_to_nbc_q7(256,6,48,&section[208896],section);
 
@@ -440,7 +440,7 @@ int quantization_inference(void) {
 
     output_dims.c=96;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[258048],&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,section,7332);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[258048],&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,section,4610);
 
     arm_elementwise_add_s8_with_neg(section,&section[282624],17,2136739840,-1,128,1533058688,0,0,&section[24576],-75,2147483647,0,-128,127,24576);
 
@@ -465,7 +465,7 @@ int quantization_inference(void) {
 
     output_dims.c=128;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,&section[249856],9716);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,&section[249856],6145);
 
     fc_params.input_offset=128;
     fc_params.output_offset=4;
@@ -478,7 +478,7 @@ int quantization_inference(void) {
 
     output_dims.c=96;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[249856],&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,section,9706);
+    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[249856],&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,section,6145);
 
     arm_elementwise_add_s8_with_neg(section,&section[282624],-4,1082566272,0,40,1828365312,0,0,&section[24576],-32,2147483647,0,-128,127,24576);
 
@@ -499,7 +499,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_27,384);
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_27,&bias_dims,bias_27,&output_dims,&section[282624],65900);
+    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_27,&bias_dims,bias_27,&output_dims,&section[282624],41475);
 
 
     filter_dims.h=1;
@@ -515,7 +515,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_28,1024);
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,&section[282624],&filter_dims,weight_28,&bias_dims,bias_28,&output_dims,section,19552);
+    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,&section[282624],&filter_dims,weight_28,&bias_dims,bias_28,&output_dims,section,12290);
 
     // block: last conv
 
@@ -529,7 +529,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_29,2048);
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_29,&bias_dims,bias_29,&output_dims,&section[176128],104138);
+    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_29,&bias_dims,bias_29,&output_dims,&section[176128],65540);
 
     memcpy(section,&section[176128],131072);
 
@@ -570,7 +570,7 @@ int quantization_inference(void) {
 
     memcpy(section,&section[307190],10);
 
-    result_check(&ctx,section,9);
+    result_check(&ctx,section,5);
 
     return 0;
 }
