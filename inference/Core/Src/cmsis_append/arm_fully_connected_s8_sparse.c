@@ -37,6 +37,8 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
     q7_t input_0, input_1;
     q31_t input_15x2, kernel_15x2;
     q31_t offset_q15x2 = __PKHBT(in_offset, in_offset, 16);
+    const q7_t *filter_ptr, *in_ptr;
+    q7_t *out_ptr;
 
     // used for decode and storage
     int32_t two_count = 0;
@@ -57,10 +59,9 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
     for (i_batch = 0; i_batch < batch; i_batch++) {
         buffer = 0;
 
-        const q7_t *filter_ptr = filter_data;
-        const q7_t *in_ptr = &input_data[i_batch * input_ch];
-        q7_t *out_ptr = &output_data[i_batch * output_ch];
-        
+        filter_ptr = filter_data;
+        in_ptr = &input_data[i_batch * input_ch];
+        out_ptr = &output_data[i_batch * output_ch];
         last_val = 0;
         last_out_ch = 0;
         last_in_ch = 0;
@@ -68,6 +69,7 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
         two_count = 0;
         mat_flag = 0;
         cnt = input_count;
+        block_cnt = 0;
 
         while (cnt) {
             // decode procedure
@@ -77,7 +79,7 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
                 &mat_flag, &cnt,
                 &block_cnt, &cur_val);
             
-            if (mat_flag) {   
+            if (mat_flag) {
                 // change the output channel, last output channel conv is done
                 if (two_count == 1 && last_val != 0) {
                     // remain one val to conv (last_val)
@@ -183,7 +185,7 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
                 out_ptr[i_out_ch] = (q7_t)requant;
             }
         }
-        
+
     }
     
     return ARM_MATH_SUCCESS;

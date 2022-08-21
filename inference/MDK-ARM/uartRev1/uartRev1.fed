@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Wed Aug 03 11:15:14 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Sun Aug 21 19:38:43 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -108,7 +108,6 @@ __asm___17_arm_convolve_s8_c_0431e2e9____RRX <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REV16 <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REVSH <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____RRX <= USED 0
-arm_convolve_s8_sparse_get_buffer_size <= USED 0
 ;FILE arm_convolve_wrapper_s16.o
 __asm___26_arm_convolve_wrapper_s16_c_0198abd5____REV16 <= USED 0
 __asm___26_arm_convolve_wrapper_s16_c_0198abd5____REVSH <= USED 0
@@ -145,9 +144,6 @@ arm_depthwise_conv_s8_opt_get_buffer_size <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____REV16 <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____REVSH <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____RRX <= USED 0
-arm_depthwise_conv_s8_sparse <= USED 0
-arm_nn_dw_convolve_s8_double_sparse <= USED 0
-arm_nn_dw_convolve_s8_single_sparse <= USED 0
 ;FILE arm_depthwise_conv_u8_basic_ver1.o
 __asm___34_arm_depthwise_conv_u8_basic_ver1_c_55f7f530____REV16 <= USED 0
 __asm___34_arm_depthwise_conv_u8_basic_ver1_c_55f7f530____REVSH <= USED 0
@@ -866,9 +862,9 @@ arm_quaternion_product_f32 <= USED 0
 arm_quaternion_product_single_f32 <= USED 0
 arm_rotation2quaternion_f32 <= USED 0
 ;FILE result_check.o
-__asm___14_result_check_c_ad7afb9f____REV16 <= USED 0
-__asm___14_result_check_c_ad7afb9f____REVSH <= USED 0
-__asm___14_result_check_c_ad7afb9f____RRX <= USED 0
+__asm___14_result_check_c_771eb2b0____REV16 <= USED 0
+__asm___14_result_check_c_771eb2b0____REVSH <= USED 0
+__asm___14_result_check_c_771eb2b0____RRX <= USED 0
 ;FILE retarget_io.o
 __aeabi_assert <= USED 0
 __backspace <= USED 0

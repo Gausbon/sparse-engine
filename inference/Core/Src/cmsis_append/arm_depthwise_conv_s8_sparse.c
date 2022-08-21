@@ -200,7 +200,8 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
         double_flag = 0;
         mat_flag = 0;
         cnt = input_count;
-
+        block_cnt = 0;
+        
         while (cnt) {
             // decode procedure
             arm_nn_sparse_decode_4d(

@@ -105,6 +105,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  quantization_inference();
   while (1)
   {
     /* USER CODE BEGIN 3 */
@@ -113,11 +114,8 @@ int main(void)
 		
 		
 //		HAL_UART_Transmit(&huart1, (uint8_t*)&data, sizeof(data), 100);
-    uint32_t start = HAL_GetTick();
-    quantization_inference();
-		uint32_t end = HAL_GetTick();
-    printf("Inference time(ms): %d\r\n",end - start);
-		HAL_Delay(1000);
+      HAL_Delay(10000);
+      printf("End of the inference\r\n");
   }
   /* USER CODE END 3 */
 }

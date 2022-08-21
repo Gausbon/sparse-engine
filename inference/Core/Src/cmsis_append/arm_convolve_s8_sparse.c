@@ -205,6 +205,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
         double_flag = 0;
         mat_flag = 0;
         cnt = input_count;
+        block_cnt = 0;
         
         while (cnt) {
             // decode procedure

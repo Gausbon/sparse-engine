@@ -92,6 +92,8 @@ arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
                            const q7_t *input_data,
                            q7_t *output_data)
 {
+    (void) ctx;
+    
     const int32_t in_offset = layernorm_params->input_offset;
     const int32_t out_offset = layernorm_params->output_offset;
     const int32_t act_max = layernorm_params->activation.max;

@@ -2,9 +2,20 @@
 #include "data.h"
 #include "func.h"
 #include "stdio.h"
+#include "main.h"
 
 int quantization_inference(void) {
-    static q7_t buf[4*32*32]={0};
+    uint32_t start, end;
+    
+    int32_t conv_count = 0, conv_time = 0;
+    int32_t linear_count = 0, linear_time = 0;
+    int32_t trans_count = 0, trans_time = 0;
+    int32_t softmax_count = 0, softmax_time = 0;
+    int32_t norm_count = 0, norm_time = 0;
+    int32_t pool_count = 0, pool_time = 0;
+    int32_t matmul_count = 0, matmul_time = 0;
+    int32_t add_count = 0, add_time = 0;
+
     cmsis_nn_dims input_dims, output_dims, filter_dims, bias_dims;
     
     cmsis_nn_dw_conv_params dw_conv_params;
@@ -17,6 +28,4 @@ int quantization_inference(void) {
     cmsis_nn_per_channel_quant_params c_quant_params;
 
     cmsis_nn_context ctx;
-  	ctx.size = sizeof(buf);
-    ctx.buf = buf;
 

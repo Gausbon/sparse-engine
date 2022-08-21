@@ -1,24 +1,26 @@
 # full model_config_path: ../TinySPOS/configs/{model_config_path}/quant_dmtp_single.yml
 model_config_path: 'toy_dmtp_config_/level_'
 
-# ram section size for calculation
-ram_size: 300
-
 # input image info
-image_path: 'input/5.npy'
-image_class: 5
+image_path: 'input/9.npy'
+image_class: 9
+
+# count of [downsample, mv2block, transformer]
+# assert dmt_count = 1 or dmt_count = 2
+dmt_count: 2
 
 # block size
-block: 4
+block: 2
 
-# if force_sparse is true, conv will be sparse 
-# even when sparse tensor is larger than the origin
-force_sparse: false
+# force_sparse == False: tensors are sparse if sparse encoding reduce the size
+# force_sparse == true: all tensors are sparse
+force_sparse: False
+
 
 # constant part
-
 # full tensor path: ../TinySPOS/{tensor_path}
 tensor_path: 'tensor/'
+
 # full memory_list path: ../TinySPOS/{memory_list}
 memory_list: 'statistic.yml'
 

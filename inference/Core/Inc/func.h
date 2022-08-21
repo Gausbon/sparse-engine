@@ -204,9 +204,25 @@ arm_status arm_maxpool_s8_with_quantization (const cmsis_nn_context *ctx,
                           q7_t *dst);
 
 
-int result_check(const cmsis_nn_context *ctx,
+int result_check_statistics(const cmsis_nn_context *ctx,
                           const q7_t *section,
+                          const int32_t conv_count,
+                          const int32_t conv_time,
+                          const int32_t linear_count,
+                          const int32_t linear_time,
+                          const int32_t trans_count,
+                          const int32_t trans_time,
+                          const int32_t softmax_count,
+                          const int32_t softmax_time,
+                          const int32_t norm_count,
+                          const int32_t norm_time,
+                          const int32_t pool_count,
+                          const int32_t pool_time,
+                          const int32_t matmul_count,
+                          const int32_t matmul_time,
+                          const int32_t add_count,
+                          const int32_t add_time,
                           const int32_t class);
-                          
+
 
 #endif

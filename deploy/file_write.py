@@ -1,3 +1,6 @@
+from numpy import ndarray
+
+
 class File_writer():
     def __init__(self, func_path, data_path):
         self.func_path = func_path
@@ -6,7 +9,7 @@ class File_writer():
         self.data_file = open(self.data_path,'w')
         self.var_dict = {}
         self.const_tensor_size = 0
-
+        self.init_pos = 0
 
     def __del__(self):
         self.func_file.close()
@@ -73,3 +76,47 @@ class File_writer():
                 self.var_dict[new_key] = value
                 self.func_file.write('    ' + name + '.' + key + '=' + str(value) + ';\n')
         self.func_file.write('\n')
+
+    
+    def write_extime(self, type:str):
+        self.func_file.write('    end = HAL_GetTick();\n')
+        self.func_file.write('    ' + type + '_time += (end - start);\n')
+        self.func_file.write('    ' + type + '_count++;\n')
+        self.func_file.write('    start = end;\n\n')
+
+
+    def write_init(self, image:ndarray, block:int, max_size:int):
+        self.init_pos = self.func_file.tell()
+
+        self.func_file.write('    static q7_t buf[0]={0};\n')
+        self.func_file.write('    static int32_t conv_mult_use[0]={0};\n')
+        self.func_file.write('    static int32_t conv_shift_use[0]={0};\n')
+        self.func_file.write('        \n')
+
+        self.func_file.write('    static q7_t section[' + str(max_size) + ']={0};\n\n')
+        self.func_file.write('    c_quant_params.multiplier=conv_mult_use;\n')
+        self.func_file.write('    c_quant_params.shift=conv_shift_use;\n\n')
+        self.func_file.write('    ctx.size = sizeof(buf);\n')
+        self.func_file.write('    ctx.buf = buf;\n\n')
+        self.func_file.write('    memcpy(&section,&image,3072);\n\n')
+        self.func_file.write('    start = HAL_GetTick();\n\n')
+
+        self.data_file.write('# define BLOCK ' + str(block) + '\n')
+        self.write_const_tensor(image, 'image', 'q7_t')
+
+    def write_end(self, image_class:int, buf_size:int, quant_size:int):
+        result_check_params = ['&ctx','section','conv_count','conv_time',
+            'linear_count','linear_time','trans_count','trans_time',
+            'softmax_count','softmax_time','norm_count','norm_time',
+            'pool_count','pool_time','matmul_count','matmul_time',
+            'add_count','add_time',str(image_class)]
+        self.write_func_call('result_check_statistics', result_check_params)
+
+        self.func_file.write('    return 0;\n}\n')
+        self.data_file.write('\n#endif\n')
+        
+        self.func_file.seek(self.init_pos)
+        self.func_file.write('    static q7_t buf[' + str(int(buf_size)) + ']={0};\n')
+        self.func_file.write('    static int32_t conv_mult_use[' + str(int(quant_size)) + ']={0};\n')
+        self.func_file.write('    static int32_t conv_shift_use[' + str(int(quant_size)) + ']={0};\n')
+        
