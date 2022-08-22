@@ -107,8 +107,8 @@ arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
     int32_t loop_count;
     int32_t input_1;
     int32_t input_2;
-    int8_t input_1_q7;
-    int8_t input_2_q7;
+    int16_t input_1_q15;
+    int16_t input_2_q15;
     int32_t sum;
 
 #if defined(ARM_MATH_DSP)
@@ -137,11 +137,11 @@ arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
 
         /* Sum 1 */
         
-        input_1_q7 = (b_1 & 0x0FFFF) << left_shift;
-        input_1 = arm_nn_requantize(input_1_q7, input_1_mult, input_1_shift);
+        input_1_q15 = (b_1 & 0x0FFFF) << left_shift;
+        input_1 = arm_nn_requantize(input_1_q15, input_1_mult, input_1_shift);
         
-        input_2_q7 = (b_2 & 0x0FFFF) << left_shift;
-        input_2 = arm_nn_requantize(input_2_q7, input_2_mult, input_2_shift);
+        input_2_q15 = (b_2 & 0x0FFFF) << left_shift;
+        input_2 = arm_nn_requantize(input_2_q15, input_2_mult, input_2_shift);
         
         sum = input_1 + input_2;
         sum = arm_nn_requantize(sum, out_mult, out_shift);
@@ -151,11 +151,11 @@ arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
         r1 = (q7_t)sum;
         
         /* Sum 3 */
-        input_1_q7 = ((b_1 >> 16) & 0x0FFFF) << left_shift;
-        input_1 = arm_nn_requantize(input_1_q7, input_1_mult, input_1_shift);
+        input_1_q15 = ((b_1 >> 16) & 0x0FFFF) << left_shift;
+        input_1 = arm_nn_requantize(input_1_q15, input_1_mult, input_1_shift);
 
-        input_2_q7 = ((b_2 >> 16) & 0x0FFFF) << left_shift;
-        input_2 = arm_nn_requantize(input_2_q7, input_2_mult, input_2_shift);
+        input_2_q15 = ((b_2 >> 16) & 0x0FFFF) << left_shift;
+        input_2 = arm_nn_requantize(input_2_q15, input_2_mult, input_2_shift);
 
         sum = input_1 + input_2;
         sum = arm_nn_requantize(sum, out_mult, out_shift);
@@ -165,25 +165,27 @@ arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
         r3 = (q7_t)sum;
 
         /* Sum 2 */
-        input_1_q7 = (a_1 & 0x0FFFF) << left_shift;
-        input_1 = arm_nn_requantize(input_1_q7, input_1_mult, input_1_shift);
+        input_1_q15 = (a_1 & 0x0FFFF) << left_shift;
+        input_1 = arm_nn_requantize(input_1_q15, input_1_mult, input_1_shift);
 
-        input_2_q7 = (a_2 & 0x0FFFF) << left_shift;
-        input_2 = arm_nn_requantize(input_2_q7, input_2_mult, input_2_shift);
+        input_2_q15 = (a_2 & 0x0FFFF) << left_shift;
+        input_2 = arm_nn_requantize(input_2_q15, input_2_mult, input_2_shift);
 
         sum = input_1 + input_2;
         sum = arm_nn_requantize(sum, out_mult, out_shift);
+        
         sum += out_offset;
+
         sum = MAX(sum, out_activation_min);
         sum = MIN(sum, out_activation_max);
         r2 = (q7_t)sum;
 
         /* Sum 4 */
-        input_1_q7 = ((a_1 >> 16) & 0x0FFFF) << left_shift;
-        input_1 = arm_nn_requantize(input_1_q7, input_1_mult, input_1_shift);
+        input_1_q15 = ((a_1 >> 16) & 0x0FFFF) << left_shift;
+        input_1 = arm_nn_requantize(input_1_q15, input_1_mult, input_1_shift);
 
-        input_2_q7 = ((a_2 >> 16) & 0x0FFFF) << left_shift;
-        input_2 = arm_nn_requantize(input_2_q7, input_2_mult, input_2_shift);
+        input_2_q15 = ((a_2 >> 16) & 0x0FFFF) << left_shift;
+        input_2 = arm_nn_requantize(input_2_q15, input_2_mult, input_2_shift);
 
         sum = input_1 + input_2;
         sum = arm_nn_requantize(sum, out_mult, out_shift);
@@ -206,11 +208,11 @@ arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
     while (loop_count > 0)
     {
         /* C = A + B */
-        input_1 = (*input_1_vect++ + input_1_offset) << left_shift;
-        input_2 = (*input_2_vect++ + input_2_offset) << left_shift;
+        input_1_q15 = (*input_1_vect++ + input_1_offset) << left_shift;
+        input_2_q15 = (*input_2_vect++ + input_2_offset) << left_shift;
         
-        input_1 = arm_nn_requantize(input_1, input_1_mult, input_1_shift);
-        input_2 = arm_nn_requantize(input_2, input_2_mult, input_2_shift);
+        input_1 = arm_nn_requantize(input_1_q15, input_1_mult, input_1_shift);
+        input_2 = arm_nn_requantize(input_2_q15, input_2_mult, input_2_shift);
         
         sum = input_1 + input_2;
         sum = arm_nn_requantize(sum, out_mult, out_shift);

@@ -63,7 +63,7 @@ int result_check_statistics(const cmsis_nn_context *ctx,
     int32_t total_time = conv_time + linear_time + trans_time + softmax_time
           + norm_time + pool_time + matmul_time + add_time;
     
-    printf("\r\ntotal inference time:%d\r\n\r\n");
+    printf("\r\ntotal inference time:%d\r\n\r\n", total_time);
     printf("%10s%10s%10s%10s\r\n","count","time","avg","ratio");
     printf("conv: %4d%10d%10.2f%10.2f%%\r\n",conv_count,conv_time,
         ((conv_count!=0)?((double)conv_time/conv_count):0),(double)conv_time*100/total_time);
