@@ -172,7 +172,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_4,384);
 
-    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[204800],&filter_dims,weight_4,&bias_dims,bias_4,&output_dims,section,690);
+    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[204800],&filter_dims,weight_4,&bias_dims,bias_4,&output_dims,section,799);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -238,7 +238,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_7,1024);
 
-    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[147456],&filter_dims,weight_7,&bias_dims,bias_7,&output_dims,section,1905);
+    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[147456],&filter_dims,weight_7,&bias_dims,bias_7,&output_dims,section,2108);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -558,7 +558,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_20,1024);
 
-    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[163840],&filter_dims,weight_20,&bias_dims,bias_20,&output_dims,section,1899);
+    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[163840],&filter_dims,weight_20,&bias_dims,bias_20,&output_dims,section,2100);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -627,7 +627,7 @@ int quantization_inference(void) {
 
     memcpy(conv_shift_use,shift_23,2048);
 
-    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[188416],&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,section,3953);
+    arm_depthwise_conv_s8_sparse(&ctx,&dw_conv_params,&c_quant_params,&input_dims,&section[188416],&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,section,4054);
 
     end = HAL_GetTick();
     conv_time += (end - start);

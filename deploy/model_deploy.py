@@ -31,12 +31,13 @@ class Model_deployer(Layer_deployer):
         self.size = self.image.shape[1]
         
         print('-'*70)
-        print('basic info')
-        print('model config path: ' + str(self.config['model_config_path']))
-        print('ram size: ' + str(self.max_size))
-        print('image input path: ' + str(self.config['image_path']))
-        print('image class: ' + str(self.image_class))
-        print('force sparse: ' + str(self.config['force_sparse']))
+        print('Model path: ' + str(self.config['model_config_path']))
+        print('RAM size: ' + str(self.max_size))
+        print('Image path: ' + str(self.config['image_path']))
+        print('Image class: ' + str(self.image_class) + '\n')
+        print('Force sparse: ' + str(self.config['force_sparse']))
+        print('Block size: ' + str(self.config['block']))
+        print('DMT count: ' + str(self.config['dmt_count']))
         print('-'*70)
 
 
@@ -551,19 +552,16 @@ class Model_deployer(Layer_deployer):
                 self.deploy_mv2block(batch, key, value, d_sparse, self.size, 'section')
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
             self.size /= 2
-            print('-'*70)
 
         for key, value in mv2block_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
             self.deploy_mv2block(batch, key, value, d_sparse, self.size, 'section')
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
-            print('-'*70)
 
         for key, value in transformer_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
             self.deploy_transformer(batch, key, value, self.size, 'section')
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
-            print('-'*70)
 
 
     def deploy_model(self, batch=1):
@@ -599,23 +597,21 @@ class Model_deployer(Layer_deployer):
         self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict,
             self.size, section)
         self.file_writer.writeln('printf("last_conv finished\\r\\n");', 'func')
-        print('-'*70)
 
         for key, value in self.pooling_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
             self.deploy_global_pooling(batch, key, value,
                 self.size, last_channel, section)
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
-            print('-'*70)
 
         self.file_writer.writeln('// block: classifier', 'func')
         self.deploy_classifier(batch, 'classifier', self.classifier_dict,
             section)
         self.file_writer.writeln('printf("classifier finished\\r\\n");', 'func')
-        print('-'*70)
         
         self.file_writer.write_end(self.image_class, self.max_buf_size, self.max_quant_size)
 
+        print('-'*70)
         print('Model deploy completed')
         if (len(self.size_list) != 0):
             print('Warning! Size list may not be set properly!')

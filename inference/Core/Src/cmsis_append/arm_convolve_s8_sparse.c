@@ -1,4 +1,5 @@
 #include "func.h"
+#include "data.h"
 #include "arm_nnfunctions.h"
 #include "arm_nnsupportfunctions.h"
 int32_t arm_convolve_s8_sparse_get_buffer_size (const cmsis_nn_dims *output_dims)
@@ -210,6 +211,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
         while (cnt) {
             // decode procedure
             arm_nn_sparse_decode_4d(
+                BLOCK,
                 last_in_ch, last_h,
                 last_w, last_out_ch,
                 input_ch, kernel_x,

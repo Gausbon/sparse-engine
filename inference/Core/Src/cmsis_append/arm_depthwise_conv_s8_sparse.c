@@ -1,6 +1,8 @@
 #include "func.h"
 #include "arm_nnfunctions.h"
 #include "arm_nnsupportfunctions.h"
+
+# define DW_BLOCK 3
 void arm_nn_dw_convolve_s8_single_sparse( const cmsis_nn_dw_conv_params *dw_conv_params,
                                     const int32_t stride_x_size,
                                     const int32_t stride_y_size,
@@ -205,6 +207,7 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
         while (cnt) {
             // decode procedure
             arm_nn_sparse_decode_4d(
+                DW_BLOCK,
                 last_in_ch, last_h,
                 last_w, last_out_ch,
                 1, kernel_x,

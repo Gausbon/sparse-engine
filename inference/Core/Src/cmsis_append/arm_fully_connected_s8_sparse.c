@@ -1,4 +1,5 @@
 #include "func.h"
+#include "data.h"
 #include "arm_nnfunctions.h"
 #include "arm_nnsupportfunctions.h"
 
@@ -73,7 +74,8 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
 
         while (cnt) {
             // decode procedure
-            arm_nn_sparse_decode_2d(last_in_ch, last_out_ch,
+            arm_nn_sparse_decode_2d(BLOCK,
+                last_in_ch, last_out_ch,
                 input_ch, &filter_ptr,
                 &cur_in_ch, &cur_out_ch,
                 &mat_flag, &cnt,

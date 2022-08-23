@@ -75,7 +75,8 @@ void arm_nn_output_per_channel (   const int32_t start_channel,
                                 q7_t *output_data);
 
 
-void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
+void arm_nn_sparse_decode_4d(       const int32_t block,
+                                    const int32_t last_in_ch,
                                     const int32_t last_h,
                                     const int32_t last_w,
                                     const int32_t last_out_ch,
@@ -93,7 +94,8 @@ void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
                                     q7_t *cur_val);
 
 
-void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
+void arm_nn_sparse_decode_2d(       const int32_t block,
+                                    const int32_t last_in_ch,
                                     const int32_t last_out_ch,
                                     const int32_t input_ch,
                                     const q7_t **filter_data,

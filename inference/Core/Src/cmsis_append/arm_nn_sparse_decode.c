@@ -2,7 +2,8 @@
 #include "arm_nnsupportfunctions.h"
 #include "data.h"
 
-void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
+void arm_nn_sparse_decode_4d(       const int32_t block,
+                                    const int32_t last_in_ch,
                                     const int32_t last_h,
                                     const int32_t last_w,
                                     const int32_t last_out_ch,
@@ -31,7 +32,7 @@ void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
         *cnt -= 2;
 
         if (*cur_val == 0) {
-            *block_cnt = BLOCK - 1;
+            *block_cnt = block - 1;
         }
     } else {
         *cur_in_ch = last_in_ch + 1;
@@ -41,7 +42,7 @@ void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
     }
 
     *block_cnt += 1;
-    if (*block_cnt >= BLOCK) {
+    if (*block_cnt >= block) {
         *block_cnt = 0;
     }    
     
@@ -61,7 +62,8 @@ void arm_nn_sparse_decode_4d(    const int32_t last_in_ch,
     }
 }
 
-void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
+void arm_nn_sparse_decode_2d(       const int32_t block,
+                                    const int32_t last_in_ch,
                                     const int32_t last_out_ch,
                                     const int32_t input_ch,
                                     const q7_t **filter_data,
@@ -81,7 +83,7 @@ void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
         *filter_data += 2;
         *cnt -= 2;
         if (*cur_val == 0) {
-            *block_cnt = BLOCK - 1;
+            *block_cnt = block - 1;
         }
     } else {
         *cur_in_ch = last_in_ch + 1;
@@ -91,7 +93,7 @@ void arm_nn_sparse_decode_2d(    const int32_t last_in_ch,
     }
 
     *block_cnt += 1;
-    if (*block_cnt >= BLOCK) {
+    if (*block_cnt >= block) {
         *block_cnt = 0;
     }
     

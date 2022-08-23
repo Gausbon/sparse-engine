@@ -116,7 +116,12 @@ class Layer_deployer():
 
         # recheck the sparse encode 
         if (is_sparse):
-            weight, is_sparse = conv_data_to_sparse(weight, self.block, self.force_sparse)
+            if (not is_depthwise):
+                weight, is_sparse = conv_data_to_sparse(weight, self.block, self.force_sparse)
+            else:
+                # dw sparse conv use block 3 at w direction
+                weight, is_sparse = conv_data_to_sparse(weight, 3, self.force_sparse)
+            
             # this branch goes to dwconv:
             # should be sparse, but after sparse encode the tensor got larger
             if (is_depthwise and not is_sparse):
