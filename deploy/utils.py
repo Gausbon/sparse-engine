@@ -14,6 +14,8 @@ def approximate_float(M):
 
 def conv_data_to_sparse(input, block, force_sparse):
     output = conv_data_to_sparse_encode_1(input, block)
+    print('out: ' + str(output.size))
+    print('in: ' + str(input.size))
     if (force_sparse or output.size < input.size):
         return output, True
     else:

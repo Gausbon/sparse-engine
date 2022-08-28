@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Tue Aug 23 09:15:35 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Sun Aug 28 15:15:25 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -134,6 +134,7 @@ arm_depthwise_conv_s16 <= USED 0
 __asm___23_arm_depthwise_conv_s8_c_f80ab36b____REV16 <= USED 0
 __asm___23_arm_depthwise_conv_s8_c_f80ab36b____REVSH <= USED 0
 __asm___23_arm_depthwise_conv_s8_c_f80ab36b____RRX <= USED 0
+arm_depthwise_conv_s8 <= USED 0
 ;FILE arm_depthwise_conv_s8_opt.o
 __asm___27_arm_depthwise_conv_s8_opt_c_eb4022c9____REV16 <= USED 0
 __asm___27_arm_depthwise_conv_s8_opt_c_eb4022c9____REVSH <= USED 0
@@ -385,7 +386,7 @@ arm_maxpool_q7_HWC <= USED 0
 __asm___31_arm_pool_s8_with_quantization_c_4e5eb87c____REV16 <= USED 0
 __asm___31_arm_pool_s8_with_quantization_c_4e5eb87c____REVSH <= USED 0
 __asm___31_arm_pool_s8_with_quantization_c_4e5eb87c____RRX <= USED 0
-arm_maxpool_s8_with_quantization <= USED 0
+arm_avgpool_s8_with_quantization <= USED 0
 ;FILE arm_q7_to_q15_no_shift.o
 __asm___24_arm_q7_to_q15_no_shift_c_e777f2cc____REV16 <= USED 0
 __asm___24_arm_q7_to_q15_no_shift_c_e777f2cc____REVSH <= USED 0

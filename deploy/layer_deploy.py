@@ -180,10 +180,10 @@ class Layer_deployer():
         mult_name = 'mult_' + str(self.counter)
         shift_name = 'shift_' + str(self.counter)
         self.file_writer.write_const_tensor(mult, mult_name, 'q31_t')
-        self.file_writer.write_const_tensor(shift, shift_name, 'q31_t')
+        self.file_writer.write_const_tensor(shift, shift_name, 'q7_t')
         
         self.file_writer.writeln('memcpy(conv_mult_use,' + mult_name + ',' + str(4*mult.size) + ');','func')
-        self.file_writer.writeln('memcpy(conv_shift_use,' + shift_name + ',' + str(4*shift.size) + ');','func')
+        self.file_writer.writeln('for(int i = 0; i < ' + str(shift.size) + '; i++) { conv_shift_use[i] = ' + shift_name + '[i]; }', 'func')
 
         if (is_sparse):
             param_list.append(weight.size)
@@ -285,11 +285,19 @@ class Layer_deployer():
 
         # get offset
         param_list.append(-block_dict[name + 'qi.zero_point'])
-        param_list.append(block_dict[name + 'qo.zero_point'])
-
+        if (is_avg):
+            param_list.append(block_dict[name + 'qo.zero_point'])
+        else:
+            # qi.zero_point = qo.zero_point
+            param_list.append(block_dict[name + 'qi.zero_point'])
+        
         # get input mult
         qi_scale = block_dict[name + 'qi.scale']
-        qo_scale = block_dict[name + 'qo.scale']
+        if (is_avg):
+            qo_scale = block_dict[name + 'qo.scale']
+        else:
+            qo_scale = block_dict[name + 'qi.scale']
+            
         mult, shift = approximate_float(qi_scale / qo_scale)
         param_list.extend([mult, shift, out_section])
 

@@ -214,7 +214,7 @@ class Model_deployer(Layer_deployer):
                     '&' + section + '[' + str(self.max_size - bnc_size) + ']', section)
 
 
-    def deploy_tokenizer(self, batch:int, block_dict:dict,
+    def deploy_tokenizer(self, batch:int, name:str, block_dict:dict,
             input_size:int, section:str):
         # qconv_relu: head -> tail
         size_0 = self.size_list.pop(0)[1]
@@ -223,8 +223,8 @@ class Model_deployer(Layer_deployer):
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
         self.conv_dict['stride.h'], self.conv_dict['stride.w'] = 1, 1
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
-        self.deploy_conv(self, 'qconv_relu.', block_dict, False, False,
-                    section, '&'+section+'['+str(self.max_size - size_0[1])+']')
+        self.deploy_conv('qconv_relu.', block_dict, False, False,
+                    section, '&'+section+'['+str(self.max_size - size_0)+']')
 
         # max_pool: tail -> head
         self.size_list.pop(0)
@@ -238,7 +238,9 @@ class Model_deployer(Layer_deployer):
         self.pooling_dict['activation.min'] , self.pooling_dict['activation.max'] = -128, 127
 
         self.deploy_pooling('qmaxpool.', block_dict, False,
-                '&'+section+'['+str(self.max_size - size_0[1])+']', section)
+                '&'+section+'['+str(self.max_size - size_0)+']', section)
+
+        print('Block:' + name + ' deploy completed')
 
 
     def deploy_mv2block(self, batch:int, name:str, block_dict:dict, is_sparse:bool,
@@ -547,7 +549,7 @@ class Model_deployer(Layer_deployer):
             self.file_writer.writeln('// block: ' + key, 'func')
             key_list = key.split('_')
             if (key_list[0].endswith('0')):
-                self.deploy_tokenizer(batch, value, self.size, 'section')
+                self.deploy_tokenizer(batch, key, value, self.size, 'section')
             elif (key_list[0].endswith('1')):
                 self.deploy_mv2block(batch, key, value, d_sparse, self.size, 'section')
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
@@ -607,6 +609,7 @@ class Model_deployer(Layer_deployer):
         self.file_writer.writeln('// block: classifier', 'func')
         self.deploy_classifier(batch, 'classifier', self.classifier_dict,
             section)
+
         self.file_writer.writeln('printf("classifier finished\\r\\n");', 'func')
         
         self.file_writer.write_end(self.image_class, self.max_buf_size, self.max_quant_size)
@@ -618,53 +621,43 @@ class Model_deployer(Layer_deployer):
             print('Remaining size list count: ' + str(len(self.size_list)) + ' (0 is correct)')
 
 
-    def print_tensor(self):
-        for key, value in self.downsample_list_dict.items():
-            print("\nblock: " + key)
-            for key0, value0 in value.items():
-                print(("key: " + key0).ljust(70, ' '), end="")
-                if (type(value0) == float):
-                    print(value0)
-                else:
-                    print(value0.shape)
-        for key, value in self.mv2block_list_dict.items():
-            print("\nblock: " + key)
-            for key0, value0 in value.items():
-                print(("key: " + key0).ljust(70, ' '), end="")
-                if (type(value0) == float):
-                    print(value0)
-                else:
-                    print(value0.shape)
-        for key, value in self.transformer_list_dict.items():
-            print("\nblock: " + key)
-            for key0, value0 in value.items():
-                print(("key: " + key0).ljust(70, ' '), end="")
-                if (type(value0) == float):
-                    print(value0)
-                else:
-                    print(value0.shape)
-        print("\nblock: qlast_conv")
-        for key, value in self.last_conv_dict.items():
+    def print_layer(self, name:str, layer_dict:dict):
+        print()
+        print("block: " + name)
+        for key, value in layer_dict.items():
             print(("key: " + key).ljust(70, ' '), end="")
             if (type(value) == float):
                 print(value)
             else:
                 print(value.shape)
+
+
+    def print_full_layer(self):
+        if (self.dmt_count == 1):
+            for key, value in self.downsample_list_dict.items():
+                self.print_layer(key, value)
+            for key, value in self.mv2block_list_dict.items():
+                self.print_layer(key, value)
+            for key, value in self.transformer_list_dict.items():
+                self.print_layer(key, value)
+        else:
+            for key, value in self.downsample_list_dict_1.items():
+                self.print_layer(key, value)
+            for key, value in self.mv2block_list_dict_1.items():
+                self.print_layer(key, value)
+            for key, value in self.transformer_list_dict_1.items():
+                self.print_layer(key, value)
+            for key, value in self.downsample_list_dict_2.items():
+                self.print_layer(key, value)
+            for key, value in self.mv2block_list_dict_2.items():
+                self.print_layer(key, value)
+            for key, value in self.transformer_list_dict_2.items():
+                self.print_layer(key, value)
+
+        self.print_layer('qlast_conv', self.last_conv_dict)
         for key, value in self.pooling_list_dict.items():
-            print("\nblock: " + key)
-            for key0, value0 in value.items():
-                print(("key: " + key0).ljust(70, ' '), end="")
-                if (type(value0) == float):
-                    print(value0)
-                else:
-                    print(value0.shape)
-        print("\nblock: qclassifier")
-        for key, value in self.classifier_dict.items():
-            print(("key: " + key).ljust(70, ' '), end="")
-            if (type(value) == float):
-                print(value)
-            else:
-                print(value.shape)
+            self.print_layer(key, value)
+        self.print_layer('qclassifier', self.classifier_dict)
         print()
 
 
@@ -673,6 +666,6 @@ if __name__ == '__main__':
     print("start")
     model_deployer = Model_deployer()
     model_deployer.load_tensor()
-    # model_deployer.print_tensor()
+    # model_deployer.print_full_layer()
     model_deployer.deploy_model()
     print('All const tensor size: {:.2f} KB'.format(model_deployer.file_writer.const_tensor_size / 1024))
