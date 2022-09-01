@@ -125,12 +125,22 @@ arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
                                            const int32_t block_size);
 
 
-arm_cmsis_nn_status arm_nn_transpose_bnc_to_nbc_q7(const int32_t dim_b, 
-                                            const int32_t dim_n, 
+arm_cmsis_nn_status arm_nn_transpose_bhwc_to_bwhc_q7(
+                                            const int32_t dim_b, 
+                                            const int32_t dim_h, 
+                                            const int32_t dim_w, 
                                             const int32_t dim_c, 
                                             const q7_t *input_section, 
                                             q7_t *output_section);
 
+void arm_softmax_s8_fast(const cmsis_nn_context *ctx,
+                    const int8_t *input,
+                    const int32_t num_rows,
+                    const int32_t row_size,
+                    const int32_t mult,
+                    const int32_t shift,
+                    const int32_t diff_min,
+                    int8_t *output);
 
 // cmsis func
 int32_t arm_convolve_s8_sparse_get_buffer_size (const cmsis_nn_dims *output_dims);
@@ -151,6 +161,33 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
 
                           
 arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
+                           const cmsis_nn_dw_conv_params *dw_conv_params, 
+                           const cmsis_nn_per_channel_quant_params *quant_params,
+                           const cmsis_nn_dims *input_dims,
+                           const q7_t *input_data,
+                           const cmsis_nn_dims *filter_dims,
+                           const q7_t *filter_data,
+                           const cmsis_nn_dims *bias_dims,
+                           const int32_t *bias_data,
+                           const cmsis_nn_dims *output_dims,
+                           q7_t *output_data,
+                           const q31_t input_count);
+
+arm_status arm_convolve_s8_sparse_CHW (const cmsis_nn_context *ctx,
+                           const cmsis_nn_conv_params *conv_params,
+                           const cmsis_nn_per_channel_quant_params *quant_params,
+                           const cmsis_nn_dims *input_dims,
+                           const q7_t *input_data,
+                           const cmsis_nn_dims *filter_dims,
+                           const q7_t *filter_data,
+                           const cmsis_nn_dims *bias_dims,
+                           const int32_t *bias_data,
+                           const cmsis_nn_dims *output_dims,
+                           q7_t *output_data,
+                           const q31_t input_count);
+
+                          
+arm_status arm_depthwise_conv_s8_sparse_CHW (const cmsis_nn_context *ctx,
                            const cmsis_nn_dw_conv_params *dw_conv_params, 
                            const cmsis_nn_per_channel_quant_params *quant_params,
                            const cmsis_nn_dims *input_dims,

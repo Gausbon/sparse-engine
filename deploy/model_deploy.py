@@ -29,7 +29,7 @@ class Model_deployer(Layer_deployer):
         self.image = np.load(self.config['image_path']).transpose(0, 2, 3, 1)
         self.image_class = self.config['image_class']
         self.size = self.image.shape[1]
-        
+
         print('-'*70)
         print('Model path: ' + str(self.config['model_config_path']))
         print('RAM size: ' + str(self.max_size))
@@ -145,7 +145,7 @@ class Model_deployer(Layer_deployer):
 
 
     def deploy_self_attn(self, name:str, block_dict:dict,
-            b:int, n:int, c:int, head_nums:int, section:str):
+            b:int, n:int, c:int, head_nums:int):
         
         # self_attention start
         # qkv linear: head -> tail
@@ -153,7 +153,7 @@ class Model_deployer(Layer_deployer):
         bncx3_size = self.size_list.pop(0)[1]
         self.input_dict['n'] = b * n
         self.deploy_linear(name + 'qqkv.', block_dict, True,
-                    section, '&'+section+'['+str(self.max_size-bncx3_size)+']')
+                    0, self.max_size-bncx3_size)
         
         # bnc transpose: tail -> head
         # from (b, n, 3, head_nums, c / head_nums) 
@@ -161,61 +161,62 @@ class Model_deployer(Layer_deployer):
         # n = input_size * input_size (image size), c = embedding_dim (channel)
         # current memory: [..... q k v | reserve]
         self.size_list.pop(0)
-        self.deploy_transpose((b * n), (3 * head_nums),
-                    (c / head_nums), '&'+section+'['+str(self.max_size-bncx3_size)+']',
-                    section)
-        self.file_writer.writeln('memcpy(&' + section + '['  + str(self.max_size-bncx3_size)
-                    + '],' + section + ',' + str(bncx3_size) + ');', 'func')
+        self.deploy_transpose(1, (b * n), (3 * head_nums),
+                    (c / head_nums), self.max_size-bncx3_size, 0)
+        self.file_writer.writeln('memcpy(&section['  + str(self.max_size-bncx3_size)
+                    + '],section,' + str(bncx3_size) + ');', 'func')
 
         # q * k^T
         # from (head_nums*b, n, c / head_nums) * (head_nums*b, c / head_nums, n)
         # to (head_nums*b, n, n)
         # current memory: [q*k ... q k v | reserve]
+        self.max_size -= bncx3_size//3
         attn_size = self.size_list.pop(0)[1]
         self.deploy_matmul('self_attn.qmatmul_qk.', block_dict, (head_nums * b),
                     n, (c / head_nums),
                     n, True,
-                    '&' + section + '[' + str(self.max_size - bncx3_size)+ ']',  # q
-                    '&' + section + '[' + str(self.max_size - bncx3_size*2//3)+ ']',  # k
-                    section)
+                    self.max_size - bncx3_size*2//3,  # q
+                    self.max_size - bncx3_size//3,  # k
+                    0)
 
         # in_place softmax
         self.size_list.pop(0)
         self.deploy_softmax('self_attn.qsoftmax1.', block_dict, 
                     head_nums * b * n, 
                     n, 
-                    section, section)
+                    0, 0)
 
         # attn * v
         # from (head_nums*b, n, n) * (head_nums*b, n, c / head_nums)
         # to (head_nums*b, n, c / head_nums)
         # current memory: [attn attn*v ... v | reserve]
+        self.max_size += bncx3_size//3
         self.size_list.pop(0)
         self.deploy_matmul('self_attn.qmatmul_attnv.', block_dict, (head_nums * b),
                     n, n, (c / head_nums), False,
-                    section, # attn
-                    '&' + section + '[' + str(self.max_size - bncx3_size//3)+ ']',  # v
-                    '&' + section + '[' + str(attn_size)+ ']')
+                    0, # attn
+                    self.max_size - bncx3_size//3,  # v
+                    attn_size)
 
         # bnc transpose
         # from (head_nums*b, n, c / head_nums)
         # to (b, n, c)
         # current memory: [(attn) attn*v ... bnc_value | reserve]
         bnc_size = self.size_list.pop(0)[1]
-        self.deploy_transpose(head_nums, (b * n),
-                    (c / head_nums), '&' + section + '[' + str(attn_size)+ ']',
-                    '&' + section + '[' + str(self.max_size - bnc_size) + ']')
+        self.deploy_transpose(1, head_nums, (b * n),
+                    (c / head_nums), attn_size,
+                    self.max_size - bnc_size)
 
         # self attention final linear
         # current memory: [proj ... bnc_value | reserve]
         self.size_list.pop(0)
         self.input_dict['n'] = b * n
         self.deploy_linear('self_attn.qproj.', block_dict, True,
-                    '&' + section + '[' + str(self.max_size - bnc_size) + ']', section)
+                    self.max_size - bnc_size, 0)
 
 
-    def deploy_tokenizer(self, batch:int, name:str, block_dict:dict,
-            input_size:int, section:str):
+    def deploy_tokenizer(self, batch:int, name:str, block_dict:dict, is_sparse:bool,
+            input_size:int):
         # qconv_relu: head -> tail
         size_0 = self.size_list.pop(0)[1]
         self.input_dict['n'] = batch
@@ -223,8 +224,8 @@ class Model_deployer(Layer_deployer):
         self.output_dict['h'], self.output_dict['w'] = input_size, input_size
         self.conv_dict['stride.h'], self.conv_dict['stride.w'] = 1, 1
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
-        self.deploy_conv('qconv_relu.', block_dict, False, False,
-                    section, '&'+section+'['+str(self.max_size - size_0)+']')
+        self.deploy_conv('qconv_relu.', block_dict, is_sparse, False,
+                    0, self.max_size - size_0)
 
         # max_pool: tail -> head
         self.size_list.pop(0)
@@ -238,13 +239,13 @@ class Model_deployer(Layer_deployer):
         self.pooling_dict['activation.min'] , self.pooling_dict['activation.max'] = -128, 127
 
         self.deploy_pooling('qmaxpool.', block_dict, False,
-                '&'+section+'['+str(self.max_size - size_0)+']', section)
+                self.max_size - size_0, 0)
 
         print('Block:' + name + ' deploy completed')
 
 
     def deploy_mv2block(self, batch:int, name:str, block_dict:dict, is_sparse:bool,
-            input_size:int, section:str):
+            input_size:int):
 
         # config_list: expansion, stride, is_sparse, output_size
         # name: {*}mv2block{type}_{index} in mv2block
@@ -271,8 +272,8 @@ class Model_deployer(Layer_deployer):
         
         if (res):
             feature_size = int(inp * input_size * input_size)
-            self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - feature_size) 
-                + '],' + section + ',' + str(feature_size) + ');', 'func')
+            self.file_writer.writeln('memcpy(&section[' + str(self.max_size - feature_size) 
+                + '],section,' + str(feature_size) + ');', 'func')
             self.max_size -= feature_size
 
         # conv_0: head -> tail
@@ -284,7 +285,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv.0.', block_dict, config_list[2], False,
-                    section, '&'+section+'['+str(self.max_size - conv0_size)+']')
+                    0, self.max_size - conv0_size)
 
         # conv_1: tail -> head
         self.size_list.pop(0)
@@ -295,7 +296,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv.1.', block_dict, config_list[2], True,
-                '&'+section+'['+str(self.max_size - conv0_size)+']', section)
+                self.max_size - conv0_size, 0)
 
         # conv_2: head -> tail
         conv2_size = self.size_list.pop(0)[1]
@@ -306,25 +307,25 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv.2.', block_dict, config_list[2], False,
-                    section, '&'+section+'['+str(self.max_size - conv2_size)+']')
+                    0, self.max_size - conv2_size)
 
         if (res):
             self.size_list.pop(0)
             self.max_size += feature_size
             self.deploy_add('qadd.', block_dict,
-                '&'+section+'['+str(self.max_size-feature_size*2)+']', 
-                '&'+section+'['+str(self.max_size-feature_size)+']',                       
-                section,feature_size)
+                self.max_size-feature_size*2, 
+                self.max_size-feature_size,                       
+                0,feature_size)
         else:
             # copy output from tail to head
-            self.file_writer.writeln('memcpy(' + section + ',&' + section 
-                    + '[' + str(self.max_size - conv2_size)+'],' + str(conv2_size) + ');', 'func')
+            self.file_writer.writeln('memcpy(section,&section[' 
+                    + str(self.max_size - conv2_size)+'],' + str(conv2_size) + ');', 'func')
 
         print('Block:' + name + ' deploy completed')
 
 
     def deploy_transformer(self, batch:int, name:str, block_dict:dict,
-            input_size:int, section:str):
+            input_size:int):
 
         # name: {*}transformer{type}_{index}
         type_name = name.split('_')[-2]
@@ -345,7 +346,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv1.', block_dict, True, False,
-                    section, '&'+section+'['+str(self.max_size - conv1_size)+']')
+                    0, self.max_size - conv1_size)
 
         # conv_2: tail -> head
         bnc_size = self.size_list.pop(0)[1]
@@ -356,69 +357,69 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv2.', block_dict, True, False,
-                    '&'+section+'['+str(self.max_size - conv1_size)+']', section)
+                    self.max_size - conv1_size, 0)
 
         embedding_dim = self.output_dict['c']
 
         # copy shortcut data from head to tail
         norm_batch = batch * input_size * input_size
-        self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - bnc_size)
-                    + '],' + section + ',' + str(bnc_size) + ');', 'func')
+        self.file_writer.writeln('memcpy(&section[' + str(self.max_size - bnc_size)
+                    + '],section,' + str(bnc_size) + ');', 'func')
         self.max_size -= bnc_size
 
         # pre_norm: head -> head
         self.size_list.pop(0)
         self.deploy_norm('qpre_norm.', block_dict, norm_batch, embedding_dim,
-                    section, section)
+                    0, 0)
 
         # self attention
         self.deploy_self_attn('self_attn.', block_dict,
-            batch, (input_size * input_size), embedding_dim, head_nums, section)
+            batch, (input_size * input_size), embedding_dim, head_nums)
         
         # add1: head + tail -> mid
         self.max_size += bnc_size
         self.size_list.pop(0)
-        self.deploy_add('qadd1.', block_dict, section, 
-            '&'+section+'['+str(self.max_size-bnc_size)+']',
-            '&'+section+'['+str(bnc_size)+']',bnc_size)
+        self.deploy_add('qadd1.', block_dict, 0, 
+            self.max_size-bnc_size,
+            bnc_size,bnc_size)
 
         # copy to head
-        self.file_writer.writeln('memcpy(' + section + ',&'
-                    + section+'['+str(bnc_size)+'],' + str(bnc_size) + ');', 'func')
+        self.file_writer.writeln('memcpy(section,&section['
+                    + str(bnc_size)+'],' + str(bnc_size) + ');', 'func')
 
         # norm1: head -> head
         self.size_list.pop(0)
         self.deploy_norm('qnorm1.', block_dict, norm_batch, 
-                    embedding_dim, section, section)
+                    embedding_dim, 0, 0)
 
         # copy head to shortcut
-        self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size-bnc_size) + '],'
-                + section + ',' + str(bnc_size) + ');', 'func')
+        self.file_writer.writeln('memcpy(&section[' + str(self.max_size-bnc_size)
+                + '],section,' + str(bnc_size) + ');', 'func')
         self.max_size -= bnc_size
         
         # linear relu1: head -> tail
         linear_size = self.size_list.pop(0)[1]
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear_relu1.', block_dict, True,
-                    section, '&'+section+'['+str(self.max_size-linear_size)+']')
+                    0, self.max_size-linear_size)
 
         # linear2: tail -> head
         linear2_size = self.size_list.pop(0)[1]
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear2.', block_dict, True,
-                    '&'+section+'['+str(self.max_size-linear_size)+']', section)
+                    self.max_size-linear_size, 0)
 
         # add2: head + tail -> mid
         self.max_size += bnc_size
         self.size_list.pop(0)
         self.deploy_add('qadd2.', block_dict,
-            section,
-            '&'+section+'['+str(self.max_size-bnc_size)+']', 
-            '&'+section+'['+str(linear2_size)+']',linear2_size)
+            0,
+            self.max_size-bnc_size, 
+            linear2_size,linear2_size)
 
         # copy add2 to head
-        self.file_writer.writeln('memcpy(' + section + ',&' + section +
-                '[' + str(linear2_size) + '],' + str(linear2_size) + ');', 'func')
+        self.file_writer.writeln('memcpy(section,&section['
+                + str(linear2_size) + '],' + str(linear2_size) + ');', 'func')
 
         # conv_3: head -> tail
         conv3_size = self.size_list.pop(0)[1]
@@ -429,7 +430,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv3.', block_dict, True, False,
-                    section, '&'+section+'['+str(self.max_size-conv3_size)+']')
+                    0, self.max_size-conv3_size)
 
         # conv_4: tail -> head
         self.size_list.pop(0)
@@ -440,13 +441,13 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv4.', block_dict, True, False,
-                    '&'+section+'['+str(self.max_size-conv3_size)+']', section)
-        
+                    self.max_size-conv3_size, 0)
+
         print('Block:' + name + ' deploy completed')
 
 
     def deploy_last_conv(self, batch:int, name:str, block_dict:dict,
-            input_size:int, section:str):
+            input_size:int):
 
         # just one conv, head -> tail
         conv_size = self.size_list.pop(0)[1]
@@ -457,38 +458,38 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('', block_dict, True, False,
-                    section, '&'+section+'['+str(self.max_size - conv_size)+']')
+                    0, self.max_size - conv_size)
 
         # copy output from tail to head
-        self.file_writer.writeln('memcpy(' + section + ',&' + section + '[' 
+        self.file_writer.writeln('memcpy(section,&section[' 
                     + str(self.max_size - conv_size)+'],' + str(conv_size) + ');', 'func')
 
         print('Block:' + name + ' deploy completed')
 
 
     def deploy_global_pooling(self, batch:int, name:str, block_dict:dict,
-            input_size:int, channel:int, section:str):
+            input_size:int, channel:int):
 
         if (name == 'global_pooling'):
             # qglobal_pooling
             # shortcut storage: head -> tail
             all_size = self.size_list.pop(0)
             in_size, out_size = all_size[0], all_size[1]
-            self.file_writer.writeln('memcpy(&' + section + '[' + str(self.max_size - in_size)
-                + '],' + section + ',' + str(in_size) + ');', 'func')
+            self.file_writer.writeln('memcpy(&section[' + str(self.max_size - in_size)
+                + '],section,' + str(in_size) + ');', 'func')
             self.max_size -= in_size
 
             # linear: head -> tail
             # shape: b (h w) c -> b (h w) 1 -> b (h w) 1
             self.input_dict['n'] = batch * input_size * input_size
             self.deploy_linear('qattention_pool.', block_dict, False,
-                        section, '&'+section+'['+str(self.max_size - out_size)+']')
+                        0, self.max_size - out_size)
             
             # qsoftmax: tail -> tail
             self.size_list.pop(0)
             self.deploy_softmax('qsoftmax.', block_dict, batch, (input_size * input_size), 
-                        '&'+section+'['+str(self.max_size - out_size)+']', 
-                        '&'+section+'['+str(self.max_size - out_size)+']')
+                        self.max_size - out_size, 
+                        self.max_size - out_size)
 
             # matmul: tail * tail -> mid
             # shape: b 1 (h w) * b (h w) c -> b 1 c -> b c
@@ -496,9 +497,9 @@ class Model_deployer(Layer_deployer):
             self.max_size += in_size
             self.deploy_matmul('qmatmul.', block_dict, batch, 1, (input_size * input_size),
                         channel, False, 
-                        '&'+section + '[' + str(self.max_size - in_size - out_size)+ ']', 
-                        '&'+section + '[' + str(self.max_size - in_size)+ ']', 
-                        section)
+                        self.max_size - in_size - out_size, 
+                        self.max_size - in_size, 
+                        0)
 
             
         elif (name == 'qglobal_pooling'):
@@ -514,11 +515,11 @@ class Model_deployer(Layer_deployer):
 
             pool_size = batch * channel
             self.deploy_pooling('', block_dict, True,
-                section, '&'+section+'['+str(self.max_size - pool_size)+']')
+                0, self.max_size - pool_size)
             
             # copy from tail to head
-            self.file_writer.writeln('memcpy(' + section + ',&' + section 
-                +'['+str(self.max_size-pool_size)+'],' + str(pool_size) + ');', 'func')
+            self.file_writer.writeln('memcpy(section,&section[' 
+                +str(self.max_size-pool_size)+'],' + str(pool_size) + ');', 'func')
 
         else: 
             print('Cannot parse block as global_pooling: ' + name)
@@ -527,18 +528,17 @@ class Model_deployer(Layer_deployer):
         print('Block:' + name + ' deploy completed')
 
 
-    def deploy_classifier(self, batch:int, name:str, block_dict:dict,
-            section:str):
+    def deploy_classifier(self, batch:int, name:str, block_dict:dict):
 
         # just one linear
         linear_size = self.size_list.pop(0)[1]
         self.input_dict['n'] = batch
         self.deploy_linear('', block_dict, False,
-                        section, '&'+section+'['+str(self.max_size-linear_size)+']')
+                        0, self.max_size-linear_size)
 
         # copy from tail to head
-        self.file_writer.writeln('memcpy(' + section + ',&' + section 
-            +'['+str(self.max_size-linear_size)+'],' + str(linear_size) + ');', 'func')
+        self.file_writer.writeln('memcpy(section,&section['
+            +str(self.max_size-linear_size)+'],' + str(linear_size) + ');', 'func')
 
         print('Block:' + name + ' deploy completed')
 
@@ -549,22 +549,24 @@ class Model_deployer(Layer_deployer):
             self.file_writer.writeln('// block: ' + key, 'func')
             key_list = key.split('_')
             if (key_list[0].endswith('0')):
-                self.deploy_tokenizer(batch, key, value, self.size, 'section')
+                self.deploy_tokenizer(batch, key, value, d_sparse, self.size)
             elif (key_list[0].endswith('1')):
-                self.deploy_mv2block(batch, key, value, d_sparse, self.size, 'section')
+                self.deploy_mv2block(batch, key, value, d_sparse, self.size)
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
             self.size /= 2
+            # print(self.file_writer.const_tensor_size)
 
         for key, value in mv2block_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
-            self.deploy_mv2block(batch, key, value, d_sparse, self.size, 'section')
+            self.deploy_mv2block(batch, key, value, d_sparse, self.size)
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
+            # print(self.file_writer.const_tensor_size)
 
         for key, value in transformer_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
-            self.deploy_transformer(batch, key, value, self.size, 'section')
+            self.deploy_transformer(batch, key, value, self.size)
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
-
+            # print(self.file_writer.const_tensor_size)
 
     def deploy_model(self, batch=1):
         model_config_path = '../TinySPOS/configs/' + self.config['model_config_path'] + \
@@ -574,7 +576,6 @@ class Model_deployer(Layer_deployer):
         
 
         last_channel = model_config['last_channel']
-        section = 'section'
 
         # init file
         with open(self.config['func_init'], 'r') as r_file:
@@ -597,19 +598,21 @@ class Model_deployer(Layer_deployer):
 
         self.file_writer.writeln('// block: last conv', 'func')
         self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict,
-            self.size, section)
+            self.size)
         self.file_writer.writeln('printf("last_conv finished\\r\\n");', 'func')
+        # print(self.file_writer.const_tensor_size)
 
         for key, value in self.pooling_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
             self.deploy_global_pooling(batch, key, value,
-                self.size, last_channel, section)
+                self.size, last_channel)
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
+            # print(self.file_writer.const_tensor_size)
 
         self.file_writer.writeln('// block: classifier', 'func')
-        self.deploy_classifier(batch, 'classifier', self.classifier_dict,
-            section)
-
+        self.deploy_classifier(batch, 'classifier', self.classifier_dict)
+        # print(self.file_writer.const_tensor_size)
+        
         self.file_writer.writeln('printf("classifier finished\\r\\n");', 'func')
         
         self.file_writer.write_end(self.image_class, self.max_buf_size, self.max_quant_size)

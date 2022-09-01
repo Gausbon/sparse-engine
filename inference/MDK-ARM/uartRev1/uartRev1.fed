@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Sun Aug 28 15:15:25 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Thu Sep 01 19:11:26 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -108,6 +108,13 @@ __asm___17_arm_convolve_s8_c_0431e2e9____RRX <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REV16 <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REVSH <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____RRX <= USED 0
+;FILE arm_convolve_s8_sparse_chw.o
+__asm___28_arm_convolve_s8_sparse_CHW_c_e0357b21____REV16 <= USED 0
+__asm___28_arm_convolve_s8_sparse_CHW_c_e0357b21____REVSH <= USED 0
+__asm___28_arm_convolve_s8_sparse_CHW_c_e0357b21____RRX <= USED 0
+arm_convolve_s8_sparse_CHW <= USED 0
+arm_nn_convolve_s8_double_sparse_CHW <= USED 0
+arm_nn_convolve_s8_single_sparse_CHW <= USED 0
 ;FILE arm_convolve_wrapper_s16.o
 __asm___26_arm_convolve_wrapper_s16_c_0198abd5____REV16 <= USED 0
 __asm___26_arm_convolve_wrapper_s16_c_0198abd5____REVSH <= USED 0
@@ -134,7 +141,6 @@ arm_depthwise_conv_s16 <= USED 0
 __asm___23_arm_depthwise_conv_s8_c_f80ab36b____REV16 <= USED 0
 __asm___23_arm_depthwise_conv_s8_c_f80ab36b____REVSH <= USED 0
 __asm___23_arm_depthwise_conv_s8_c_f80ab36b____RRX <= USED 0
-arm_depthwise_conv_s8 <= USED 0
 ;FILE arm_depthwise_conv_s8_opt.o
 __asm___27_arm_depthwise_conv_s8_opt_c_eb4022c9____REV16 <= USED 0
 __asm___27_arm_depthwise_conv_s8_opt_c_eb4022c9____REVSH <= USED 0
@@ -145,6 +151,13 @@ arm_depthwise_conv_s8_opt_get_buffer_size <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____REV16 <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____REVSH <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____RRX <= USED 0
+;FILE arm_depthwise_conv_s8_sparse_chw.o
+__asm___34_arm_depthwise_conv_s8_sparse_CHW_c_5b2a65d5____REV16 <= USED 0
+__asm___34_arm_depthwise_conv_s8_sparse_CHW_c_5b2a65d5____REVSH <= USED 0
+__asm___34_arm_depthwise_conv_s8_sparse_CHW_c_5b2a65d5____RRX <= USED 0
+arm_depthwise_conv_s8_sparse_CHW <= USED 0
+arm_nn_dw_convolve_s8_double_sparse_CHW <= USED 0
+arm_nn_dw_convolve_s8_single_sparse_CHW <= USED 0
 ;FILE arm_depthwise_conv_u8_basic_ver1.o
 __asm___34_arm_depthwise_conv_u8_basic_ver1_c_55f7f530____REV16 <= USED 0
 __asm___34_arm_depthwise_conv_u8_basic_ver1_c_55f7f530____REVSH <= USED 0
@@ -350,14 +363,15 @@ __asm___27_arm_nn_output_per_channel_c_f3a9ad2c____RRX <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____REV16 <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____REVSH <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____RRX <= USED 0
+arm_nn_softmax_common_s8 <= USED 0
 ;FILE arm_nn_sparse_decode.o
 __asm___22_arm_nn_sparse_decode_c_e9b65fd1____REV16 <= USED 0
 __asm___22_arm_nn_sparse_decode_c_e9b65fd1____REVSH <= USED 0
 __asm___22_arm_nn_sparse_decode_c_e9b65fd1____RRX <= USED 0
-;FILE arm_nn_transpose_bnc_to_nbc_q7.o
-__asm___32_arm_nn_transpose_bnc_to_nbc_q7_c_59928ecd____REV16 <= USED 0
-__asm___32_arm_nn_transpose_bnc_to_nbc_q7_c_59928ecd____REVSH <= USED 0
-__asm___32_arm_nn_transpose_bnc_to_nbc_q7_c_59928ecd____RRX <= USED 0
+;FILE arm_nn_transpose_bhwc_to_bwhc_q7.o
+__asm___34_arm_nn_transpose_bhwc_to_bwhc_q7_c_0c7c9da4____REV16 <= USED 0
+__asm___34_arm_nn_transpose_bhwc_to_bwhc_q7_c_0c7c9da4____REVSH <= USED 0
+__asm___34_arm_nn_transpose_bhwc_to_bwhc_q7_c_0c7c9da4____RRX <= USED 0
 ;FILE arm_nn_vec_mat_mult_t_s16.o
 __asm___27_arm_nn_vec_mat_mult_t_s16_c_133d0361____REV16 <= USED 0
 __asm___27_arm_nn_vec_mat_mult_t_s16_c_133d0361____REVSH <= USED 0
@@ -386,7 +400,7 @@ arm_maxpool_q7_HWC <= USED 0
 __asm___31_arm_pool_s8_with_quantization_c_4e5eb87c____REV16 <= USED 0
 __asm___31_arm_pool_s8_with_quantization_c_4e5eb87c____REVSH <= USED 0
 __asm___31_arm_pool_s8_with_quantization_c_4e5eb87c____RRX <= USED 0
-arm_avgpool_s8_with_quantization <= USED 0
+arm_maxpool_s8_with_quantization <= USED 0
 ;FILE arm_q7_to_q15_no_shift.o
 __asm___24_arm_q7_to_q15_no_shift_c_e777f2cc____REV16 <= USED 0
 __asm___24_arm_q7_to_q15_no_shift_c_e777f2cc____REVSH <= USED 0
@@ -445,6 +459,11 @@ arm_softmax_s16 <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____REV16 <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____REVSH <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____RRX <= USED 0
+arm_softmax_s8 <= USED 0
+;FILE arm_softmax_s8_fast.o
+__asm___21_arm_softmax_s8_fast_c_20d0f6e2____REV16 <= USED 0
+__asm___21_arm_softmax_s8_fast_c_20d0f6e2____REVSH <= USED 0
+__asm___21_arm_softmax_s8_fast_c_20d0f6e2____RRX <= USED 0
 ;FILE arm_softmax_s8_s16.o
 __asm___20_arm_softmax_s8_s16_c_16f9a8f7____REV16 <= USED 0
 __asm___20_arm_softmax_s8_s16_c_16f9a8f7____REVSH <= USED 0

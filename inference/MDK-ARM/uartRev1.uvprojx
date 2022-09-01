@@ -473,14 +473,29 @@
               <FilePath>..\Core\Src\cmsis_append\arm_pool_s8_with_quantization.c</FilePath>
             </File>
             <File>
-              <FileName>arm_nn_transpose_bnc_to_nbc_q7.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\cmsis_append\arm_nn_transpose_bnc_to_nbc_q7.c</FilePath>
-            </File>
-            <File>
               <FileName>arm_elementwise_add_s8_with_neg.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_elementwise_add_s8_with_neg.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_softmax_s8_fast.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_softmax_s8_fast.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_nn_transpose_bhwc_to_bwhc_q7.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_nn_transpose_bhwc_to_bwhc_q7.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_convolve_s8_sparse_CHW.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_convolve_s8_sparse_CHW.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_depthwise_conv_s8_sparse_CHW.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_depthwise_conv_s8_sparse_CHW.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -2,8 +2,8 @@
 model_config_path: 'toy_dmtp_config_/level_'
 
 # input image info
-image_path: 'input/9.npy'
-image_class: 9
+image_path: 'input/3.npy'
+image_class: 3
 
 # count of [downsample, mv2block, transformer]
 # assert dmt_count = 1 or dmt_count = 2
@@ -14,7 +14,7 @@ block: 2
 
 # force_sparse == False: tensors are sparse if sparse encoding reduce the size
 # force_sparse == true: all tensors are sparse
-force_sparse: False
+force_sparse: True
 
 
 # constant part

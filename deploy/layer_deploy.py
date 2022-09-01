@@ -1,6 +1,6 @@
 import numpy as np
 import yaml
-from utils import conv_data_to_sparse, approximate_float
+from utils import conv_data_to_sparse, approximate_float, get_addr_str
 from file_write import File_writer
 
 class Layer_deployer():
@@ -43,12 +43,13 @@ class Layer_deployer():
             if sum > self.max_size:
                 self.max_size = sum
         self.ori_max_size = self.max_size
+                
 
     def deploy_add(self, name:str, block_dict:dict, 
-            in_section_1:str, in_section_2:str, out_section:str, count:int):
+            in_addr_1:int, in_addr_2:int, out_addr:int, count:int):
         
         # init
-        param_list = [in_section_1, in_section_2]
+        param_list = [get_addr_str(in_addr_1), get_addr_str(in_addr_2)]
 
         # quant param
         M1 = block_dict[name + 'M1']
@@ -62,14 +63,14 @@ class Layer_deployer():
         
         # func call
         param_list.extend([qi1_offset, qi1_mult, qi1_shift, qi2_offset, qi2_mult, qi2_shift,
-            0, out_section, qo_offset, 0x7fffffff, 0, -128, 127, count])
+            0, get_addr_str(out_addr), qo_offset, 0x7fffffff, 0, -128, 127, count])
         self.file_writer.write_func_call('arm_elementwise_add_s8_with_neg', param_list)
 
         self.file_writer.write_extime('add')
 
 
     def deploy_conv(self, name:str, block_dict:dict, is_sparse:bool, is_depthwise:bool, 
-            in_section:str, out_section:str):
+            in_addr:int, out_addr:int):
 
         # init
         param_list = ['&ctx']
@@ -77,7 +78,7 @@ class Layer_deployer():
             param_list.append('&dw_conv_params')
         else:
             param_list.append('&conv_params')
-        param_list.extend(['&c_quant_params', '&input_dims', in_section])
+        param_list.extend(['&c_quant_params', '&input_dims', get_addr_str(in_addr)])
 
         # weight operation
         weight = block_dict[name + 'conv_module.weight']
@@ -156,7 +157,7 @@ class Layer_deployer():
         
 
         # output operation and parse conv params
-        param_list.extend(['&output_dims', out_section])
+        param_list.extend(['&output_dims', get_addr_str(out_addr)])
         self.conv_dict['activation.max'] = 127
         self.conv_dict['activation.min'] = -128
         # notice the input offset is negative zero point
@@ -187,7 +188,7 @@ class Layer_deployer():
 
         if (is_sparse):
             param_list.append(weight.size)
-
+        
         # function call generate
         func_name = 'arm_'
         if (is_depthwise):
@@ -204,11 +205,11 @@ class Layer_deployer():
 
 
     def deploy_linear(self, name:str, block_dict:dict, is_sparse:bool,
-            in_section:str, out_section:str):
+            in_addr:int, out_addr:int):
 
         # init
         param_list = ['&ctx', '&fc_params', '&t_quant_params', '&input_dims', 
-            in_section]
+            get_addr_str(in_addr)]
         
         # weight operation
         weight = block_dict[name + 'fc_module.weight']
@@ -235,7 +236,7 @@ class Layer_deployer():
         
 
         # output operation and parsefc params
-        param_list.extend(['&output_dims', out_section])
+        param_list.extend(['&output_dims', get_addr_str(out_addr)])
         self.fc_dict['activation.max'] = 127
         self.fc_dict['activation.min'] = -128
         # notice the input offset is negative zero point
@@ -269,10 +270,10 @@ class Layer_deployer():
 
 
     def deploy_pooling(self, name:str, block_dict:dict, is_avg:bool,
-            in_section:str, out_section:str):
+            in_addr:int, out_addr:int):
 
         # init
-        param_list = ['&ctx', '&pool_params', '&input_dims', in_section, 
+        param_list = ['&ctx', '&pool_params', '&input_dims', get_addr_str(in_addr), 
                 '&filter_dims', '&output_dims']
         
         self.file_writer.write_param_parser('input_dims', self.input_dict)
@@ -299,7 +300,7 @@ class Layer_deployer():
             qo_scale = block_dict[name + 'qi.scale']
             
         mult, shift = approximate_float(qi_scale / qo_scale)
-        param_list.extend([mult, shift, out_section])
+        param_list.extend([mult, shift, get_addr_str(out_addr)])
 
         # func call
         func_name = 'arm_'
@@ -313,10 +314,10 @@ class Layer_deployer():
 
 
     def deploy_matmul(self, name:str, block_dict, dim_b:int, dim_lr:int, dim_lc:int,
-            dim_rc:int, is_trans:bool, in_section_1:str, in_section_2:str, out_section:str):
+            dim_rc:int, is_trans:bool, in_addr_1:int, in_addr_2:int, out_addr:int):
         
         # init
-        param_list = [in_section_1, in_section_2, 'NULL', out_section]
+        param_list = [get_addr_str(in_addr_1), get_addr_str(in_addr_2), 'NULL', get_addr_str(out_addr)]
         if (not is_trans):
             param_list.insert(0, '&ctx')
             if (4 * dim_rc > self.max_buf_size):
@@ -346,7 +347,7 @@ class Layer_deployer():
 
 
     def deploy_norm(self, name:str, block_dict:dict, dim_b:int, dim_c:int, 
-            in_section:str, out_section:str):
+            in_addr:int, out_addr:int):
 
         # init
         param_list = ['&ctx', '&norm_params', '&t_quant_params', dim_b, dim_c]
@@ -378,26 +379,26 @@ class Layer_deployer():
         self.t_quant_dict['shift'] = shift
         self.file_writer.write_param_parser('t_quant_params', self.t_quant_dict)
 
-        param_list.extend([in_section, out_section])
+        param_list.extend([get_addr_str(in_addr), get_addr_str(out_addr)])
         self.file_writer.write_func_call('arm_nn_layernorm_s8', param_list)
 
         self.counter += 1
         self.file_writer.write_extime('norm')
 
 
-    def deploy_transpose(self, dim_b:int, dim_n:int, dim_c:int,
-            input_section:str, output_section:str):
+    def deploy_transpose(self, dim_b:int, dim_h:int, dim_w:int, dim_c:int,
+            in_addr:int, out_addr:int):
 
-        param_list = [dim_b, dim_n, dim_c, input_section, output_section]
-        self.file_writer.write_func_call('arm_nn_transpose_bnc_to_nbc_q7', param_list)
+        param_list = [dim_b, dim_h, dim_w, dim_c, get_addr_str(in_addr), get_addr_str(out_addr)]
+        self.file_writer.write_func_call('arm_nn_transpose_bhwc_to_bwhc_q7', param_list)
         self.file_writer.write_extime('trans')
 
 
     def deploy_softmax(self, name:str, block_dict, dim_b:int, dim_c:int,
-            in_section:str, out_section:str):
+            in_addr:int, out_addr:int):
 
         # init
-        param_list = [in_section, dim_b, dim_c]
+        param_list = ['&ctx', get_addr_str(in_addr), dim_b, dim_c]
 
         # input quant
         qi_scale = block_dict[name + 'qi.scale']
@@ -405,10 +406,13 @@ class Layer_deployer():
         qi_scale = min(qi_scale * (1 << (31 - softmax_input_integer_bits)),
                                    (1 << 31) - 1)
         qi_mult, qi_shift = approximate_float(qi_scale)
+        
+        if (256 * 4 + 256 > self.max_buf_size):
+            self.max_buf_size = 256 * 4 + 256
 
         param_list.extend([qi_mult, qi_shift, -248, 
-                out_section])
-        self.file_writer.write_func_call('arm_softmax_s8', param_list)
+                get_addr_str(out_addr)])
+        self.file_writer.write_func_call('arm_softmax_s8_fast', param_list)
 
         self.file_writer.write_extime('softmax')
 

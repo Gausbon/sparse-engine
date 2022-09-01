@@ -2,6 +2,22 @@ import numpy as np
 # for the sparse encode algorithm, please check the readme.md
 
 
+def get_addr_str (addr:int):
+    if (addr == 0):
+        return 'section'
+    else:
+        return '&section[' + str(addr) + ']'
+
+'''
+def get_sparsity(M):
+    M_flatten = M.flatten()
+    zero_count = 0
+    for item in M_flatten:
+        if (item == 0):
+            zero_count += 1
+    print(zero_count / M_flatten.size)
+'''
+
 def approximate_float(M):
     significand, shift = np.frexp(M)
     significand_q31 = np.round(significand * (1 << 31))
@@ -13,9 +29,10 @@ def approximate_float(M):
 
 
 def conv_data_to_sparse(input, block, force_sparse):
+    # get_sparsity(input)
     output = conv_data_to_sparse_encode_1(input, block)
-    print('out: ' + str(output.size))
-    print('in: ' + str(input.size))
+    # print('in: ' + str(input.size))
+    # print('out: ' + str(output.size))
     if (force_sparse or output.size < input.size):
         return output, True
     else:
