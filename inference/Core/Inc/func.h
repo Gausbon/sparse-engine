@@ -50,7 +50,7 @@ arm_cmsis_nn_status arm_nn_batch_mat_mult_s8(const cmsis_nn_context *ctx,
                                             const int32_t activation_max);
 
 
-arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
+arm_status arm_layernorm_s8 (const cmsis_nn_context *ctx,
                            const cmsis_nn_layernorm_params *layernorm_params,
                            const cmsis_nn_per_tensor_quant_params *quant_params,
                            const int32_t dim_b,
@@ -73,38 +73,6 @@ void arm_nn_output_per_channel (   const int32_t start_channel,
                                 const int32_t *shift_data,
                                 const q31_t *input_data,
                                 q7_t *output_data);
-
-
-void arm_nn_sparse_decode_4d(       const int32_t block,
-                                    const int32_t last_in_ch,
-                                    const int32_t last_h,
-                                    const int32_t last_w,
-                                    const int32_t last_out_ch,
-                                    const int32_t input_ch,
-                                    const int32_t kernel_x,
-                                    const int32_t kernel_y,
-                                    const q7_t **filter_data,
-                                    int32_t *cur_in_ch,
-                                    int32_t *cur_h,
-                                    int32_t *cur_w,
-                                    int32_t *cur_out_ch,
-                                    int32_t *mat_flag,
-                                    int32_t *cnt,
-                                    int32_t *block_cnt,
-                                    q7_t *cur_val);
-
-
-void arm_nn_sparse_decode_2d(       const int32_t block,
-                                    const int32_t last_in_ch,
-                                    const int32_t last_out_ch,
-                                    const int32_t input_ch,
-                                    const q7_t **filter_data,
-                                    int32_t *cur_in_ch,
-                                    int32_t *cur_out_ch,
-                                    int32_t *mat_flag,
-                                    int32_t *cnt,
-                                    int32_t *block_cnt,
-                                    q7_t *cur_val);
 
 
 arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,

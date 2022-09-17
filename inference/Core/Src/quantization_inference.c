@@ -330,7 +330,7 @@ int quantization_inference(void) {
     t_quant_params.multiplier=2034313600;
     t_quant_params.shift=-9;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_11,bias_11,section,section);
+    arm_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_11,bias_11,section,section);
 
     end = HAL_GetTick();
     norm_time += (end - start);
@@ -426,7 +426,7 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=1840683008;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_14,bias_14,section,section);
+    arm_layernorm_s8(&ctx,&norm_params,&t_quant_params,256,96,weight_14,bias_14,section,section);
 
     end = HAL_GetTick();
     norm_time += (end - start);
@@ -715,7 +715,7 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=1128445824;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_27,bias_27,section,section);
+    arm_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_27,bias_27,section,section);
 
     end = HAL_GetTick();
     norm_time += (end - start);
@@ -808,7 +808,7 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1131436544;
     t_quant_params.shift=-8;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_30,bias_30,section,section);
+    arm_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_30,bias_30,section,section);
 
     end = HAL_GetTick();
     norm_time += (end - start);
@@ -955,7 +955,7 @@ int quantization_inference(void) {
     t_quant_params.multiplier=1164345984;
     t_quant_params.shift=-8;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_37,bias_37,section,section);
+    arm_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_37,bias_37,section,section);
 
     end = HAL_GetTick();
     norm_time += (end - start);
@@ -1048,7 +1048,7 @@ int quantization_inference(void) {
 
     t_quant_params.multiplier=1934036736;
 
-    arm_nn_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_40,bias_40,section,section);
+    arm_layernorm_s8(&ctx,&norm_params,&t_quant_params,64,128,weight_40,bias_40,section,section);
 
     end = HAL_GetTick();
     norm_time += (end - start);

@@ -380,7 +380,7 @@ class Layer_deployer():
         self.file_writer.write_param_parser('t_quant_params', self.t_quant_dict)
 
         param_list.extend([get_addr_str(in_addr), get_addr_str(out_addr)])
-        self.file_writer.write_func_call('arm_nn_layernorm_s8', param_list)
+        self.file_writer.write_func_call('arm_layernorm_s8', param_list)
 
         self.counter += 1
         self.file_writer.write_extime('norm')

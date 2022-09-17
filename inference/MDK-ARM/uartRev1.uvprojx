@@ -448,11 +448,6 @@
               <FilePath>..\Core\Src\cmsis_append\arm_nn_batch_mat_mult_s8.c</FilePath>
             </File>
             <File>
-              <FileName>arm_nn_layernorm_s8.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\cmsis_append\arm_nn_layernorm_s8.c</FilePath>
-            </File>
-            <File>
               <FileName>arm_nn_output_per_channel.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_nn_output_per_channel.c</FilePath>
@@ -461,11 +456,6 @@
               <FileName>arm_nn_softmax_common_s8.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_nn_softmax_common_s8.c</FilePath>
-            </File>
-            <File>
-              <FileName>arm_nn_sparse_decode.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\cmsis_append\arm_nn_sparse_decode.c</FilePath>
             </File>
             <File>
               <FileName>arm_pool_s8_with_quantization.c</FileName>
@@ -488,14 +478,9 @@
               <FilePath>..\Core\Src\cmsis_append\arm_nn_transpose_bhwc_to_bwhc_q7.c</FilePath>
             </File>
             <File>
-              <FileName>arm_convolve_s8_sparse_CHW.c</FileName>
+              <FileName>arm_layernorm_s8.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Core\Src\cmsis_append\arm_convolve_s8_sparse_CHW.c</FilePath>
-            </File>
-            <File>
-              <FileName>arm_depthwise_conv_s8_sparse_CHW.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\cmsis_append\arm_depthwise_conv_s8_sparse_CHW.c</FilePath>
+              <FilePath>..\Core\Src\cmsis_append\arm_layernorm_s8.c</FilePath>
             </File>
           </Files>
         </Group>

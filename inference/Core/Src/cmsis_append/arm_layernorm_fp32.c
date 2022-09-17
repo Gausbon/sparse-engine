@@ -82,7 +82,7 @@ adj:
 }
 
 
-arm_status arm_nn_layernorm_s8 (const cmsis_nn_context *ctx,
+arm_status arm_layernorm_s8 (const cmsis_nn_context *ctx,
                            const cmsis_nn_layernorm_params *layernorm_params,
                            const cmsis_nn_per_tensor_quant_params *quant_params,
                            const int32_t dim_b,

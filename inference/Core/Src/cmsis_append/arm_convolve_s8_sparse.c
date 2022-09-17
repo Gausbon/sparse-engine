@@ -187,13 +187,13 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
     int32_t stride_y_size = stride_y * input_x * input_ch;
     int32_t stride_x_size = stride_x * input_ch;
     
-    int32_t cnt;
     int32_t block_cnt = 0;
 
     for (int32_t i_batch = 0; i_batch < batch; ++i_batch) {
         memset(buffer, 0, sizeof(q31_t) * output_count);
         
         const q7_t *filter_ptr = filter_data;
+        const q7_t *end_ptr = filter_ptr + input_count;
         const q7_t *in_ptr = &input_data[i_batch * input_x * input_y * input_ch];
         q7_t *out_ptr = &output_data[i_batch * output_x * output_y * output_ch];
 
@@ -205,21 +205,42 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
 
         double_flag = 0;
         mat_flag = 0;
-        cnt = input_count;
         block_cnt = 0;
         
-        while (cnt) {
+        while (filter_ptr < end_ptr) {
             // decode procedure
-            arm_nn_sparse_decode_4d(
-                BLOCK,
-                last_in_ch, last_h,
-                last_w, last_out_ch,
-                input_ch, kernel_x,
-                kernel_y, &filter_ptr,
-                &cur_in_ch, &cur_h,
-                &cur_w, &cur_out_ch,
-                &mat_flag, &cnt,
-                &block_cnt, &cur_val);
+            cur_out_ch = last_out_ch;
+            cur_h = last_h;
+            cur_w = last_w;
+            if (block_cnt == 0) {
+                cur_in_ch = (*filter_ptr++) + last_in_ch + 128;
+                cur_val = (*filter_ptr++);
+
+                if (cur_val == 0) {
+                    block_cnt = BLOCK - 1;
+                }
+            } else {
+                cur_in_ch = last_in_ch + 1;
+                cur_val = (*filter_ptr++);
+            }
+
+            if (++block_cnt >= BLOCK) {
+                block_cnt = 0;
+            }
+
+            while (cur_in_ch >= input_ch) {
+                ++cur_w;
+                cur_in_ch -= input_ch;
+                while (cur_w >= kernel_x) {
+                    ++cur_h;
+                    cur_w -= kernel_x;
+                    while (cur_h >= kernel_y) {
+                        ++cur_out_ch;
+                        cur_h -= kernel_y;
+                        mat_flag = 1;
+                    }
+                }
+            }
             
             if (mat_flag) {   
                 // change the output channel, last output channel conv is done

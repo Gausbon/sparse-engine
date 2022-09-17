@@ -1,5 +1,5 @@
 # full model_config_path: ../TinySPOS/configs/{model_config_path}/quant_dmtp_single.yml
-model_config_path: 'toy_dmtp_config_/level_'
+model_config_path: 'toy_dmtp_config_/block_2'
 
 # input image info
 image_path: 'input/3.npy'
@@ -14,7 +14,7 @@ block: 2
 
 # force_sparse == False: tensors are sparse if sparse encoding reduce the size
 # force_sparse == true: all tensors are sparse
-force_sparse: True
+force_sparse: False
 
 
 # constant part
