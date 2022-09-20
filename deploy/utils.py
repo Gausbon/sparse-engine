@@ -28,12 +28,14 @@ def approximate_float(M):
     return significand_q31, shift
 
 
-def conv_data_to_sparse(input, block, force_sparse):
+def conv_data_to_sparse(input, block, sparse_choice):
     # get_sparsity(input)
+    if (sparse_choice == 0):
+        return input, False
     output = conv_data_to_sparse_encode_1(input, block)
     # print('in: ' + str(input.size))
     # print('out: ' + str(output.size))
-    if (force_sparse or output.size < input.size):
+    if (sparse_choice == 1 or output.size < input.size):
         return output, True
     else:
         return input, False

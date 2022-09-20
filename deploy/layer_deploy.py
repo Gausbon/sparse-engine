@@ -28,7 +28,7 @@ class Layer_deployer():
         # block counter for conv and linear
         self.counter = 0
 
-        self.force_sparse = self.config['force_sparse']
+        self.sparse_choice = self.config['sparse_choice']
         self.block = self.config['block']
         
         # dynamic size
@@ -118,10 +118,10 @@ class Layer_deployer():
         # recheck the sparse encode 
         if (is_sparse):
             if (not is_depthwise):
-                weight, is_sparse = conv_data_to_sparse(weight, self.block, self.force_sparse)
+                weight, is_sparse = conv_data_to_sparse(weight, self.block, self.sparse_choice)
             else:
                 # dw sparse conv use block 3 at w direction
-                weight, is_sparse = conv_data_to_sparse(weight, 3, self.force_sparse)
+                weight, is_sparse = conv_data_to_sparse(weight, 3, self.sparse_choice)
             
             # this branch goes to dwconv:
             # should be sparse, but after sparse encode the tensor got larger
@@ -195,7 +195,7 @@ class Layer_deployer():
             func_name = func_name + 'depthwise_conv_s8'
         else:
             func_name = func_name + 'convolve_s8'
-        
+
         if (is_sparse):
             func_name = func_name + '_sparse'
         self.file_writer.write_func_call(func_name, param_list)
@@ -215,7 +215,7 @@ class Layer_deployer():
         weight = block_dict[name + 'fc_module.weight']
         weight_shape = weight.shape
         if (is_sparse):
-            weight, is_sparse = conv_data_to_sparse(weight, self.block, self.force_sparse)
+            weight, is_sparse = conv_data_to_sparse(weight, self.block, self.sparse_choice)
         weight_name = 'weight_' + str(self.counter)
         param_list.extend(['&filter_dims', weight_name])
         self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')

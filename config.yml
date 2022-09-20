@@ -7,15 +7,15 @@ image_class: 3
 
 # count of [downsample, mv2block, transformer]
 # assert dmt_count = 1 or dmt_count = 2
-dmt_count: 2
+dmt_count: 1
 
 # block size
 block: 2
 
-# force_sparse == False: tensors are sparse if sparse encoding reduce the size
-# force_sparse == true: all tensors are sparse
-force_sparse: False
-
+# sparse_choice == 0: force dense
+# sparse_choice == 1: force sparse
+# sparse_choice == 2: self adoption
+sparse_choice: 2
 
 # constant part
 # full tensor path: ../TinySPOS/{tensor_path}

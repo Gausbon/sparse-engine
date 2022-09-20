@@ -105,6 +105,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  // layernorm_test();
   quantization_inference();
   while (1)
   {

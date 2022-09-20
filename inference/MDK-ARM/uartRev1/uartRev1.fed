@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Sat Sep 17 21:55:03 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Tue Sep 20 20:18:16 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -46,7 +46,6 @@ arm_convolve_1x1_HWC_q7_fast_nonsquare <= USED 0
 __asm___26_arm_convolve_1x1_s8_fast_c_0af6fe33____REV16 <= USED 0
 __asm___26_arm_convolve_1x1_s8_fast_c_0af6fe33____REVSH <= USED 0
 __asm___26_arm_convolve_1x1_s8_fast_c_0af6fe33____RRX <= USED 0
-arm_convolve_1x1_s8_fast <= USED 0
 arm_convolve_1x1_s8_fast_get_buffer_size <= USED 0
 ;FILE arm_convolve_fast_s16.o
 __asm___23_arm_convolve_fast_s16_c_52cfb9d3____REV16 <= USED 0
@@ -108,6 +107,7 @@ __asm___17_arm_convolve_s8_c_0431e2e9____RRX <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REV16 <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REVSH <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____RRX <= USED 0
+arm_convolve_s8_sparse_get_buffer_size <= USED 0
 ;FILE arm_convolve_wrapper_s16.o
 __asm___26_arm_convolve_wrapper_s16_c_0198abd5____REV16 <= USED 0
 __asm___26_arm_convolve_wrapper_s16_c_0198abd5____REVSH <= USED 0
@@ -144,6 +144,9 @@ arm_depthwise_conv_s8_opt_get_buffer_size <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____REV16 <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____REVSH <= USED 0
 __asm___30_arm_depthwise_conv_s8_sparse_c_30cffb26____RRX <= USED 0
+arm_depthwise_conv_s8_sparse <= USED 0
+arm_nn_dw_convolve_s8_double_sparse <= USED 0
+arm_nn_dw_convolve_s8_single_sparse <= USED 0
 ;FILE arm_depthwise_conv_u8_basic_ver1.o
 __asm___34_arm_depthwise_conv_u8_basic_ver1_c_55f7f530____REV16 <= USED 0
 __asm___34_arm_depthwise_conv_u8_basic_ver1_c_55f7f530____REVSH <= USED 0
@@ -325,7 +328,6 @@ __asm___31_arm_nn_mat_mult_kernel_s8_s16_c_ac2b9b7f____RRX <= USED 0
 __asm___25_arm_nn_mat_mult_nt_t_s8_c_5f688af7____REV16 <= USED 0
 __asm___25_arm_nn_mat_mult_nt_t_s8_c_5f688af7____REVSH <= USED 0
 __asm___25_arm_nn_mat_mult_nt_t_s8_c_5f688af7____RRX <= USED 0
-arm_nn_mat_mult_nt_t_s8 <= USED 0
 ;FILE arm_nn_mat_mult_s8.o
 __asm___20_arm_nn_mat_mult_s8_c_0e61ee37____REV16 <= USED 0
 __asm___20_arm_nn_mat_mult_s8_c_0e61ee37____REVSH <= USED 0

@@ -35,7 +35,7 @@ class Model_deployer(Layer_deployer):
         print('RAM size: ' + str(self.max_size))
         print('Image path: ' + str(self.config['image_path']))
         print('Image class: ' + str(self.image_class) + '\n')
-        print('Force sparse: ' + str(self.config['force_sparse']))
+        print('Sparse choice: ' + str(self.config['sparse_choice']))
         print('Block size: ' + str(self.config['block']))
         print('DMT count: ' + str(self.config['dmt_count']))
         print('-'*70)
@@ -251,7 +251,7 @@ class Model_deployer(Layer_deployer):
         # name: {*}mv2block{type}_{index} in mv2block
         # {*}mv2block_{index} in downsample
         type_name = name.split('_')[-2]
-        if (type_name.startswith('downsample')):
+        if (type_name.startswith('downsample') or type_name == 'mv2block'):
             config_list = [2, 2, is_sparse, input_size/2]
         elif (type_name.endswith('0')):
             config_list = [2, 1, True, input_size]
@@ -544,14 +544,21 @@ class Model_deployer(Layer_deployer):
 
 
     def dedploy_dmt(self, batch, downsample_list_dict, mv2block_list_dict, 
-            transformer_list_dict, d_sparse):
+            transformer_list_dict, d_sparse, dmt_count):
         for key, value in downsample_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
             key_list = key.split('_')
-            if (key_list[0].endswith('0')):
-                self.deploy_tokenizer(batch, key, value, d_sparse, self.size)
-            elif (key_list[0].endswith('1')):
-                self.deploy_mv2block(batch, key, value, d_sparse, self.size)
+            if (dmt_count == 2):
+                if (key_list[0].endswith('0')):
+                    self.deploy_tokenizer(batch, key, value, d_sparse, self.size)
+                elif (key_list[0].endswith('1')):
+                    self.deploy_mv2block(batch, key, value, d_sparse, self.size)
+            else:
+                if (key_list[-2] == 'tokenizer'):
+                    self.deploy_tokenizer(batch, key, value, d_sparse, self.size)
+                elif (key_list[-2] == 'mv2block'):
+                    self.deploy_mv2block(batch, key, value, d_sparse, self.size)
+
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
             self.size /= 2
             # print(self.file_writer.const_tensor_size)
@@ -589,12 +596,12 @@ class Model_deployer(Layer_deployer):
         # deploy quantization inference
         if (self.config['dmt_count'] == 1):
             self.dedploy_dmt(batch, self.downsample_list_dict, self.mv2block_list_dict, 
-                self.transformer_list_dict)
+                self.transformer_list_dict, False, 1)
         else:
             self.dedploy_dmt(batch, self.downsample_list_dict_1, self.mv2block_list_dict_1, 
-                self.transformer_list_dict_1, False)
+                self.transformer_list_dict_1, False, 2)
             self.dedploy_dmt(batch, self.downsample_list_dict_2, self.mv2block_list_dict_2, 
-                self.transformer_list_dict_2, True)
+                self.transformer_list_dict_2, True, 2)
 
         self.file_writer.writeln('// block: last conv', 'func')
         self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict,
