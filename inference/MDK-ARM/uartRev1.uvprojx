@@ -313,7 +313,7 @@
           <Cads>
             <interw>1</interw>
             <Optim>4</Optim>
-            <oTime>0</oTime>
+            <oTime>1</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
             <Strict>0</Strict>
@@ -326,7 +326,7 @@
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
             <uGnu>0</uGnu>
-            <useXO>0</useXO>
+            <useXO>1</useXO>
             <v6Lang>5</v6Lang>
             <v6LangP>3</v6LangP>
             <vShortEn>1</vShortEn>
@@ -481,6 +481,21 @@
               <FileName>arm_layernorm_s8.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_layernorm_s8.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_convolve_s8_sparse_CHW.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_convolve_s8_sparse_CHW.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_depthwise_conv_s8_sparse_CHW.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_depthwise_conv_s8_sparse_CHW.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_fully_connected_s8_sparse_CHW.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_fully_connected_s8_sparse_CHW.c</FilePath>
             </File>
           </Files>
         </Group>

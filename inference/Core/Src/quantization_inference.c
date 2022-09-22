@@ -152,7 +152,7 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 64; i++) { conv_shift_use[i] = shift_3[i]; }
 
-    arm_convolve_1x1_s8_fast(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_3,&bias_dims,bias_3,&output_dims,&section[212992]);
+    arm_convolve_s8(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_3,&bias_dims,bias_3,&output_dims,&section[212992]);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -191,7 +191,7 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 64; i++) { conv_shift_use[i] = shift_5[i]; }
 
-    arm_convolve_1x1_s8_fast(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_5,&bias_dims,bias_5,&output_dims,&section[212992]);
+    arm_convolve_s8(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_5,&bias_dims,bias_5,&output_dims,&section[212992]);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -217,7 +217,7 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 128; i++) { conv_shift_use[i] = shift_6[i]; }
 
-    arm_convolve_1x1_s8_fast(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_6,&bias_dims,bias_6,&output_dims,&section[180224]);
+    arm_convolve_s8(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_6,&bias_dims,bias_6,&output_dims,&section[180224]);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -255,7 +255,7 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 64; i++) { conv_shift_use[i] = shift_8[i]; }
 
-    arm_convolve_1x1_s8_fast(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_8,&bias_dims,bias_8,&output_dims,&section[196608]);
+    arm_convolve_s8(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_8,&bias_dims,bias_8,&output_dims,&section[196608]);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -309,7 +309,7 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 96; i++) { conv_shift_use[i] = shift_10[i]; }
 
-    arm_convolve_1x1_s8_fast(&ctx,&conv_params,&c_quant_params,&input_dims,&section[212992],&filter_dims,weight_10,&bias_dims,bias_10,&output_dims,section);
+    arm_convolve_s8(&ctx,&conv_params,&c_quant_params,&input_dims,&section[212992],&filter_dims,weight_10,&bias_dims,bias_10,&output_dims,section);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -510,7 +510,7 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 128; i++) { conv_shift_use[i] = shift_18[i]; }
 
-    arm_convolve_1x1_s8_fast(&ctx,&conv_params,&c_quant_params,&input_dims,&section[204800],&filter_dims,weight_18,&bias_dims,bias_18,&output_dims,section);
+    arm_convolve_s8(&ctx,&conv_params,&c_quant_params,&input_dims,&section[204800],&filter_dims,weight_18,&bias_dims,bias_18,&output_dims,section);
 
     end = HAL_GetTick();
     conv_time += (end - start);
@@ -534,11 +534,25 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 128; i++) { conv_shift_use[i] = shift_19[i]; }
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_19,&bias_dims,bias_19,&output_dims,&section[196608],88467);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,128,1,section,&section[196608]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_convolve_s8_sparse_1x1_CHW(&ctx,&conv_params,&c_quant_params,&input_dims,&section[196608],&filter_dims,weight_19,&bias_dims,bias_19,&output_dims,section,88467);
 
     end = HAL_GetTick();
     conv_time += (end - start);
     conv_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,128,256,1,section,&section[196608]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
 
@@ -554,11 +568,25 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 96; i++) { conv_shift_use[i] = shift_20[i]; }
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,&section[196608],&filter_dims,weight_20,&bias_dims,bias_20,&output_dims,section,7374);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,128,1,&section[196608],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_convolve_s8_sparse_1x1_CHW(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_20,&bias_dims,bias_20,&output_dims,&section[204800],7374);
 
     end = HAL_GetTick();
     conv_time += (end - start);
     conv_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,96,256,1,&section[204800],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
     memcpy(&section[204800],section,24576);
@@ -587,11 +615,25 @@ int quantization_inference(void) {
 
     output_dims.c=288;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_22,&bias_dims,NULL,&output_dims,&section[131072],16590);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,96,1,section,&section[180224]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_fully_connected_s8_sparse_CHW(&ctx,&fc_params,&t_quant_params,&input_dims,&section[180224],&filter_dims,weight_22,&bias_dims,NULL,&output_dims,section,16590);
 
     end = HAL_GetTick();
     linear_time += (end - start);
     linear_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,288,256,1,section,&section[131072]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
     arm_nn_transpose_bhwc_to_bwhc_q7(1,256,6,48,&section[131072],section);
@@ -641,11 +683,25 @@ int quantization_inference(void) {
 
     output_dims.c=96;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[180224],&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,section,5532);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,96,1,&section[180224],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_fully_connected_s8_sparse_CHW(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_23,&bias_dims,bias_23,&output_dims,&section[180224],5532);
 
     end = HAL_GetTick();
     linear_time += (end - start);
     linear_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,96,256,1,&section[180224],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
     arm_elementwise_add_s8_with_neg(section,&section[204800],17,2136739840,-1,128,1533058688,0,0,&section[24576],-75,2147483647,0,-128,127,24576);
@@ -681,11 +737,25 @@ int quantization_inference(void) {
 
     output_dims.c=128;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,&section[172032],7371);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,96,1,section,&section[180224]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_fully_connected_s8_sparse_CHW(&ctx,&fc_params,&t_quant_params,&input_dims,&section[180224],&filter_dims,weight_25,&bias_dims,bias_25,&output_dims,section,7371);
 
     end = HAL_GetTick();
     linear_time += (end - start);
     linear_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,128,256,1,section,&section[172032]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
     fc_params.input_offset=128;
@@ -699,11 +769,25 @@ int quantization_inference(void) {
 
     output_dims.c=96;
 
-    arm_fully_connected_s8_sparse(&ctx,&fc_params,&t_quant_params,&input_dims,&section[172032],&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,section,7371);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,128,1,&section[172032],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_fully_connected_s8_sparse_CHW(&ctx,&fc_params,&t_quant_params,&input_dims,section,&filter_dims,weight_26,&bias_dims,bias_26,&output_dims,&section[180224],7371);
 
     end = HAL_GetTick();
     linear_time += (end - start);
     linear_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,96,256,1,&section[180224],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
     arm_elementwise_add_s8_with_neg(section,&section[204800],-4,1082566272,0,40,1828365312,0,0,&section[24576],-32,2147483647,0,-128,127,24576);
@@ -730,11 +814,25 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 96; i++) { conv_shift_use[i] = shift_27[i]; }
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_27,&bias_dims,bias_27,&output_dims,&section[204800],49767);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,96,1,section,&section[204800]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_convolve_s8_sparse_1x1_CHW(&ctx,&conv_params,&c_quant_params,&input_dims,&section[204800],&filter_dims,weight_27,&bias_dims,bias_27,&output_dims,section,49767);
 
     end = HAL_GetTick();
     conv_time += (end - start);
     conv_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,96,256,1,section,&section[204800]);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
 
@@ -751,11 +849,25 @@ int quantization_inference(void) {
 
     for(int i = 0; i < 256; i++) { conv_shift_use[i] = shift_28[i]; }
 
-    arm_convolve_s8_sparse(&ctx,&conv_params,&c_quant_params,&input_dims,&section[204800],&filter_dims,weight_28,&bias_dims,bias_28,&output_dims,section,14748);
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,96,1,&section[204800],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
+    start = end;
+
+    arm_convolve_s8_sparse_1x1_CHW(&ctx,&conv_params,&c_quant_params,&input_dims,section,&filter_dims,weight_28,&bias_dims,bias_28,&output_dims,&section[163840],14748);
 
     end = HAL_GetTick();
     conv_time += (end - start);
     conv_count++;
+    start = end;
+
+    arm_nn_transpose_bhwc_to_bwhc_q7(1,256,256,1,&section[163840],section);
+
+    end = HAL_GetTick();
+    trans_time += (end - start);
+    trans_count++;
     start = end;
 
     printf("transformer0_1 finished\r\n");

@@ -70,7 +70,7 @@ class Layer_deployer():
 
 
     def deploy_conv(self, name:str, block_dict:dict, is_sparse:bool, is_depthwise:bool, 
-            in_addr:int, out_addr:int):
+            in_ptr:str, out_ptr:str, in_size:int, out_size:int):
 
         # init
         param_list = ['&ctx']
@@ -78,7 +78,6 @@ class Layer_deployer():
             param_list.append('&dw_conv_params')
         else:
             param_list.append('&conv_params')
-        param_list.extend(['&c_quant_params', '&input_dims', get_addr_str(in_addr)])
 
         # weight operation
         weight = block_dict[name + 'conv_module.weight']
@@ -129,6 +128,12 @@ class Layer_deployer():
                 weight = weight.transpose((1, 2, 3, 0))
                 self.input_dict['c'] = ori_shape[0]
 
+        if (is_sparse and self.conv_dict['stride.w'] == 1 and self.conv_dict['stride.h'] == 1
+            and in_size * 2 <= self.max_size and out_size * 2 <= self.max_size):
+            chw_trans = True
+        else:
+            chw_trans = False
+
         # record the buffer size
         if is_sparse:
             buf_size = sparse_buf_size
@@ -141,6 +146,12 @@ class Layer_deployer():
         self.file_writer.write_param_parser('input_dims', self.input_dict)
         self.file_writer.write_param_parser('filter_dims', self.filter_dict)
         self.file_writer.write_param_parser('output_dims', self.output_dict)
+
+        # get the input addr
+        if (chw_trans ^ (in_ptr == 'head')):
+            param_list.extend(['&c_quant_params', '&input_dims', get_addr_str(0)])
+        else:
+            param_list.extend(['&c_quant_params', '&input_dims', get_addr_str(self.max_size - in_size)])
 
         weight_name = 'weight_' + str(self.counter)
         param_list.extend(['&filter_dims', weight_name])
@@ -157,7 +168,13 @@ class Layer_deployer():
         
 
         # output operation and parse conv params
-        param_list.extend(['&output_dims', get_addr_str(out_addr)])
+        
+        # get the output addr
+        if (chw_trans ^ (out_ptr == 'head')):
+            param_list.extend(['&output_dims', get_addr_str(0)])
+        else:
+            param_list.extend(['&output_dims', get_addr_str(self.max_size - out_size)])
+        
         self.conv_dict['activation.max'] = 127
         self.conv_dict['activation.min'] = -128
         # notice the input offset is negative zero point
@@ -189,6 +206,16 @@ class Layer_deployer():
         if (is_sparse):
             param_list.append(weight.size)
         
+        
+        # transpose if sparse
+        if (chw_trans):
+            if (in_ptr == 'head'):
+                self.deploy_transpose(self.input_dict['n'], self.input_dict['h'] * self.input_dict['w'],
+                self.input_dict['c'], 1, 0, self.max_size - in_size)
+            else:
+                self.deploy_transpose(self.input_dict['n'], self.input_dict['h'] * self.input_dict['w'],
+                self.input_dict['c'], 1, self.max_size - in_size, 0)
+
         # function call generate
         func_name = 'arm_'
         if (is_depthwise):
@@ -198,18 +225,28 @@ class Layer_deployer():
 
         if (is_sparse):
             func_name = func_name + '_sparse'
+            if (chw_trans):
+                func_name = func_name + '_1x1_CHW'
         self.file_writer.write_func_call(func_name, param_list)
 
         self.counter += 1
         self.file_writer.write_extime('conv')
 
+        # transpose back if sparse
+        if (chw_trans):
+            if (out_ptr == 'head'):
+                self.deploy_transpose(self.input_dict['n'], self.output_dict['c'],
+                self.output_dict['h'] * self.output_dict['w'], 1, self.max_size - out_size, 0)
+            else:
+                self.deploy_transpose(self.input_dict['n'], self.output_dict['c'],
+                self.output_dict['h'] * self.output_dict['w'], 1, 0, self.max_size - out_size)
+
 
     def deploy_linear(self, name:str, block_dict:dict, is_sparse:bool,
-            in_addr:int, out_addr:int):
+            in_ptr:str, out_ptr:str, in_size:int, out_size:int):
 
         # init
-        param_list = ['&ctx', '&fc_params', '&t_quant_params', '&input_dims', 
-            get_addr_str(in_addr)]
+        param_list = ['&ctx', '&fc_params', '&t_quant_params', '&input_dims']
         
         # weight operation
         weight = block_dict[name + 'fc_module.weight']
@@ -217,6 +254,17 @@ class Layer_deployer():
         if (is_sparse):
             weight, is_sparse = conv_data_to_sparse(weight, self.block, self.sparse_choice)
         weight_name = 'weight_' + str(self.counter)
+
+        if (is_sparse and in_size * 2 < self.max_size and out_size * 2 < self.max_size):
+            chw_trans = True
+        else:
+            chw_trans = False
+
+        if (chw_trans ^ (in_ptr == 'head')):
+            param_list.append(get_addr_str(0))
+        else:
+            param_list.append(get_addr_str(self.max_size - in_size))
+
         param_list.extend(['&filter_dims', weight_name])
         self.file_writer.write_const_tensor(weight, weight_name, 'q7_t')
         
@@ -236,7 +284,12 @@ class Layer_deployer():
         
 
         # output operation and parsefc params
-        param_list.extend(['&output_dims', get_addr_str(out_addr)])
+        param_list.extend(['&output_dims'])
+        if (chw_trans ^ (out_ptr == 'head')):
+            param_list.append(get_addr_str(0))
+        else:
+            param_list.append(get_addr_str(self.max_size - out_size))
+
         self.fc_dict['activation.max'] = 127
         self.fc_dict['activation.min'] = -128
         # notice the input offset is negative zero point
@@ -259,14 +312,32 @@ class Layer_deployer():
         if (is_sparse):
             param_list.append(weight.size)
             
+        if (chw_trans):
+            if (in_ptr == 'head'):
+                self.deploy_transpose(1, self.input_dict['n'],
+                    self.filter_dict['n'], 1, 0, self.max_size - in_size)
+            else:
+                self.deploy_transpose(1, self.input_dict['n'],
+                    self.filter_dict['n'], 1, self.max_size - in_size, 0)
+
         # function call generate
         func_name = 'arm_fully_connected_s8'
         if (is_sparse):
             func_name = func_name + '_sparse'
+            if (chw_trans):
+                func_name = func_name + '_CHW'
         self.file_writer.write_func_call(func_name, param_list)
 
         self.counter += 1
         self.file_writer.write_extime('linear')
+
+        if (chw_trans):
+            if (out_ptr == 'head'):
+                self.deploy_transpose(1, self.output_dict['c'],
+                    self.input_dict['n'], 1, self.max_size - out_size, 0)
+            else:
+                self.deploy_transpose(1, self.output_dict['c'],
+                    self.input_dict['n'], 1, 0, self.max_size - out_size)
 
 
     def deploy_pooling(self, name:str, block_dict:dict, is_avg:bool,

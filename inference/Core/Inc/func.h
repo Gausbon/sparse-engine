@@ -75,6 +75,20 @@ void arm_nn_output_per_channel (   const int32_t start_channel,
                                 q7_t *output_data);
 
 
+void arm_nn_output_per_channel_CHW (   const int32_t start_channel,
+                                const int32_t end_channel,
+                                const int32_t out_offset,
+                                const int32_t output_count,
+                                const int32_t output_ch,
+                                const int32_t act_min,
+                                const int32_t act_max,
+                                const int32_t *bias_data,
+                                const int32_t *mult_data,
+                                const int32_t *shift_data,
+                                const q31_t *input_data,
+                                q7_t *output_data);
+
+
 arm_cmsis_nn_status arm_elementwise_add_s8_with_neg(const int8_t *input_1_vect,
                                            const int8_t *input_2_vect,
                                            const int32_t input_1_offset,
@@ -141,7 +155,8 @@ arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
                            q7_t *output_data,
                            const q31_t input_count);
 
-arm_status arm_convolve_s8_sparse_CHW (const cmsis_nn_context *ctx,
+
+arm_status arm_convolve_s8_sparse_1x1_CHW (const cmsis_nn_context *ctx,
                            const cmsis_nn_conv_params *conv_params,
                            const cmsis_nn_per_channel_quant_params *quant_params,
                            const cmsis_nn_dims *input_dims,
@@ -155,7 +170,7 @@ arm_status arm_convolve_s8_sparse_CHW (const cmsis_nn_context *ctx,
                            const q31_t input_count);
 
                           
-arm_status arm_depthwise_conv_s8_sparse_CHW (const cmsis_nn_context *ctx,
+arm_status arm_depthwise_conv_s8_sparse_1x1_CHW (const cmsis_nn_context *ctx,
                            const cmsis_nn_dw_conv_params *dw_conv_params, 
                            const cmsis_nn_per_channel_quant_params *quant_params,
                            const cmsis_nn_dims *input_dims,
@@ -172,6 +187,20 @@ int32_t arm_fc_s8_sparse_get_buffer_size(const cmsis_nn_dims *output_dims);
 
 
 arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
+                            const cmsis_nn_fc_params *fc_params,
+                            const cmsis_nn_per_tensor_quant_params *quant_params,
+                            const cmsis_nn_dims *input_dims,
+                            const q7_t *input_data,
+                            const cmsis_nn_dims *filter_dims,
+                            const q7_t *filter_data,
+                            const cmsis_nn_dims *bias_dims,
+                            const int32_t *bias_data,
+                            const cmsis_nn_dims *output_dims,
+                            q7_t *output_data,
+                            const int32_t input_count);
+
+
+arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
                             const cmsis_nn_fc_params *fc_params,
                             const cmsis_nn_per_tensor_quant_params *quant_params,
                             const cmsis_nn_dims *input_dims,
