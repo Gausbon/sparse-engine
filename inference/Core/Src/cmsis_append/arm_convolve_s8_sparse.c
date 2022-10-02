@@ -1,5 +1,4 @@
 #include "func.h"
-#include "data.h"
 #include "arm_nnfunctions.h"
 #include "arm_nnsupportfunctions.h"
 int32_t arm_convolve_s8_sparse_get_buffer_size (const cmsis_nn_dims *output_dims)
@@ -144,7 +143,8 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
                            const int32_t *bias_data,
                            const cmsis_nn_dims *output_dims,
                            q7_t *output_data,
-                           const q31_t input_count)
+                           const q31_t input_count,
+                           const int32_t block)
 {
     (void)bias_dims;
 	  
@@ -217,14 +217,14 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
                 cur_val = (*filter_ptr++);
 
                 if (cur_val == 0) {
-                    block_cnt = BLOCK - 1;
+                    block_cnt = block - 1;
                 }
             } else {
                 cur_in_ch = last_in_ch + 1;
                 cur_val = (*filter_ptr++);
             }
 
-            if (++block_cnt >= BLOCK) {
+            if (++block_cnt >= block) {
                 block_cnt = 0;
             }
 

@@ -85,7 +85,7 @@ class File_writer():
         self.func_file.write('    start = end;\n\n')
 
 
-    def write_init(self, image:ndarray, block:int, max_size:int):
+    def write_init(self, image:ndarray, max_size:int):
         self.init_pos = self.func_file.tell()
 
         self.func_file.write('    static q7_t buf[0]={0};\n')
@@ -100,8 +100,7 @@ class File_writer():
         self.func_file.write('    ctx.buf = buf;\n\n')
         self.func_file.write('    memcpy(&section,&image,3072);\n\n')
         self.func_file.write('    start = HAL_GetTick();\n\n')
-
-        self.data_file.write('# define BLOCK ' + str(block) + '\n')
+        
         self.write_const_tensor(image, 'image', 'q7_t')
 
     def write_end(self, image_class:int, buf_size:int, quant_size:int):

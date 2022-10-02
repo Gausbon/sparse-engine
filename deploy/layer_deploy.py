@@ -29,7 +29,6 @@ class Layer_deployer():
         self.counter = 0
 
         self.sparse_choice = self.config['sparse_choice']
-        self.block = self.config['block']
         
         # dynamic size
         self.max_quant_size = 0
@@ -70,7 +69,7 @@ class Layer_deployer():
 
 
     def deploy_conv(self, name:str, block_dict:dict, is_sparse:bool, is_depthwise:bool, 
-            in_ptr:str, out_ptr:str, in_size:int, out_size:int):
+            in_ptr:str, out_ptr:str, in_size:int, out_size:int, block_size:int):
 
         # init
         param_list = ['&ctx']
@@ -117,7 +116,7 @@ class Layer_deployer():
         # recheck the sparse encode 
         if (is_sparse):
             if (not is_depthwise):
-                weight, is_sparse = conv_data_to_sparse(weight, self.block, self.sparse_choice)
+                weight, is_sparse = conv_data_to_sparse(weight, block_size, self.sparse_choice)
             else:
                 # dw sparse conv use block 3 at w direction
                 weight, is_sparse = conv_data_to_sparse(weight, 3, self.sparse_choice)
@@ -205,16 +204,22 @@ class Layer_deployer():
 
         if (is_sparse):
             param_list.append(weight.size)
+            if (not is_depthwise):
+                param_list.append(block_size)
         
         
         # transpose if sparse
         if (chw_trans):
+            if (is_depthwise):
+                channel = self.output_dict['c']
+            else:
+                channel = self.input_dict['c']
             if (in_ptr == 'head'):
                 self.deploy_transpose(self.input_dict['n'], self.input_dict['h'] * self.input_dict['w'],
-                self.input_dict['c'], 1, 0, self.max_size - in_size)
+                channel, 1, 0, self.max_size - in_size)
             else:
                 self.deploy_transpose(self.input_dict['n'], self.input_dict['h'] * self.input_dict['w'],
-                self.input_dict['c'], 1, self.max_size - in_size, 0)
+                channel, 1, self.max_size - in_size, 0)
 
         # function call generate
         func_name = 'arm_'
@@ -243,7 +248,7 @@ class Layer_deployer():
 
 
     def deploy_linear(self, name:str, block_dict:dict, is_sparse:bool,
-            in_ptr:str, out_ptr:str, in_size:int, out_size:int):
+            in_ptr:str, out_ptr:str, in_size:int, out_size:int, block_size:int):
 
         # init
         param_list = ['&ctx', '&fc_params', '&t_quant_params', '&input_dims']
@@ -252,7 +257,7 @@ class Layer_deployer():
         weight = block_dict[name + 'fc_module.weight']
         weight_shape = weight.shape
         if (is_sparse):
-            weight, is_sparse = conv_data_to_sparse(weight, self.block, self.sparse_choice)
+            weight, is_sparse = conv_data_to_sparse(weight, block_size, self.sparse_choice)
         weight_name = 'weight_' + str(self.counter)
 
         if (is_sparse and in_size * 2 < self.max_size and out_size * 2 < self.max_size):
@@ -311,6 +316,7 @@ class Layer_deployer():
 
         if (is_sparse):
             param_list.append(weight.size)
+            param_list.append(block_size)
             
         if (chw_trans):
             if (in_ptr == 'head'):

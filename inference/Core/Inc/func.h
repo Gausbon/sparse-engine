@@ -139,7 +139,8 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
                            const int32_t *bias_data,
                            const cmsis_nn_dims *output_dims,
                            q7_t *output_data,
-                           const q31_t input_count);
+                           const q31_t input_count,
+                           const int32_t block);
 
                           
 arm_status arm_depthwise_conv_s8_sparse (const cmsis_nn_context *ctx,
@@ -167,7 +168,8 @@ arm_status arm_convolve_s8_sparse_1x1_CHW (const cmsis_nn_context *ctx,
                            const int32_t *bias_data,
                            const cmsis_nn_dims *output_dims,
                            q7_t *output_data,
-                           const q31_t input_count);
+                           const q31_t input_count,
+                           const int32_t block);
 
                           
 arm_status arm_depthwise_conv_s8_sparse_1x1_CHW (const cmsis_nn_context *ctx,
@@ -197,7 +199,8 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
                             const int32_t *bias_data,
                             const cmsis_nn_dims *output_dims,
                             q7_t *output_data,
-                            const int32_t input_count);
+                            const int32_t input_count,
+                            const int32_t block);
 
 
 arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
@@ -211,7 +214,8 @@ arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
                             const int32_t *bias_data,
                             const cmsis_nn_dims *output_dims,
                             q7_t *output_data,
-                            const int32_t input_count);
+                            const int32_t input_count,
+                            const int32_t block);
 
 
 arm_status arm_avgpool_s8_with_quantization (const cmsis_nn_context *ctx,

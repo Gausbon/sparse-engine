@@ -8,19 +8,7 @@ class Model_deployer(Layer_deployer):
         super().__init__()
 
         # dict list
-        self.dmt_count = self.config['dmt_count']
-        assert(self.dmt_count == 1 or self.dmt_count == 2)
-        if (self.dmt_count == 1):
-            self.downsample_list_dict = {}
-            self.mv2block_list_dict = {}
-            self.transformer_list_dict = {}
-        else:
-            self.downsample_list_dict_1 = {}
-            self.downsample_list_dict_2 = {}
-            self.mv2block_list_dict_1 = {}
-            self.mv2block_list_dict_2 = {}
-            self.transformer_list_dict_1 = {}
-            self.transformer_list_dict_2 = {}
+        self.parse_initial()
 
         self.last_conv_dict = {}
         self.pooling_list_dict = {}
@@ -36,14 +24,48 @@ class Model_deployer(Layer_deployer):
         print('Image path: ' + str(self.config['image_path']))
         print('Image class: ' + str(self.image_class) + '\n')
         print('Sparse choice: ' + str(self.config['sparse_choice']))
-        print('Block size: ' + str(self.config['block']))
-        print('DMT count: ' + str(self.config['dmt_count']))
+        print('DMT count: ' + str(self.dmt_count))
         print('-'*70)
 
 
+    def parse_initial(self):
+        # initial dmt count
+        tensor_dir = os.listdir(self.tensor_path)
+        for file in tensor_dir:
+            name_list = file.split('.')
+            if (name_list[0].startswith("downsample")):
+                if (name_list[0].endswith('one') or name_list[0].endswith('two')):
+                    self.dmt_count = 2
+                    self.downsample_list_dict_1 = {}
+                    self.downsample_list_dict_2 = {}
+                    self.mv2block_list_dict_1 = {}
+                    self.mv2block_list_dict_2 = {}
+                    self.transformer_list_dict_1 = {}
+                    self.transformer_list_dict_2 = {}
+                else:
+                    self.dmt_count = 1
+                    self.downsample_list_dict = {}
+                    self.mv2block_list_dict = {}
+                    self.transformer_list_dict = {}
+                break
+
+        # initial block
+        pruning_config_path = '../TinySPOS/configs/' + self.config['model_config_path'] + \
+                            '/pruning_dmtp_single.yml'
+        with open(pruning_config_path, 'r') as file:
+            pruning_config = yaml.load(file, Loader=yaml.FullLoader)
+
+        pruning_config_inner = pruning_config['pruning_config']
+        self.block_size_list = []
+        for item in pruning_config_inner:
+            if ('block_size' in item.keys()):
+                self.block_size_list.append(item['block_size'])
+            else:
+                self.block_size_list.append(1)
+
     def load_tensor(self):
         tensor_dir = os.listdir(self.tensor_path)
-        
+
         for file in tensor_dir:
             name_list = file.split('.')
             if (name_list[0].startswith("downsample")):
@@ -145,7 +167,7 @@ class Model_deployer(Layer_deployer):
 
 
     def deploy_self_attn(self, name:str, block_dict:dict,
-            b:int, n:int, c:int, head_nums:int):
+            b:int, n:int, c:int, head_nums:int, block_size:int):
         
         # self_attention start
         # qkv linear: head -> tail
@@ -154,7 +176,7 @@ class Model_deployer(Layer_deployer):
         qqkv_in_size, bncx3_size = qqkv_size[0], qqkv_size[1]
         self.input_dict['n'] = b * n
         self.deploy_linear(name + 'qqkv.', block_dict, True,
-                    'head', 'tail', qqkv_in_size, bncx3_size)
+                    'head', 'tail', qqkv_in_size, bncx3_size, block_size)
         
         # bnc transpose: tail -> head
         # from (b, n, 3, head_nums, c / head_nums) 
@@ -214,11 +236,11 @@ class Model_deployer(Layer_deployer):
         proj_in, proj_out = proj_size[0], proj_size[1]
         self.input_dict['n'] = b * n
         self.deploy_linear('self_attn.qproj.', block_dict, True,
-                    'tail', 'head', proj_in, proj_out)
+                    'tail', 'head', proj_in, proj_out, block_size)
 
 
     def deploy_tokenizer(self, batch:int, name:str, block_dict:dict, is_sparse:bool,
-            input_size:int):
+            input_size:int, block_size:int):
         # qconv_relu: head -> tail
         conv_list = self.size_list.pop(0)
         conv_in, conv_out = conv_list[0], conv_list[1]
@@ -228,7 +250,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['stride.h'], self.conv_dict['stride.w'] = 1, 1
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
         self.deploy_conv('qconv_relu.', block_dict, is_sparse, False,
-                    'head', 'tail', conv_in, conv_out)
+                    'head', 'tail', conv_in, conv_out, block_size)
 
         # max_pool: tail -> head
         self.size_list.pop(0)
@@ -244,11 +266,11 @@ class Model_deployer(Layer_deployer):
         self.deploy_pooling('qmaxpool.', block_dict, False,
                 self.max_size - conv_out, 0)
 
-        print('Block:' + name + ' deploy completed')
+        print('Block:' + name + ' deploy completed, block_size: ' + str(block_size))
 
 
     def deploy_mv2block(self, batch:int, name:str, block_dict:dict, is_sparse:bool,
-            input_size:int):
+            input_size:int, block_size:int):
 
         # config_list: expansion, stride, is_sparse, output_size
         # name: {*}mv2block{type}_{index} in mv2block
@@ -289,7 +311,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv.0.', block_dict, config_list[2], False,
-                    'head', 'tail', conv0_in, conv0_out)
+                    'head', 'tail', conv0_in, conv0_out, block_size)
 
         # conv_1: tail -> head
         conv1_list = self.size_list.pop(0)
@@ -301,7 +323,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv.1.', block_dict, config_list[2], True,
-                'tail', 'head', conv1_in, conv1_out)
+                'tail', 'head', conv1_in, conv1_out, block_size)
 
         # conv_2: head -> tail
         conv2_list = self.size_list.pop(0)
@@ -313,7 +335,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv.2.', block_dict, config_list[2], False,
-                    'head', 'tail', conv2_in, conv2_out)
+                    'head', 'tail', conv2_in, conv2_out, block_size)
 
         if (res):
             self.size_list.pop(0)
@@ -327,11 +349,11 @@ class Model_deployer(Layer_deployer):
             self.file_writer.writeln('memcpy(section,&section[' 
                     + str(self.max_size - conv2_out)+'],' + str(conv2_out) + ');', 'func')
 
-        print('Block:' + name + ' deploy completed')
+        print('Block:' + name + ' deploy completed, block_size: ' + str(block_size))
 
 
     def deploy_transformer(self, batch:int, name:str, block_dict:dict,
-            input_size:int):
+            input_size:int, block_size:int):
 
         # name: {*}transformer{type}_{index}
         type_name = name.split('_')[-2]
@@ -353,7 +375,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv1.', block_dict, True, False,
-                    'head', 'tail', conv1_in, conv1_out)
+                    'head', 'tail', conv1_in, conv1_out, block_size)
 
         # conv_2: tail -> head
         conv2_list = self.size_list.pop(0)
@@ -365,7 +387,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv2.', block_dict, True, False,
-                    'tail', 'head', conv2_in, bnc_size)
+                    'tail', 'head', conv2_in, bnc_size, block_size)
 
         embedding_dim = self.output_dict['c']
 
@@ -382,7 +404,7 @@ class Model_deployer(Layer_deployer):
 
         # self attention
         self.deploy_self_attn('self_attn.', block_dict,
-            batch, (input_size * input_size), embedding_dim, head_nums)
+            batch, (input_size * input_size), embedding_dim, head_nums, block_size)
         
         # add1: head + tail -> mid
         self.max_size += bnc_size
@@ -410,14 +432,14 @@ class Model_deployer(Layer_deployer):
         relu1_in, relu1_out = relu1_size[0], relu1_size[1]
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear_relu1.', block_dict, True,
-                    'head', 'tail', relu1_in, relu1_out)
+                    'head', 'tail', relu1_in, relu1_out, block_size)
 
         # linear2: tail -> head
         linear2_size = self.size_list.pop(0)
         linear2_in, linear2_out = linear2_size[0], linear2_size[1]
         self.input_dict['n'] = norm_batch
         self.deploy_linear('qlinear2.', block_dict, True,
-                    'tail', 'head', linear2_in, linear2_out)
+                    'tail', 'head', linear2_in, linear2_out, block_size)
 
         # add2: head + tail -> mid
         self.max_size += bnc_size
@@ -441,7 +463,7 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 1, 1
 
         self.deploy_conv('qconv3.', block_dict, True, False,
-                    'head', 'tail', conv3_in, conv3_out)
+                    'head', 'tail', conv3_in, conv3_out, block_size)
 
         # conv_4: tail -> head
         conv4_list = self.size_list.pop(0)
@@ -453,13 +475,13 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('qconv4.', block_dict, True, False,
-                    'tail', 'head', conv4_in, conv4_out)
+                    'tail', 'head', conv4_in, conv4_out, block_size)
 
-        print('Block:' + name + ' deploy completed')
+        print('Block:' + name + ' deploy completed, block_size: ' + str(block_size))
 
 
     def deploy_last_conv(self, batch:int, name:str, block_dict:dict,
-            input_size:int):
+            input_size:int, block_size:int):
 
         # just one conv, head -> tail
         conv_list = self.size_list.pop(0)
@@ -471,13 +493,13 @@ class Model_deployer(Layer_deployer):
         self.conv_dict['padding.h'], self.conv_dict['padding.w'] = 0, 0
 
         self.deploy_conv('', block_dict, True, False,
-                    'head', 'tail', conv_in, conv_out)
+                    'head', 'tail', conv_in, conv_out, block_size)
 
         # copy output from tail to head
         self.file_writer.writeln('memcpy(section,&section[' 
                     + str(self.max_size - conv_out)+'],' + str(conv_out) + ');', 'func')
 
-        print('Block:' + name + ' deploy completed')
+        print('Block:' + name + ' deploy completed, block_size: '+ str(block_size))
 
 
     def deploy_global_pooling(self, batch:int, name:str, block_dict:dict,
@@ -496,7 +518,7 @@ class Model_deployer(Layer_deployer):
             # shape: b (h w) c -> b (h w) 1 -> b (h w) 1
             self.input_dict['n'] = batch * input_size * input_size
             self.deploy_linear('qattention_pool.', block_dict, False,
-                        'head', 'tail', in_size, out_size)
+                        'head', 'tail', in_size, out_size, 1)
             
             # qsoftmax: tail -> tail
             self.size_list.pop(0)
@@ -538,7 +560,7 @@ class Model_deployer(Layer_deployer):
             print('Cannot parse block as global_pooling: ' + name)
             return
 
-        print('Block:' + name + ' deploy completed')
+        print('Block:' + name + ' deploy completed, block_size: 1')
 
 
     def deploy_classifier(self, batch:int, name:str, block_dict:dict):
@@ -548,13 +570,13 @@ class Model_deployer(Layer_deployer):
         linear_in, linear_out = linear_size[0], linear_size[1]
         self.input_dict['n'] = batch
         self.deploy_linear('', block_dict, False,
-                        'head', 'tail', linear_in, linear_out)
+                        'head', 'tail', linear_in, linear_out, 1)
 
         # copy from tail to head
         self.file_writer.writeln('memcpy(section,&section['
             +str(self.max_size-linear_out)+'],' + str(linear_out) + ');', 'func')
 
-        print('Block:' + name + ' deploy completed')
+        print('Block:' + name + ' deploy completed, block_size: 1')
 
 
     def dedploy_dmt(self, batch, downsample_list_dict, mv2block_list_dict, 
@@ -562,30 +584,37 @@ class Model_deployer(Layer_deployer):
         for key, value in downsample_list_dict.items():
             self.file_writer.writeln('// block: ' + key, 'func')
             key_list = key.split('_')
+            if (d_sparse):
+                block_size = self.block_size_list.pop(0)
+            else:
+                block_size = 1
+                
             if (dmt_count == 2):
                 if (key_list[0].endswith('0')):
-                    self.deploy_tokenizer(batch, key, value, d_sparse, self.size)
+                    self.deploy_tokenizer(batch, key, value, d_sparse, self.size, block_size)
                 elif (key_list[0].endswith('1')):
-                    self.deploy_mv2block(batch, key, value, d_sparse, self.size)
+                    self.deploy_mv2block(batch, key, value, d_sparse, self.size, block_size)
             else:
                 if (key_list[-2] == 'tokenizer'):
-                    self.deploy_tokenizer(batch, key, value, d_sparse, self.size)
+                    self.deploy_tokenizer(batch, key, value, d_sparse, self.size, block_size)
                 elif (key_list[-2] == 'mv2block'):
-                    self.deploy_mv2block(batch, key, value, d_sparse, self.size)
+                    self.deploy_mv2block(batch, key, value, d_sparse, self.size, block_size)
 
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
             self.size /= 2
             # print(self.file_writer.const_tensor_size)
 
         for key, value in mv2block_list_dict.items():
+            block_size = self.block_size_list.pop(0)
             self.file_writer.writeln('// block: ' + key, 'func')
-            self.deploy_mv2block(batch, key, value, d_sparse, self.size)
+            self.deploy_mv2block(batch, key, value, d_sparse, self.size, block_size)
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
             # print(self.file_writer.const_tensor_size)
 
         for key, value in transformer_list_dict.items():
+            block_size = self.block_size_list.pop(0)
             self.file_writer.writeln('// block: ' + key, 'func')
-            self.deploy_transformer(batch, key, value, self.size)
+            self.deploy_transformer(batch, key, value, self.size, block_size)
             self.file_writer.writeln('printf("'+ key + ' finished\\r\\n");', 'func')
             # print(self.file_writer.const_tensor_size)
 
@@ -605,10 +634,10 @@ class Model_deployer(Layer_deployer):
         with open(self.config['data_init'], 'r') as r_file:
             self.file_writer.write_file(r_file, 'data')
         
-        self.file_writer.write_init(self.image, self.block, self.max_size)
+        self.file_writer.write_init(self.image, self.max_size)
 
         # deploy quantization inference
-        if (self.config['dmt_count'] == 1):
+        if (self.dmt_count == 1):
             self.dedploy_dmt(batch, self.downsample_list_dict, self.mv2block_list_dict, 
                 self.transformer_list_dict, False, 1)
         else:
@@ -619,7 +648,7 @@ class Model_deployer(Layer_deployer):
 
         self.file_writer.writeln('// block: last conv', 'func')
         self.deploy_last_conv(batch, 'last_conv', self.last_conv_dict,
-            self.size)
+            self.size, self.block_size_list.pop(0))
         self.file_writer.writeln('printf("last_conv finished\\r\\n");', 'func')
         # print(self.file_writer.const_tensor_size)
 

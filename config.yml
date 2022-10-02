@@ -1,16 +1,9 @@
 # full model_config_path: ../TinySPOS/configs/{model_config_path}/quant_dmtp_single.yml
-model_config_path: 'toy_dmtp_config_/block_2'
+model_config_path: 'kserhfg7_Ii5Xv/5tzib08c_tCGwn'
 
 # input image info
 image_path: 'input/3.npy'
 image_class: 3
-
-# count of [downsample, mv2block, transformer]
-# assert dmt_count = 1 or dmt_count = 2
-dmt_count: 1
-
-# block size
-block: 2
 
 # sparse_choice == 0: force dense
 # sparse_choice == 1: force sparse

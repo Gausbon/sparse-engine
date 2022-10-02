@@ -1,5 +1,4 @@
 #include "func.h"
-#include "data.h"
 #include "arm_nnfunctions.h"
 #include "arm_nnsupportfunctions.h"
 
@@ -14,7 +13,8 @@ arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
                             const int32_t *bias_data,
                             const cmsis_nn_dims *output_dims,
                             q7_t *output_data,
-                            const int32_t input_count)
+                            const int32_t input_count,
+                            const int32_t block)
 {
     (void)bias_dims;
 	int32_t *buffer = (int32_t*)ctx->buf;
@@ -66,19 +66,20 @@ arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
         cur_out_ch = last_out_ch;
         if (block_cnt == 0) {
             cur_in_ch = (*filter_ptr++) + last_in_ch + 128;
+            cur_val = *filter_ptr++;
+
+            if (cur_val == 0) {
+                block_cnt = block - 1;
+            }
         } else {
             cur_in_ch = last_in_ch + 1;
+            cur_val = (*filter_ptr++);
         }
 
         cur_val = *filter_ptr++;
 
-        if (cur_val == 0) {
+        if (++block_cnt >= block) {
             block_cnt = 0;
-        } else {
-            block_cnt = block_cnt + 1;
-            if (block_cnt == BLOCK) {
-                block_cnt = 0;
-            }
         }
         
         while (cur_in_ch >= input_ch) {
