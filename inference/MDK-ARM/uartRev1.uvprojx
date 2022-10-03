@@ -417,6 +417,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\result_check.c</FilePath>
             </File>
+            <File>
+              <FileName>layernorm_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\layernorm_test.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -496,6 +501,11 @@
               <FileName>arm_fully_connected_s8_sparse_CHW.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_fully_connected_s8_sparse_CHW.c</FilePath>
+            </File>
+            <File>
+              <FileName>arm_layernorm_fp64.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_layernorm_fp64.c</FilePath>
             </File>
           </Files>
         </Group>

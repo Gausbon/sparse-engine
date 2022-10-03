@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Sun Oct 02 23:19:40 2022
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Mon Oct 03 19:56:24 2022
 ;VERSION 0.2
 ;FILE arm_avgpool_s16.o
 __asm___17_arm_avgpool_s16_c_cad8149a____REV16 <= USED 0
@@ -111,12 +111,14 @@ __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REV16 <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____REVSH <= USED 0
 __asm___24_arm_convolve_s8_sparse_c_d0e7b199____RRX <= USED 0
 arm_convolve_s8_sparse <= USED 0
+arm_convolve_s8_sparse_get_buffer_size <= USED 0
 arm_nn_convolve_s8_double_sparse <= USED 0
 arm_nn_convolve_s8_single_sparse <= USED 0
 ;FILE arm_convolve_s8_sparse_chw.o
 __asm___28_arm_convolve_s8_sparse_CHW_c_26b7d94d____REV16 <= USED 0
 __asm___28_arm_convolve_s8_sparse_CHW_c_26b7d94d____REVSH <= USED 0
 __asm___28_arm_convolve_s8_sparse_CHW_c_26b7d94d____RRX <= USED 0
+arm_convolve_s8_sparse_1x1_CHW <= USED 0
 arm_nn_convolve_s8_double_sparse_1x1_CHW <= USED 0
 arm_nn_convolve_s8_single_sparse_1x1_CHW <= USED 0
 ;FILE arm_convolve_wrapper_s16.o
@@ -162,6 +164,7 @@ arm_nn_dw_convolve_s8_single_sparse <= USED 0
 __asm___34_arm_depthwise_conv_s8_sparse_CHW_c_a8e2b25d____REV16 <= USED 0
 __asm___34_arm_depthwise_conv_s8_sparse_CHW_c_a8e2b25d____REVSH <= USED 0
 __asm___34_arm_depthwise_conv_s8_sparse_CHW_c_a8e2b25d____RRX <= USED 0
+arm_depthwise_conv_s8_sparse_1x1_CHW <= USED 0
 arm_nn_dw_convolve_s8_double_sparse_1x1_CHW <= USED 0
 arm_nn_dw_convolve_s8_single_sparse_1x1_CHW <= USED 0
 ;FILE arm_depthwise_conv_u8_basic_ver1.o
@@ -261,6 +264,11 @@ __asm___35_arm_fully_connected_s8_sparse_CHW_c_f7609426____REV16 <= USED 0
 __asm___35_arm_fully_connected_s8_sparse_CHW_c_f7609426____REVSH <= USED 0
 __asm___35_arm_fully_connected_s8_sparse_CHW_c_f7609426____RRX <= USED 0
 arm_fully_connected_s8_sparse_CHW <= USED 0
+;FILE arm_layernorm_fp64.o
+__asm___20_arm_layernorm_fp64_c_202106ae____REV16 <= USED 0
+__asm___20_arm_layernorm_fp64_c_202106ae____REVSH <= USED 0
+__asm___20_arm_layernorm_fp64_c_202106ae____RRX <= USED 0
+arm_layernorm_fp64 <= USED 0
 ;FILE arm_layernorm_s8.o
 __asm___18_arm_layernorm_s8_c_adcf580d____REV16 <= USED 0
 __asm___18_arm_layernorm_s8_c_adcf580d____REVSH <= USED 0
@@ -372,11 +380,11 @@ __asm___27_arm_nn_output_per_channel_c_f3a9ad2c____REV16 <= USED 0
 __asm___27_arm_nn_output_per_channel_c_f3a9ad2c____REVSH <= USED 0
 __asm___27_arm_nn_output_per_channel_c_f3a9ad2c____RRX <= USED 0
 arm_nn_output_per_channel <= USED 0
+arm_nn_output_per_channel_CHW <= USED 0
 ;FILE arm_nn_softmax_common_s8.o
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____REV16 <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____REVSH <= USED 0
 __asm___26_arm_nn_softmax_common_s8_c_a563679e____RRX <= USED 0
-arm_nn_softmax_common_s8 <= USED 0
 ;FILE arm_nn_transpose_bhwc_to_bwhc_q7.o
 __asm___34_arm_nn_transpose_bhwc_to_bwhc_q7_c_0c7c9da4____REV16 <= USED 0
 __asm___34_arm_nn_transpose_bhwc_to_bwhc_q7_c_0c7c9da4____REVSH <= USED 0
@@ -468,11 +476,11 @@ arm_softmax_s16 <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____REV16 <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____REVSH <= USED 0
 __asm___16_arm_softmax_s8_c_223e8695____RRX <= USED 0
-arm_softmax_s8 <= USED 0
 ;FILE arm_softmax_s8_fast.o
 __asm___21_arm_softmax_s8_fast_c_20d0f6e2____REV16 <= USED 0
 __asm___21_arm_softmax_s8_fast_c_20d0f6e2____REVSH <= USED 0
 __asm___21_arm_softmax_s8_fast_c_20d0f6e2____RRX <= USED 0
+arm_softmax_s8_fast <= USED 0
 ;FILE arm_softmax_s8_s16.o
 __asm___20_arm_softmax_s8_s16_c_16f9a8f7____REV16 <= USED 0
 __asm___20_arm_softmax_s8_s16_c_16f9a8f7____REVSH <= USED 0
@@ -815,6 +823,11 @@ arm_spline_init_f32 <= USED 0
 __asm___27_InterpolationFunctionsF16_c____REV16 <= USED 0
 __asm___27_InterpolationFunctionsF16_c____REVSH <= USED 0
 __asm___27_InterpolationFunctionsF16_c____RRX <= USED 0
+;FILE layernorm_test.o
+__asm___16_layernorm_test_c_input_q7____REV16 <= USED 0
+__asm___16_layernorm_test_c_input_q7____REVSH <= USED 0
+__asm___16_layernorm_test_c_input_q7____RRX <= USED 0
+layernorm_test <= USED 0
 ;FILE main.o
 Error_Handler <= USED 0
 __asm___6_main_c_main____REV16 <= USED 0
