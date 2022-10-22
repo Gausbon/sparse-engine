@@ -219,6 +219,20 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
                 if (cur_val == 0) {
                     block_cnt = block - 1;
                 }
+
+                while (cur_in_ch >= input_ch) {
+                    ++cur_w;
+                    cur_in_ch -= input_ch;
+                    while (cur_w >= kernel_x) {
+                        ++cur_h;
+                        cur_w -= kernel_x;
+                        while (cur_h >= kernel_y) {
+                            ++cur_out_ch;
+                            cur_h -= kernel_y;
+                            mat_flag = 1;
+                        }
+                    }
+                }
             } else {
                 cur_in_ch = last_in_ch + 1;
                 cur_val = (*filter_ptr++);
@@ -226,20 +240,6 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
 
             if (++block_cnt >= block) {
                 block_cnt = 0;
-            }
-
-            while (cur_in_ch >= input_ch) {
-                ++cur_w;
-                cur_in_ch -= input_ch;
-                while (cur_w >= kernel_x) {
-                    ++cur_h;
-                    cur_w -= kernel_x;
-                    while (cur_h >= kernel_y) {
-                        ++cur_out_ch;
-                        cur_h -= kernel_y;
-                        mat_flag = 1;
-                    }
-                }
             }
             
             if (mat_flag) {   

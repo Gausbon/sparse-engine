@@ -46,7 +46,7 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
     int32_t last_out_ch = 0, cur_out_ch = 0;
     int32_t last_in_ch = 0, cur_in_ch = 0;
     int32_t mat_flag = 0;
-
+    printf("add cur_out_ch:%d %d\r\n",cur_out_ch, &cur_out_ch);
     // used for output and requant
     int32_t mult = quant_params->multiplier;
     int32_t shift = quant_params->shift;
@@ -80,8 +80,6 @@ arm_status arm_fully_connected_s8_sparse (const cmsis_nn_context *ctx,
             cur_in_ch = last_in_ch + 1;
             cur_val = (*filter_ptr++);
         }
-
-        cur_val = *filter_ptr++;
 
         if (++block_cnt >= block) {
             block_cnt = 0;

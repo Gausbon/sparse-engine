@@ -46,14 +46,18 @@ Section Cross References
     quantization_inference.o(i.quantization_inference) refers to arm_convolve_s8.o(i.arm_convolve_s8) for arm_convolve_s8
     quantization_inference.o(i.quantization_inference) refers to arm_depthwise_conv_s8.o(i.arm_depthwise_conv_s8) for arm_depthwise_conv_s8
     quantization_inference.o(i.quantization_inference) refers to printfa.o(i.__0printf) for __2printf
+    quantization_inference.o(i.quantization_inference) refers to arm_nn_transpose_bhwc_to_bwhc_q7.o(i.arm_nn_transpose_bhwc_to_bwhc_q7) for arm_nn_transpose_bhwc_to_bwhc_q7
+    quantization_inference.o(i.quantization_inference) refers to arm_convolve_s8_sparse_chw.o(i.arm_convolve_s8_sparse_1x1_CHW) for arm_convolve_s8_sparse_1x1_CHW
+    quantization_inference.o(i.quantization_inference) refers to arm_depthwise_conv_s8_sparse_chw.o(i.arm_depthwise_conv_s8_sparse_1x1_CHW) for arm_depthwise_conv_s8_sparse_1x1_CHW
     quantization_inference.o(i.quantization_inference) refers to arm_elementwise_add_s8_with_neg.o(i.arm_elementwise_add_s8_with_neg) for arm_elementwise_add_s8_with_neg
     quantization_inference.o(i.quantization_inference) refers to arm_layernorm_s8.o(i.arm_layernorm_s8) for arm_layernorm_s8
-    quantization_inference.o(i.quantization_inference) refers to arm_fully_connected_s8.o(i.arm_fully_connected_s8) for arm_fully_connected_s8
-    quantization_inference.o(i.quantization_inference) refers to arm_nn_transpose_bhwc_to_bwhc_q7.o(i.arm_nn_transpose_bhwc_to_bwhc_q7) for arm_nn_transpose_bhwc_to_bwhc_q7
+    quantization_inference.o(i.quantization_inference) refers to arm_fully_connected_s8_sparse_chw.o(i.arm_fully_connected_s8_sparse_CHW) for arm_fully_connected_s8_sparse_CHW
     quantization_inference.o(i.quantization_inference) refers to arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8) for arm_nn_batch_mat_mult_nt_t_s8
-    quantization_inference.o(i.quantization_inference) refers to arm_softmax_s8.o(i.arm_softmax_s8) for arm_softmax_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_softmax_s8_fast.o(i.arm_softmax_s8_fast) for arm_softmax_s8_fast
     quantization_inference.o(i.quantization_inference) refers to arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8) for arm_nn_batch_mat_mult_s8
+    quantization_inference.o(i.quantization_inference) refers to arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse) for arm_fully_connected_s8_sparse
     quantization_inference.o(i.quantization_inference) refers to arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization) for arm_maxpool_s8_with_quantization
+    quantization_inference.o(i.quantization_inference) refers to arm_fully_connected_s8.o(i.arm_fully_connected_s8) for arm_fully_connected_s8
     quantization_inference.o(i.quantization_inference) refers to result_check.o(i.result_check_statistics) for result_check_statistics
     result_check.o(i.result_check_statistics) refers to result_check.o(.conststring) for .conststring
     result_check.o(i.result_check_statistics) refers to printfa.o(i.__0printf) for __2printf
@@ -74,6 +78,8 @@ Section Cross References
     arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse_get_buffer_size) for arm_convolve_s8_sparse_get_buffer_size
     arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to memseta.o(.text) for __aeabi_memclr4
     arm_depthwise_conv_s8_sparse.o(i.arm_depthwise_conv_s8_sparse) refers to arm_nn_output_per_channel.o(i.arm_nn_output_per_channel) for arm_nn_output_per_channel
+    arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse) refers to arm_fully_connected_s8_sparse.o(.conststring) for .conststring
+    arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse) refers to printfa.o(i.__0printf) for __2printf
     arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse) refers to memseta.o(.text) for __aeabi_memclr4
     arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8) refers to arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_vec_mat_mult_t_s8_rhs_offset) for arm_nn_vec_mat_mult_t_s8_rhs_offset
     arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8) refers to arm_nn_batch_mat_mult_s8.o(i.arm_nn_vec_mat_mult_s8_rhs_offset) for arm_nn_vec_mat_mult_s8_rhs_offset
@@ -1838,8 +1844,7 @@ Removing Unused input sections from the image.
     Removing arm_convolve_s8_sparse.o(.rev16_text), (4 bytes).
     Removing arm_convolve_s8_sparse.o(.revsh_text), (4 bytes).
     Removing arm_convolve_s8_sparse.o(.rrx_text), (6 bytes).
-    Removing arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse), (1692 bytes).
-    Removing arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse_get_buffer_size), (12 bytes).
+    Removing arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse), (1678 bytes).
     Removing arm_convolve_s8_sparse.o(i.arm_nn_convolve_s8_double_sparse), (380 bytes).
     Removing arm_convolve_s8_sparse.o(i.arm_nn_convolve_s8_single_sparse), (228 bytes).
     Removing arm_depthwise_conv_s8_sparse.o(.rev16_text), (4 bytes).
@@ -1852,7 +1857,6 @@ Removing Unused input sections from the image.
     Removing arm_fully_connected_s8_sparse.o(.revsh_text), (4 bytes).
     Removing arm_fully_connected_s8_sparse.o(.rrx_text), (6 bytes).
     Removing arm_fully_connected_s8_sparse.o(i.arm_fc_s8_sparse_get_buffer_size), (4 bytes).
-    Removing arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse), (1238 bytes).
     Removing arm_nn_batch_mat_mult_nt_t_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_batch_mat_mult_nt_t_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_batch_mat_mult_nt_t_s8.o(.rrx_text), (6 bytes).
@@ -1863,10 +1867,10 @@ Removing Unused input sections from the image.
     Removing arm_nn_output_per_channel.o(.revsh_text), (4 bytes).
     Removing arm_nn_output_per_channel.o(.rrx_text), (6 bytes).
     Removing arm_nn_output_per_channel.o(i.arm_nn_output_per_channel), (672 bytes).
-    Removing arm_nn_output_per_channel.o(i.arm_nn_output_per_channel_CHW), (630 bytes).
     Removing arm_nn_softmax_common_s8.o(.rev16_text), (4 bytes).
     Removing arm_nn_softmax_common_s8.o(.revsh_text), (4 bytes).
     Removing arm_nn_softmax_common_s8.o(.rrx_text), (6 bytes).
+    Removing arm_nn_softmax_common_s8.o(i.arm_nn_softmax_common_s8), (3806 bytes).
     Removing arm_pool_s8_with_quantization.o(.rev16_text), (4 bytes).
     Removing arm_pool_s8_with_quantization.o(.revsh_text), (4 bytes).
     Removing arm_pool_s8_with_quantization.o(.rrx_text), (6 bytes).
@@ -1877,7 +1881,6 @@ Removing Unused input sections from the image.
     Removing arm_softmax_s8_fast.o(.rev16_text), (4 bytes).
     Removing arm_softmax_s8_fast.o(.revsh_text), (4 bytes).
     Removing arm_softmax_s8_fast.o(.rrx_text), (6 bytes).
-    Removing arm_softmax_s8_fast.o(i.arm_softmax_s8_fast), (3018 bytes).
     Removing arm_nn_transpose_bhwc_to_bwhc_q7.o(.rev16_text), (4 bytes).
     Removing arm_nn_transpose_bhwc_to_bwhc_q7.o(.revsh_text), (4 bytes).
     Removing arm_nn_transpose_bhwc_to_bwhc_q7.o(.rrx_text), (6 bytes).
@@ -1887,19 +1890,16 @@ Removing Unused input sections from the image.
     Removing arm_convolve_s8_sparse_chw.o(.rev16_text), (4 bytes).
     Removing arm_convolve_s8_sparse_chw.o(.revsh_text), (4 bytes).
     Removing arm_convolve_s8_sparse_chw.o(.rrx_text), (6 bytes).
-    Removing arm_convolve_s8_sparse_chw.o(i.arm_convolve_s8_sparse_1x1_CHW), (1522 bytes).
     Removing arm_convolve_s8_sparse_chw.o(i.arm_nn_convolve_s8_double_sparse_1x1_CHW), (346 bytes).
     Removing arm_convolve_s8_sparse_chw.o(i.arm_nn_convolve_s8_single_sparse_1x1_CHW), (164 bytes).
     Removing arm_depthwise_conv_s8_sparse_chw.o(.rev16_text), (4 bytes).
     Removing arm_depthwise_conv_s8_sparse_chw.o(.revsh_text), (4 bytes).
     Removing arm_depthwise_conv_s8_sparse_chw.o(.rrx_text), (6 bytes).
-    Removing arm_depthwise_conv_s8_sparse_chw.o(i.arm_depthwise_conv_s8_sparse_1x1_CHW), (1420 bytes).
     Removing arm_depthwise_conv_s8_sparse_chw.o(i.arm_nn_dw_convolve_s8_double_sparse_1x1_CHW), (346 bytes).
     Removing arm_depthwise_conv_s8_sparse_chw.o(i.arm_nn_dw_convolve_s8_single_sparse_1x1_CHW), (164 bytes).
     Removing arm_fully_connected_s8_sparse_chw.o(.rev16_text), (4 bytes).
     Removing arm_fully_connected_s8_sparse_chw.o(.revsh_text), (4 bytes).
     Removing arm_fully_connected_s8_sparse_chw.o(.rrx_text), (6 bytes).
-    Removing arm_fully_connected_s8_sparse_chw.o(i.arm_fully_connected_s8_sparse_CHW), (1206 bytes).
     Removing arm_layernorm_fp64.o(.rev16_text), (4 bytes).
     Removing arm_layernorm_fp64.o(.revsh_text), (4 bytes).
     Removing arm_layernorm_fp64.o(.rrx_text), (6 bytes).
@@ -3353,6 +3353,7 @@ Removing Unused input sections from the image.
     Removing arm_softmax_s8.o(.rev16_text), (4 bytes).
     Removing arm_softmax_s8.o(.revsh_text), (4 bytes).
     Removing arm_softmax_s8.o(.rrx_text), (6 bytes).
+    Removing arm_softmax_s8.o(i.arm_softmax_s8), (26 bytes).
     Removing arm_softmax_s8_s16.o(.rev16_text), (4 bytes).
     Removing arm_softmax_s8_s16.o(.revsh_text), (4 bytes).
     Removing arm_softmax_s8_s16.o(.rrx_text), (6 bytes).
@@ -3382,7 +3383,7 @@ Removing Unused input sections from the image.
     Removing fpstat.o(.text), (4 bytes).
     Removing arm_convolve_hwc_q7_rgb.o(i.__ARM_common_memclr4_6), (8 bytes).
 
-1571 unused section(s) (total 1703446 bytes) removed from the image.
+1566 unused section(s) (total 1698218 bytes) removed from the image.
 
 ==============================================================================
 
@@ -3414,66 +3415,66 @@ Image Symbol Table
     ../Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.c 0x00000000   Number         0  stm32f7xx_hal_tim_ex.o ABSOLUTE
     ../Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.c 0x00000000   Number         0  stm32f7xx_hal_uart.o ABSOLUTE
     ../Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart_ex.c 0x00000000   Number         0  stm32f7xx_hal_uart_ex.o ABSOLUTE
-    ../clib/microlib/division.c              0x00000000   Number         0  uldiv.o ABSOLUTE
     ../clib/microlib/division.c              0x00000000   Number         0  ldiv.o ABSOLUTE
+    ../clib/microlib/division.c              0x00000000   Number         0  uldiv.o ABSOLUTE
     ../clib/microlib/division.c              0x00000000   Number         0  uidiv.o ABSOLUTE
     ../clib/microlib/errno.c                 0x00000000   Number         0  errno.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llshl.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llsshr.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf6.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfa.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf8.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf6.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf7.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf5.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf2.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf4.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf3.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf1.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf0.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfb.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf7.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf1.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf2.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf0.o ABSOLUTE
     ../clib/microlib/printf/stubs.s          0x00000000   Number         0  stubs.o ABSOLUTE
-    ../clib/microlib/stdio/fputs.c           0x00000000   Number         0  fputs_e.o ABSOLUTE
     ../clib/microlib/stdio/fputs.c           0x00000000   Number         0  fputs.o ABSOLUTE
+    ../clib/microlib/stdio/fputs.c           0x00000000   Number         0  fputs_e.o ABSOLUTE
     ../clib/microlib/stdio/streams.c         0x00000000   Number         0  stdout.o ABSOLUTE
     ../clib/microlib/stdio/streams.c         0x00000000   Number         0  stderr.o ABSOLUTE
-    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memmovea.o ABSOLUTE
-    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
-    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memmoveb.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
+    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memmovea.o ABSOLUTE
+    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memmoveb.o ABSOLUTE
+    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
     ../clib/microlib/string/memset.c         0x00000000   Number         0  memseta.o ABSOLUTE
     ../clib/microlib/stubs.s                 0x00000000   Number         0  iusefp.o ABSOLUTE
     ../fplib/microlib/d2f.c                  0x00000000   Number         0  d2f.o ABSOLUTE
     ../fplib/microlib/fpadd.c                0x00000000   Number         0  dadd.o ABSOLUTE
     ../fplib/microlib/fpdiv.c                0x00000000   Number         0  ddiv.o ABSOLUTE
-    ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  depilogue.o ABSOLUTE
     ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  fepilogue.o ABSOLUTE
-    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixi.o ABSOLUTE
-    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixul.o ABSOLUTE
+    ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  depilogue.o ABSOLUTE
     ../fplib/microlib/fpfix.c                0x00000000   Number         0  ffixl.o ABSOLUTE
-    ../fplib/microlib/fpflt.c                0x00000000   Number         0  dflti.o ABSOLUTE
+    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixul.o ABSOLUTE
+    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixi.o ABSOLUTE
     ../fplib/microlib/fpflt.c                0x00000000   Number         0  dfltui.o ABSOLUTE
+    ../fplib/microlib/fpflt.c                0x00000000   Number         0  dflti.o ABSOLUTE
     ../fplib/microlib/fpmul.c                0x00000000   Number         0  dmul.o ABSOLUTE
     ../fplib/microlib/fpneg.c                0x00000000   Number         0  dneg.o ABSOLUTE
     ../fplib/microlib/fpscalb.c              0x00000000   Number         0  dscalb.o ABSOLUTE
     ../fplib/microlib/fpsqrt.c               0x00000000   Number         0  dsqrt.o ABSOLUTE
     ../fplib/microlib/fpstat.c               0x00000000   Number         0  fpstat.o ABSOLUTE
     ../mathlib/dunder.c                      0x00000000   Number         0  dunder.o ABSOLUTE
-    ../mathlib/exp.c                         0x00000000   Number         0  exp.o ABSOLUTE
     ../mathlib/exp.c                         0x00000000   Number         0  exp_x.o ABSOLUTE
+    ../mathlib/exp.c                         0x00000000   Number         0  exp.o ABSOLUTE
     ../mathlib/expf.c                        0x00000000   Number         0  expf.o ABSOLUTE
     ../mathlib/expf.c                        0x00000000   Number         0  expf_x.o ABSOLUTE
     ../mathlib/fabs.c                        0x00000000   Number         0  fabs.o ABSOLUTE
@@ -3487,13 +3488,13 @@ Image Symbol Table
     ../mathlib/poly.c                        0x00000000   Number         0  poly.o ABSOLUTE
     ../mathlib/pow.c                         0x00000000   Number         0  pow_x.o ABSOLUTE
     ../mathlib/pow.c                         0x00000000   Number         0  pow.o ABSOLUTE
-    ../mathlib/powf.c                        0x00000000   Number         0  powf.o ABSOLUTE
     ../mathlib/powf.c                        0x00000000   Number         0  powf_x.o ABSOLUTE
+    ../mathlib/powf.c                        0x00000000   Number         0  powf.o ABSOLUTE
     ../mathlib/qnan.c                        0x00000000   Number         0  qnan.o ABSOLUTE
     ../mathlib/sqrt.c                        0x00000000   Number         0  sqrt_x.o ABSOLUTE
     ../mathlib/sqrt.c                        0x00000000   Number         0  sqrt.o ABSOLUTE
-    ../mathlib/sqrtf.c                       0x00000000   Number         0  sqrtf.o ABSOLUTE
     ../mathlib/sqrtf.c                       0x00000000   Number         0  sqrtf_x.o ABSOLUTE
+    ../mathlib/sqrtf.c                       0x00000000   Number         0  sqrtf.o ABSOLUTE
     ../mathlib/tanhf.c                       0x00000000   Number         0  tanhf.o ABSOLUTE
     ../mathlib/tanhf.c                       0x00000000   Number         0  tanhf_x.o ABSOLUTE
     ..\Core\Src\cmsis_append\arm_convolve_s8_sparse.c 0x00000000   Number         0  arm_convolve_s8_sparse.o ABSOLUTE
@@ -3866,147 +3867,153 @@ Image Symbol Table
     _printf_pre_padding                      0x080028b5   Thumb Code    46  printfa.o(i._printf_pre_padding)
     i.arm_avgpool_s8_get_buffer_size         0x080028e2   Section        0  arm_avgpool_s8.o(i.arm_avgpool_s8_get_buffer_size)
     i.arm_convolve_s8                        0x080028e8   Section        0  arm_convolve_s8.o(i.arm_convolve_s8)
-    i.arm_depthwise_conv_s8                  0x08002c68   Section        0  arm_depthwise_conv_s8.o(i.arm_depthwise_conv_s8)
-    i.arm_elementwise_add_s8_with_neg        0x0800357c   Section        0  arm_elementwise_add_s8_with_neg.o(i.arm_elementwise_add_s8_with_neg)
-    i.arm_fully_connected_s8                 0x08003bac   Section        0  arm_fully_connected_s8.o(i.arm_fully_connected_s8)
-    i.arm_layernorm_s8                       0x08003c1c   Section        0  arm_layernorm_s8.o(i.arm_layernorm_s8)
-    i.arm_maxpool_s8_with_quantization       0x08003fdc   Section        0  arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization)
-    i.arm_nn_batch_mat_mult_nt_t_s8          0x0800423e   Section        0  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8)
-    i.arm_nn_batch_mat_mult_s8               0x080042bc   Section        0  arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8)
-    i.arm_nn_mat_mult_kernel_s8_s16          0x08004344   Section        0  arm_nn_mat_mult_kernel_s8_s16.o(i.arm_nn_mat_mult_kernel_s8_s16)
-    i.arm_nn_softmax_common_s8               0x080047a4   Section        0  arm_nn_softmax_common_s8.o(i.arm_nn_softmax_common_s8)
-    i.arm_nn_transpose_bhwc_to_bwhc_q7       0x08005682   Section        0  arm_nn_transpose_bhwc_to_bwhc_q7.o(i.arm_nn_transpose_bhwc_to_bwhc_q7)
-    i.arm_nn_vec_mat_mult_s8_rhs_offset      0x080056e8   Section        0  arm_nn_batch_mat_mult_s8.o(i.arm_nn_vec_mat_mult_s8_rhs_offset)
-    i.arm_nn_vec_mat_mult_t_s8               0x08005904   Section        0  arm_nn_vec_mat_mult_t_s8.o(i.arm_nn_vec_mat_mult_t_s8)
-    i.arm_nn_vec_mat_mult_t_s8_rhs_offset    0x08005be4   Section        0  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_vec_mat_mult_t_s8_rhs_offset)
-    i.arm_q7_to_q15_with_offset              0x08005ed0   Section        0  arm_q7_to_q15_with_offset.o(i.arm_q7_to_q15_with_offset)
-    i.arm_softmax_s8                         0x08005f5e   Section        0  arm_softmax_s8.o(i.arm_softmax_s8)
-    i.fputc                                  0x08005f78   Section        0  retarget_io.o(i.fputc)
-    i.main                                   0x08005f90   Section        0  main.o(i.main)
-    i.quantization_inference                 0x080060a8   Section        0  quantization_inference.o(i.quantization_inference)
-    i.result_check_statistics                0x080079fa   Section        0  result_check.o(i.result_check_statistics)
-    i.stdout_putchar                         0x08007f08   Section        0  main.o(i.stdout_putchar)
-    .constdata                               0x08007f24   Section    970236  quantization_inference.o(.constdata)
-    bias_31                                  0x08007f24   Data           4  quantization_inference.o(.constdata)
-    shift_0                                  0x08007f28   Data           6  quantization_inference.o(.constdata)
-    shift_1                                  0x08007f2e   Data           6  quantization_inference.o(.constdata)
-    image                                    0x08007f34   Data        3072  quantization_inference.o(.constdata)
-    weight_0                                 0x08008b34   Data          18  quantization_inference.o(.constdata)
-    bias_0                                   0x08008b48   Data          24  quantization_inference.o(.constdata)
-    mult_0                                   0x08008b60   Data          24  quantization_inference.o(.constdata)
-    weight_1                                 0x08008b78   Data          54  quantization_inference.o(.constdata)
-    bias_1                                   0x08008bb0   Data          24  quantization_inference.o(.constdata)
-    mult_1                                   0x08008bc8   Data          24  quantization_inference.o(.constdata)
-    weight_2                                 0x08008be0   Data         384  quantization_inference.o(.constdata)
-    bias_2                                   0x08008d60   Data         256  quantization_inference.o(.constdata)
-    mult_2                                   0x08008e60   Data         256  quantization_inference.o(.constdata)
-    shift_2                                  0x08008f60   Data          64  quantization_inference.o(.constdata)
-    weight_3                                 0x08008fa0   Data        8192  quantization_inference.o(.constdata)
-    bias_3                                   0x0800afa0   Data         512  quantization_inference.o(.constdata)
-    mult_3                                   0x0800b1a0   Data         512  quantization_inference.o(.constdata)
-    shift_3                                  0x0800b3a0   Data         128  quantization_inference.o(.constdata)
-    weight_4                                 0x0800b420   Data        1152  quantization_inference.o(.constdata)
-    bias_4                                   0x0800b8a0   Data         512  quantization_inference.o(.constdata)
-    mult_4                                   0x0800baa0   Data         512  quantization_inference.o(.constdata)
-    shift_4                                  0x0800bca0   Data         128  quantization_inference.o(.constdata)
-    weight_5                                 0x0800bd20   Data        8192  quantization_inference.o(.constdata)
-    bias_5                                   0x0800dd20   Data         256  quantization_inference.o(.constdata)
-    mult_5                                   0x0800de20   Data         256  quantization_inference.o(.constdata)
-    shift_5                                  0x0800df20   Data          64  quantization_inference.o(.constdata)
-    weight_6                                 0x0800df60   Data       36864  quantization_inference.o(.constdata)
-    bias_6                                   0x08016f60   Data         256  quantization_inference.o(.constdata)
-    mult_6                                   0x08017060   Data         256  quantization_inference.o(.constdata)
-    shift_6                                  0x08017160   Data          64  quantization_inference.o(.constdata)
-    weight_7                                 0x080171a0   Data        4096  quantization_inference.o(.constdata)
-    bias_7                                   0x080181a0   Data         256  quantization_inference.o(.constdata)
-    mult_7                                   0x080182a0   Data         256  quantization_inference.o(.constdata)
-    shift_7                                  0x080183a0   Data          64  quantization_inference.o(.constdata)
-    weight_8                                 0x080183e0   Data          64  quantization_inference.o(.constdata)
-    bias_8                                   0x08018420   Data         256  quantization_inference.o(.constdata)
-    weight_9                                 0x08018520   Data       12288  quantization_inference.o(.constdata)
-    weight_10                                0x0801b520   Data        4096  quantization_inference.o(.constdata)
-    bias_10                                  0x0801c520   Data         256  quantization_inference.o(.constdata)
-    weight_11                                0x0801c620   Data          64  quantization_inference.o(.constdata)
-    bias_11                                  0x0801c660   Data         256  quantization_inference.o(.constdata)
-    weight_12                                0x0801c760   Data       32768  quantization_inference.o(.constdata)
-    bias_12                                  0x08024760   Data        2048  quantization_inference.o(.constdata)
-    weight_13                                0x08024f60   Data       32768  quantization_inference.o(.constdata)
-    bias_13                                  0x0802cf60   Data         256  quantization_inference.o(.constdata)
-    weight_14                                0x0802d060   Data       36864  quantization_inference.o(.constdata)
-    bias_14                                  0x08036060   Data         256  quantization_inference.o(.constdata)
-    mult_14                                  0x08036160   Data         256  quantization_inference.o(.constdata)
-    shift_14                                 0x08036260   Data          64  quantization_inference.o(.constdata)
-    weight_15                                0x080362a0   Data        8192  quantization_inference.o(.constdata)
-    bias_15                                  0x080382a0   Data         512  quantization_inference.o(.constdata)
-    mult_15                                  0x080384a0   Data         512  quantization_inference.o(.constdata)
-    shift_15                                 0x080386a0   Data         128  quantization_inference.o(.constdata)
-    weight_16                                0x08038720   Data       147456  quantization_inference.o(.constdata)
-    mult_16                                  0x0805c720   Data         512  quantization_inference.o(.constdata)
-    shift_16                                 0x0805c920   Data         128  quantization_inference.o(.constdata)
-    weight_17                                0x0805c9a0   Data       65536  quantization_inference.o(.constdata)
-    bias_17                                  0x0806c9a0   Data        2048  quantization_inference.o(.constdata)
-    mult_17                                  0x0806d1a0   Data        2048  quantization_inference.o(.constdata)
-    shift_17                                 0x0806d9a0   Data         512  quantization_inference.o(.constdata)
-    weight_18                                0x0806dba0   Data        4608  quantization_inference.o(.constdata)
-    bias_18                                  0x0806eda0   Data        2048  quantization_inference.o(.constdata)
-    mult_18                                  0x0806f5a0   Data        2048  quantization_inference.o(.constdata)
-    shift_18                                 0x0806fda0   Data         512  quantization_inference.o(.constdata)
-    weight_19                                0x0806ffa0   Data       65536  quantization_inference.o(.constdata)
-    bias_19                                  0x0807ffa0   Data         512  quantization_inference.o(.constdata)
-    mult_19                                  0x080801a0   Data         512  quantization_inference.o(.constdata)
-    shift_19                                 0x080803a0   Data         128  quantization_inference.o(.constdata)
-    weight_20                                0x08080420   Data       147456  quantization_inference.o(.constdata)
-    bias_20                                  0x080a4420   Data         512  quantization_inference.o(.constdata)
-    mult_20                                  0x080a4620   Data         512  quantization_inference.o(.constdata)
-    shift_20                                 0x080a4820   Data         128  quantization_inference.o(.constdata)
-    weight_21                                0x080a48a0   Data       12288  quantization_inference.o(.constdata)
-    bias_21                                  0x080a78a0   Data         384  quantization_inference.o(.constdata)
-    mult_21                                  0x080a7a20   Data         384  quantization_inference.o(.constdata)
-    shift_21                                 0x080a7ba0   Data          96  quantization_inference.o(.constdata)
-    weight_22                                0x080a7c00   Data          96  quantization_inference.o(.constdata)
-    bias_22                                  0x080a7c60   Data         384  quantization_inference.o(.constdata)
-    weight_23                                0x080a7de0   Data       27648  quantization_inference.o(.constdata)
-    weight_24                                0x080ae9e0   Data        9216  quantization_inference.o(.constdata)
-    bias_24                                  0x080b0de0   Data         384  quantization_inference.o(.constdata)
-    weight_25                                0x080b0f60   Data          96  quantization_inference.o(.constdata)
-    bias_25                                  0x080b0fc0   Data         384  quantization_inference.o(.constdata)
-    weight_26                                0x080b1140   Data       12288  quantization_inference.o(.constdata)
-    bias_26                                  0x080b4140   Data         512  quantization_inference.o(.constdata)
-    weight_27                                0x080b4340   Data       12288  quantization_inference.o(.constdata)
-    bias_27                                  0x080b7340   Data         384  quantization_inference.o(.constdata)
-    weight_28                                0x080b74c0   Data       82944  quantization_inference.o(.constdata)
-    bias_28                                  0x080cb8c0   Data         384  quantization_inference.o(.constdata)
-    mult_28                                  0x080cba40   Data         384  quantization_inference.o(.constdata)
-    shift_28                                 0x080cbbc0   Data          96  quantization_inference.o(.constdata)
-    weight_29                                0x080cbc20   Data       24576  quantization_inference.o(.constdata)
-    bias_29                                  0x080d1c20   Data        1024  quantization_inference.o(.constdata)
-    mult_29                                  0x080d2020   Data        1024  quantization_inference.o(.constdata)
-    shift_29                                 0x080d2420   Data         256  quantization_inference.o(.constdata)
-    weight_30                                0x080d2520   Data       131072  quantization_inference.o(.constdata)
-    bias_30                                  0x080f2520   Data        2048  quantization_inference.o(.constdata)
-    mult_30                                  0x080f2d20   Data        2048  quantization_inference.o(.constdata)
-    shift_30                                 0x080f3520   Data         512  quantization_inference.o(.constdata)
-    weight_31                                0x080f3720   Data         512  quantization_inference.o(.constdata)
-    weight_32                                0x080f3920   Data        5120  quantization_inference.o(.constdata)
-    .constdata                               0x080f4d20   Section      256  arm_layernorm_s8.o(.constdata)
-    sqq_table                                0x080f4d20   Data         256  arm_layernorm_s8.o(.constdata)
-    .constdata                               0x080f4e20   Section       16  system_stm32f7xx.o(.constdata)
-    .constdata                               0x080f4e30   Section        8  system_stm32f7xx.o(.constdata)
-    .conststring                             0x080f4e38   Section       23  main.o(.conststring)
-    .conststring                             0x080f4e50   Section      236  quantization_inference.o(.conststring)
-    .conststring                             0x080f4f3c   Section      496  result_check.o(.conststring)
-    c.UART_SetConfig.00000198                0x080f514c   Section        9  stm32f7xx_hal_uart.o(c.UART_SetConfig.00000198)
-    c.UART_SetConfig.000001be                0x080f5155   Section        9  stm32f7xx_hal_uart.o(c.UART_SetConfig.000001be)
+    i.arm_convolve_s8_sparse_1x1_CHW         0x08002c68   Section        0  arm_convolve_s8_sparse_chw.o(i.arm_convolve_s8_sparse_1x1_CHW)
+    i.arm_convolve_s8_sparse_get_buffer_size 0x08003260   Section        0  arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse_get_buffer_size)
+    i.arm_depthwise_conv_s8                  0x0800326c   Section        0  arm_depthwise_conv_s8.o(i.arm_depthwise_conv_s8)
+    i.arm_depthwise_conv_s8_sparse_1x1_CHW   0x08003b80   Section        0  arm_depthwise_conv_s8_sparse_chw.o(i.arm_depthwise_conv_s8_sparse_1x1_CHW)
+    i.arm_elementwise_add_s8_with_neg        0x0800410c   Section        0  arm_elementwise_add_s8_with_neg.o(i.arm_elementwise_add_s8_with_neg)
+    i.arm_fully_connected_s8                 0x0800473c   Section        0  arm_fully_connected_s8.o(i.arm_fully_connected_s8)
+    i.arm_fully_connected_s8_sparse          0x080047ac   Section        0  arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse)
+    i.arm_fully_connected_s8_sparse_CHW      0x08004c98   Section        0  arm_fully_connected_s8_sparse_chw.o(i.arm_fully_connected_s8_sparse_CHW)
+    i.arm_layernorm_s8                       0x08005154   Section        0  arm_layernorm_s8.o(i.arm_layernorm_s8)
+    i.arm_maxpool_s8_with_quantization       0x08005514   Section        0  arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization)
+    i.arm_nn_batch_mat_mult_nt_t_s8          0x08005776   Section        0  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8)
+    i.arm_nn_batch_mat_mult_s8               0x080057f4   Section        0  arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8)
+    i.arm_nn_mat_mult_kernel_s8_s16          0x0800587c   Section        0  arm_nn_mat_mult_kernel_s8_s16.o(i.arm_nn_mat_mult_kernel_s8_s16)
+    i.arm_nn_output_per_channel_CHW          0x08005cdc   Section        0  arm_nn_output_per_channel.o(i.arm_nn_output_per_channel_CHW)
+    i.arm_nn_transpose_bhwc_to_bwhc_q7       0x08005f52   Section        0  arm_nn_transpose_bhwc_to_bwhc_q7.o(i.arm_nn_transpose_bhwc_to_bwhc_q7)
+    i.arm_nn_vec_mat_mult_s8_rhs_offset      0x08005fb8   Section        0  arm_nn_batch_mat_mult_s8.o(i.arm_nn_vec_mat_mult_s8_rhs_offset)
+    i.arm_nn_vec_mat_mult_t_s8               0x080061d4   Section        0  arm_nn_vec_mat_mult_t_s8.o(i.arm_nn_vec_mat_mult_t_s8)
+    i.arm_nn_vec_mat_mult_t_s8_rhs_offset    0x080064b4   Section        0  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_vec_mat_mult_t_s8_rhs_offset)
+    i.arm_q7_to_q15_with_offset              0x080067a0   Section        0  arm_q7_to_q15_with_offset.o(i.arm_q7_to_q15_with_offset)
+    i.arm_softmax_s8_fast                    0x08006830   Section        0  arm_softmax_s8_fast.o(i.arm_softmax_s8_fast)
+    i.fputc                                  0x080073fa   Section        0  retarget_io.o(i.fputc)
+    i.main                                   0x08007410   Section        0  main.o(i.main)
+    i.quantization_inference                 0x08007528   Section        0  quantization_inference.o(i.quantization_inference)
+    i.result_check_statistics                0x0800968c   Section        0  result_check.o(i.result_check_statistics)
+    i.stdout_putchar                         0x08009b9a   Section        0  main.o(i.stdout_putchar)
+    .constdata                               0x08009bb4   Section    759940  quantization_inference.o(.constdata)
+    bias_31                                  0x08009bb4   Data           4  quantization_inference.o(.constdata)
+    shift_0                                  0x08009bb8   Data           6  quantization_inference.o(.constdata)
+    shift_1                                  0x08009bbe   Data           6  quantization_inference.o(.constdata)
+    image                                    0x08009bc4   Data        3072  quantization_inference.o(.constdata)
+    weight_0                                 0x0800a7c4   Data          18  quantization_inference.o(.constdata)
+    bias_0                                   0x0800a7d8   Data          24  quantization_inference.o(.constdata)
+    mult_0                                   0x0800a7f0   Data          24  quantization_inference.o(.constdata)
+    weight_1                                 0x0800a808   Data          54  quantization_inference.o(.constdata)
+    bias_1                                   0x0800a840   Data          24  quantization_inference.o(.constdata)
+    mult_1                                   0x0800a858   Data          24  quantization_inference.o(.constdata)
+    weight_2                                 0x0800a870   Data         384  quantization_inference.o(.constdata)
+    bias_2                                   0x0800a9f0   Data         256  quantization_inference.o(.constdata)
+    mult_2                                   0x0800aaf0   Data         256  quantization_inference.o(.constdata)
+    shift_2                                  0x0800abf0   Data          64  quantization_inference.o(.constdata)
+    weight_3                                 0x0800ac30   Data        6144  quantization_inference.o(.constdata)
+    bias_3                                   0x0800c430   Data         512  quantization_inference.o(.constdata)
+    mult_3                                   0x0800c630   Data         512  quantization_inference.o(.constdata)
+    shift_3                                  0x0800c830   Data         128  quantization_inference.o(.constdata)
+    weight_4                                 0x0800c8b0   Data         768  quantization_inference.o(.constdata)
+    bias_4                                   0x0800cbb0   Data         512  quantization_inference.o(.constdata)
+    mult_4                                   0x0800cdb0   Data         512  quantization_inference.o(.constdata)
+    shift_4                                  0x0800cfb0   Data         128  quantization_inference.o(.constdata)
+    weight_5                                 0x0800d030   Data        6144  quantization_inference.o(.constdata)
+    bias_5                                   0x0800e830   Data         256  quantization_inference.o(.constdata)
+    mult_5                                   0x0800e930   Data         256  quantization_inference.o(.constdata)
+    shift_5                                  0x0800ea30   Data          64  quantization_inference.o(.constdata)
+    weight_6                                 0x0800ea70   Data       27648  quantization_inference.o(.constdata)
+    bias_6                                   0x08015670   Data         256  quantization_inference.o(.constdata)
+    mult_6                                   0x08015770   Data         256  quantization_inference.o(.constdata)
+    shift_6                                  0x08015870   Data          64  quantization_inference.o(.constdata)
+    weight_7                                 0x080158b0   Data        3072  quantization_inference.o(.constdata)
+    bias_7                                   0x080164b0   Data         256  quantization_inference.o(.constdata)
+    mult_7                                   0x080165b0   Data         256  quantization_inference.o(.constdata)
+    shift_7                                  0x080166b0   Data          64  quantization_inference.o(.constdata)
+    weight_8                                 0x080166f0   Data          64  quantization_inference.o(.constdata)
+    bias_8                                   0x08016730   Data         256  quantization_inference.o(.constdata)
+    weight_9                                 0x08016830   Data        9216  quantization_inference.o(.constdata)
+    weight_10                                0x08018c30   Data        3072  quantization_inference.o(.constdata)
+    bias_10                                  0x08019830   Data         256  quantization_inference.o(.constdata)
+    weight_11                                0x08019930   Data          64  quantization_inference.o(.constdata)
+    bias_11                                  0x08019970   Data         256  quantization_inference.o(.constdata)
+    weight_12                                0x08019a70   Data       24576  quantization_inference.o(.constdata)
+    bias_12                                  0x0801fa70   Data        2048  quantization_inference.o(.constdata)
+    weight_13                                0x08020270   Data       24576  quantization_inference.o(.constdata)
+    bias_13                                  0x08026270   Data         256  quantization_inference.o(.constdata)
+    weight_14                                0x08026370   Data       27648  quantization_inference.o(.constdata)
+    bias_14                                  0x0802cf70   Data         256  quantization_inference.o(.constdata)
+    mult_14                                  0x0802d070   Data         256  quantization_inference.o(.constdata)
+    shift_14                                 0x0802d170   Data          64  quantization_inference.o(.constdata)
+    weight_15                                0x0802d1b0   Data        6144  quantization_inference.o(.constdata)
+    bias_15                                  0x0802e9b0   Data         512  quantization_inference.o(.constdata)
+    mult_15                                  0x0802ebb0   Data         512  quantization_inference.o(.constdata)
+    shift_15                                 0x0802edb0   Data         128  quantization_inference.o(.constdata)
+    weight_16                                0x0802ee30   Data       121472  quantization_inference.o(.constdata)
+    mult_16                                  0x0804c8b0   Data         512  quantization_inference.o(.constdata)
+    shift_16                                 0x0804cab0   Data         128  quantization_inference.o(.constdata)
+    weight_17                                0x0804cb30   Data       49152  quantization_inference.o(.constdata)
+    bias_17                                  0x08058b30   Data        2048  quantization_inference.o(.constdata)
+    mult_17                                  0x08059330   Data        2048  quantization_inference.o(.constdata)
+    shift_17                                 0x08059b30   Data         512  quantization_inference.o(.constdata)
+    weight_18                                0x08059d30   Data        3072  quantization_inference.o(.constdata)
+    bias_18                                  0x0805a930   Data        2048  quantization_inference.o(.constdata)
+    mult_18                                  0x0805b130   Data        2048  quantization_inference.o(.constdata)
+    shift_18                                 0x0805b930   Data         512  quantization_inference.o(.constdata)
+    weight_19                                0x0805bb30   Data       49152  quantization_inference.o(.constdata)
+    bias_19                                  0x08067b30   Data         512  quantization_inference.o(.constdata)
+    mult_19                                  0x08067d30   Data         512  quantization_inference.o(.constdata)
+    shift_19                                 0x08067f30   Data         128  quantization_inference.o(.constdata)
+    weight_20                                0x08067fb0   Data       110592  quantization_inference.o(.constdata)
+    bias_20                                  0x08082fb0   Data         512  quantization_inference.o(.constdata)
+    mult_20                                  0x080831b0   Data         512  quantization_inference.o(.constdata)
+    shift_20                                 0x080833b0   Data         128  quantization_inference.o(.constdata)
+    weight_21                                0x08083430   Data        9216  quantization_inference.o(.constdata)
+    bias_21                                  0x08085830   Data         384  quantization_inference.o(.constdata)
+    mult_21                                  0x080859b0   Data         384  quantization_inference.o(.constdata)
+    shift_21                                 0x08085b30   Data          96  quantization_inference.o(.constdata)
+    weight_22                                0x08085b90   Data          96  quantization_inference.o(.constdata)
+    bias_22                                  0x08085bf0   Data         384  quantization_inference.o(.constdata)
+    weight_23                                0x08085d70   Data       20736  quantization_inference.o(.constdata)
+    weight_24                                0x0808ae70   Data        6912  quantization_inference.o(.constdata)
+    bias_24                                  0x0808c970   Data         384  quantization_inference.o(.constdata)
+    weight_25                                0x0808caf0   Data          96  quantization_inference.o(.constdata)
+    bias_25                                  0x0808cb50   Data         384  quantization_inference.o(.constdata)
+    weight_26                                0x0808ccd0   Data        9216  quantization_inference.o(.constdata)
+    bias_26                                  0x0808f0d0   Data         512  quantization_inference.o(.constdata)
+    weight_27                                0x0808f2d0   Data        9216  quantization_inference.o(.constdata)
+    bias_27                                  0x080916d0   Data         384  quantization_inference.o(.constdata)
+    weight_28                                0x08091850   Data       62208  quantization_inference.o(.constdata)
+    bias_28                                  0x080a0b50   Data         384  quantization_inference.o(.constdata)
+    mult_28                                  0x080a0cd0   Data         384  quantization_inference.o(.constdata)
+    shift_28                                 0x080a0e50   Data          96  quantization_inference.o(.constdata)
+    weight_29                                0x080a0eb0   Data       18432  quantization_inference.o(.constdata)
+    bias_29                                  0x080a56b0   Data        1024  quantization_inference.o(.constdata)
+    mult_29                                  0x080a5ab0   Data        1024  quantization_inference.o(.constdata)
+    shift_29                                 0x080a5eb0   Data         256  quantization_inference.o(.constdata)
+    weight_30                                0x080a5fb0   Data       109703  quantization_inference.o(.constdata)
+    bias_30                                  0x080c0c38   Data        2048  quantization_inference.o(.constdata)
+    mult_30                                  0x080c1438   Data        2048  quantization_inference.o(.constdata)
+    shift_30                                 0x080c1c38   Data         512  quantization_inference.o(.constdata)
+    weight_31                                0x080c1e38   Data         512  quantization_inference.o(.constdata)
+    weight_32                                0x080c2038   Data        5120  quantization_inference.o(.constdata)
+    .constdata                               0x080c3438   Section      256  arm_layernorm_s8.o(.constdata)
+    sqq_table                                0x080c3438   Data         256  arm_layernorm_s8.o(.constdata)
+    .constdata                               0x080c3538   Section       16  system_stm32f7xx.o(.constdata)
+    .constdata                               0x080c3548   Section        8  system_stm32f7xx.o(.constdata)
+    .conststring                             0x080c3550   Section       23  main.o(.conststring)
+    .conststring                             0x080c3568   Section      236  quantization_inference.o(.conststring)
+    .conststring                             0x080c3654   Section      496  result_check.o(.conststring)
+    .conststring                             0x080c3844   Section       23  arm_fully_connected_s8_sparse.o(.conststring)
+    c.UART_SetConfig.00000198                0x080c387c   Section        9  stm32f7xx_hal_uart.o(c.UART_SetConfig.00000198)
+    c.UART_SetConfig.000001be                0x080c3885   Section        9  stm32f7xx_hal_uart.o(c.UART_SetConfig.000001be)
     .data                                    0x20000000   Section        4  system_stm32f7xx.o(.data)
     .data                                    0x20000004   Section       12  stm32f7xx_hal.o(.data)
     .data                                    0x20000010   Section        4  stdout.o(.data)
     .bss                                     0x20000014   Section      132  main.o(.bss)
-    .bss                                     0x20000098   Section    205312  quantization_inference.o(.bss)
-    buf                                      0x20000098   Data        4608  quantization_inference.o(.bss)
-    conv_mult_use                            0x20001298   Data        2048  quantization_inference.o(.bss)
-    conv_shift_use                           0x20001a98   Data        2048  quantization_inference.o(.bss)
-    section                                  0x20002298   Data       196608  quantization_inference.o(.bss)
-    STACK                                    0x20032298   Section     1024  startup_stm32f746xx.o(STACK)
+    .bss                                     0x20000098   Section    202752  quantization_inference.o(.bss)
+    buf                                      0x20000098   Data        2048  quantization_inference.o(.bss)
+    conv_mult_use                            0x20000898   Data        2048  quantization_inference.o(.bss)
+    conv_shift_use                           0x20001098   Data        2048  quantization_inference.o(.bss)
+    section                                  0x20001898   Data       196608  quantization_inference.o(.bss)
+    STACK                                    0x20031898   Section     1024  startup_stm32f746xx.o(STACK)
 
     Global Symbols
 
@@ -4252,37 +4259,42 @@ Image Symbol Table
     __scatterload_zeroinit                   0x08002021   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
     arm_avgpool_s8_get_buffer_size           0x080028e3   Thumb Code     4  arm_avgpool_s8.o(i.arm_avgpool_s8_get_buffer_size)
     arm_convolve_s8                          0x080028e9   Thumb Code   894  arm_convolve_s8.o(i.arm_convolve_s8)
-    arm_depthwise_conv_s8                    0x08002c69   Thumb Code  2324  arm_depthwise_conv_s8.o(i.arm_depthwise_conv_s8)
-    arm_elementwise_add_s8_with_neg          0x0800357d   Thumb Code  1582  arm_elementwise_add_s8_with_neg.o(i.arm_elementwise_add_s8_with_neg)
-    arm_fully_connected_s8                   0x08003bad   Thumb Code   110  arm_fully_connected_s8.o(i.arm_fully_connected_s8)
-    arm_layernorm_s8                         0x08003c1d   Thumb Code   958  arm_layernorm_s8.o(i.arm_layernorm_s8)
-    arm_maxpool_s8_with_quantization         0x08003fdd   Thumb Code   610  arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization)
-    arm_nn_batch_mat_mult_nt_t_s8            0x0800423f   Thumb Code   126  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8)
-    arm_nn_batch_mat_mult_s8                 0x080042bd   Thumb Code   136  arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8)
-    arm_nn_mat_mult_kernel_s8_s16            0x08004345   Thumb Code  1118  arm_nn_mat_mult_kernel_s8_s16.o(i.arm_nn_mat_mult_kernel_s8_s16)
-    arm_nn_softmax_common_s8                 0x080047a5   Thumb Code  3806  arm_nn_softmax_common_s8.o(i.arm_nn_softmax_common_s8)
-    arm_nn_transpose_bhwc_to_bwhc_q7         0x08005683   Thumb Code   102  arm_nn_transpose_bhwc_to_bwhc_q7.o(i.arm_nn_transpose_bhwc_to_bwhc_q7)
-    arm_nn_vec_mat_mult_s8_rhs_offset        0x080056e9   Thumb Code   538  arm_nn_batch_mat_mult_s8.o(i.arm_nn_vec_mat_mult_s8_rhs_offset)
-    arm_nn_vec_mat_mult_t_s8                 0x08005905   Thumb Code   734  arm_nn_vec_mat_mult_t_s8.o(i.arm_nn_vec_mat_mult_t_s8)
-    arm_nn_vec_mat_mult_t_s8_rhs_offset      0x08005be5   Thumb Code   748  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_vec_mat_mult_t_s8_rhs_offset)
-    arm_q7_to_q15_with_offset                0x08005ed1   Thumb Code   142  arm_q7_to_q15_with_offset.o(i.arm_q7_to_q15_with_offset)
-    arm_softmax_s8                           0x08005f5f   Thumb Code    26  arm_softmax_s8.o(i.arm_softmax_s8)
-    fputc                                    0x08005f79   Thumb Code    22  retarget_io.o(i.fputc)
-    main                                     0x08005f91   Thumb Code   278  main.o(i.main)
-    quantization_inference                   0x080060a9   Thumb Code  6482  quantization_inference.o(i.quantization_inference)
-    result_check_statistics                  0x080079fb   Thumb Code  1294  result_check.o(i.result_check_statistics)
-    stdout_putchar                           0x08007f09   Thumb Code    26  main.o(i.stdout_putchar)
-    AHBPrescTable                            0x080f4e20   Data          16  system_stm32f7xx.o(.constdata)
-    APBPrescTable                            0x080f4e30   Data           8  system_stm32f7xx.o(.constdata)
-    Region$$Table$$Base                      0x080f512c   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x080f514c   Number         0  anon$$obj.o(Region$$Table)
+    arm_convolve_s8_sparse_1x1_CHW           0x08002c69   Thumb Code  1528  arm_convolve_s8_sparse_chw.o(i.arm_convolve_s8_sparse_1x1_CHW)
+    arm_convolve_s8_sparse_get_buffer_size   0x08003261   Thumb Code    12  arm_convolve_s8_sparse.o(i.arm_convolve_s8_sparse_get_buffer_size)
+    arm_depthwise_conv_s8                    0x0800326d   Thumb Code  2324  arm_depthwise_conv_s8.o(i.arm_depthwise_conv_s8)
+    arm_depthwise_conv_s8_sparse_1x1_CHW     0x08003b81   Thumb Code  1420  arm_depthwise_conv_s8_sparse_chw.o(i.arm_depthwise_conv_s8_sparse_1x1_CHW)
+    arm_elementwise_add_s8_with_neg          0x0800410d   Thumb Code  1582  arm_elementwise_add_s8_with_neg.o(i.arm_elementwise_add_s8_with_neg)
+    arm_fully_connected_s8                   0x0800473d   Thumb Code   110  arm_fully_connected_s8.o(i.arm_fully_connected_s8)
+    arm_fully_connected_s8_sparse            0x080047ad   Thumb Code  1260  arm_fully_connected_s8_sparse.o(i.arm_fully_connected_s8_sparse)
+    arm_fully_connected_s8_sparse_CHW        0x08004c99   Thumb Code  1212  arm_fully_connected_s8_sparse_chw.o(i.arm_fully_connected_s8_sparse_CHW)
+    arm_layernorm_s8                         0x08005155   Thumb Code   958  arm_layernorm_s8.o(i.arm_layernorm_s8)
+    arm_maxpool_s8_with_quantization         0x08005515   Thumb Code   610  arm_pool_s8_with_quantization.o(i.arm_maxpool_s8_with_quantization)
+    arm_nn_batch_mat_mult_nt_t_s8            0x08005777   Thumb Code   126  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_batch_mat_mult_nt_t_s8)
+    arm_nn_batch_mat_mult_s8                 0x080057f5   Thumb Code   136  arm_nn_batch_mat_mult_s8.o(i.arm_nn_batch_mat_mult_s8)
+    arm_nn_mat_mult_kernel_s8_s16            0x0800587d   Thumb Code  1118  arm_nn_mat_mult_kernel_s8_s16.o(i.arm_nn_mat_mult_kernel_s8_s16)
+    arm_nn_output_per_channel_CHW            0x08005cdd   Thumb Code   630  arm_nn_output_per_channel.o(i.arm_nn_output_per_channel_CHW)
+    arm_nn_transpose_bhwc_to_bwhc_q7         0x08005f53   Thumb Code   102  arm_nn_transpose_bhwc_to_bwhc_q7.o(i.arm_nn_transpose_bhwc_to_bwhc_q7)
+    arm_nn_vec_mat_mult_s8_rhs_offset        0x08005fb9   Thumb Code   538  arm_nn_batch_mat_mult_s8.o(i.arm_nn_vec_mat_mult_s8_rhs_offset)
+    arm_nn_vec_mat_mult_t_s8                 0x080061d5   Thumb Code   734  arm_nn_vec_mat_mult_t_s8.o(i.arm_nn_vec_mat_mult_t_s8)
+    arm_nn_vec_mat_mult_t_s8_rhs_offset      0x080064b5   Thumb Code   748  arm_nn_batch_mat_mult_nt_t_s8.o(i.arm_nn_vec_mat_mult_t_s8_rhs_offset)
+    arm_q7_to_q15_with_offset                0x080067a1   Thumb Code   142  arm_q7_to_q15_with_offset.o(i.arm_q7_to_q15_with_offset)
+    arm_softmax_s8_fast                      0x08006831   Thumb Code  3018  arm_softmax_s8_fast.o(i.arm_softmax_s8_fast)
+    fputc                                    0x080073fb   Thumb Code    22  retarget_io.o(i.fputc)
+    main                                     0x08007411   Thumb Code   278  main.o(i.main)
+    quantization_inference                   0x08007529   Thumb Code  8548  quantization_inference.o(i.quantization_inference)
+    result_check_statistics                  0x0800968d   Thumb Code  1294  result_check.o(i.result_check_statistics)
+    stdout_putchar                           0x08009b9b   Thumb Code    26  main.o(i.stdout_putchar)
+    AHBPrescTable                            0x080c3538   Data          16  system_stm32f7xx.o(.constdata)
+    APBPrescTable                            0x080c3548   Data           8  system_stm32f7xx.o(.constdata)
+    Region$$Table$$Base                      0x080c385c   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x080c387c   Number         0  anon$$obj.o(Region$$Table)
     SystemCoreClock                          0x20000000   Data           4  system_stm32f7xx.o(.data)
     uwTickFreq                               0x20000004   Data           1  stm32f7xx_hal.o(.data)
     uwTickPrio                               0x20000008   Data           4  stm32f7xx_hal.o(.data)
     uwTick                                   0x2000000c   Data           4  stm32f7xx_hal.o(.data)
     __stdout                                 0x20000010   Data           4  stdout.o(.data)
     huart1                                   0x20000014   Data         132  main.o(.bss)
-    __initial_sp                             0x20032698   Data           0  startup_stm32f746xx.o(STACK)
+    __initial_sp                             0x20031c98   Data           0  startup_stm32f746xx.o(STACK)
 
 
 
@@ -4292,65 +4304,65 @@ Memory Map of the image
 
   Image Entry point : 0x080001c9
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x000f5174, Max: 0x00100000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x000c38a4, Max: 0x00100000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x000f5160, Max: 0x00100000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x000c3890, Max: 0x00100000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x08000000   0x08000000   0x000001c8   Data   RO            3    RESET               startup_stm32f746xx.o
-    0x080001c8   0x080001c8   0x00000000   Code   RO         1707  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x080001c8   0x080001c8   0x00000004   Code   RO         1882    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
-    0x080001cc   0x080001cc   0x00000004   Code   RO         1885    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x080001d0   0x080001d0   0x00000000   Code   RO         1887    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x080001d0   0x080001d0   0x00000000   Code   RO         1889    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x080001d0   0x080001d0   0x00000008   Code   RO         1890    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x080001d8   0x080001d8   0x00000000   Code   RO         1892    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
-    0x080001d8   0x080001d8   0x00000000   Code   RO         1894    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
-    0x080001d8   0x080001d8   0x00000004   Code   RO         1883    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
+    0x080001c8   0x080001c8   0x00000000   Code   RO         1708  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
+    0x080001c8   0x080001c8   0x00000004   Code   RO         1883    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
+    0x080001cc   0x080001cc   0x00000004   Code   RO         1886    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x080001d0   0x080001d0   0x00000000   Code   RO         1888    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x080001d0   0x080001d0   0x00000000   Code   RO         1890    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x080001d0   0x080001d0   0x00000008   Code   RO         1891    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x080001d8   0x080001d8   0x00000000   Code   RO         1893    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
+    0x080001d8   0x080001d8   0x00000000   Code   RO         1895    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
+    0x080001d8   0x080001d8   0x00000004   Code   RO         1884    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
     0x080001dc   0x080001dc   0x00000024   Code   RO            4    .text               startup_stm32f746xx.o
-    0x08000200   0x08000200   0x00000062   Code   RO         1714    .text               mc_w.l(uldiv.o)
-    0x08000262   0x08000262   0x00000062   Code   RO         1715    .text               mc_w.l(ldiv.o)
-    0x080002c4   0x080002c4   0x0000001e   Code   RO         1716    .text               mc_w.l(llshl.o)
-    0x080002e2   0x080002e2   0x00000024   Code   RO         1717    .text               mc_w.l(llsshr.o)
-    0x08000306   0x08000306   0x00000040   Code   RO         1719    .text               mc_w.l(memmovea.o)
-    0x08000346   0x08000346   0x00000024   Code   RO         1720    .text               mc_w.l(memseta.o)
-    0x0800036a   0x0800036a   0x0000014e   Code   RO         1854    .text               mf_w.l(dadd.o)
-    0x080004b8   0x080004b8   0x000000e4   Code   RO         1855    .text               mf_w.l(dmul.o)
-    0x0800059c   0x0800059c   0x000000de   Code   RO         1856    .text               mf_w.l(ddiv.o)
-    0x0800067a   0x0800067a   0x00000022   Code   RO         1858    .text               mf_w.l(dflti.o)
-    0x0800069c   0x0800069c   0x00000030   Code   RO         1862    .text               mf_w.l(cdrcmple.o)
-    0x080006cc   0x080006cc   0x0000002c   Code   RO         1896    .text               mc_w.l(uidiv.o)
-    0x080006f8   0x080006f8   0x00000020   Code   RO         1897    .text               mc_w.l(llushr.o)
-    0x08000718   0x08000718   0x00000000   Code   RO         1902    .text               mc_w.l(iusefp.o)
-    0x08000718   0x08000718   0x000000ba   Code   RO         1904    .text               mf_w.l(depilogue.o)
-    0x080007d2   0x080007d2   0x00000030   Code   RO         1908    .text               mf_w.l(dfixul.o)
+    0x08000200   0x08000200   0x00000062   Code   RO         1715    .text               mc_w.l(uldiv.o)
+    0x08000262   0x08000262   0x00000062   Code   RO         1716    .text               mc_w.l(ldiv.o)
+    0x080002c4   0x080002c4   0x0000001e   Code   RO         1717    .text               mc_w.l(llshl.o)
+    0x080002e2   0x080002e2   0x00000024   Code   RO         1718    .text               mc_w.l(llsshr.o)
+    0x08000306   0x08000306   0x00000040   Code   RO         1720    .text               mc_w.l(memmovea.o)
+    0x08000346   0x08000346   0x00000024   Code   RO         1721    .text               mc_w.l(memseta.o)
+    0x0800036a   0x0800036a   0x0000014e   Code   RO         1855    .text               mf_w.l(dadd.o)
+    0x080004b8   0x080004b8   0x000000e4   Code   RO         1856    .text               mf_w.l(dmul.o)
+    0x0800059c   0x0800059c   0x000000de   Code   RO         1857    .text               mf_w.l(ddiv.o)
+    0x0800067a   0x0800067a   0x00000022   Code   RO         1859    .text               mf_w.l(dflti.o)
+    0x0800069c   0x0800069c   0x00000030   Code   RO         1863    .text               mf_w.l(cdrcmple.o)
+    0x080006cc   0x080006cc   0x0000002c   Code   RO         1897    .text               mc_w.l(uidiv.o)
+    0x080006f8   0x080006f8   0x00000020   Code   RO         1898    .text               mc_w.l(llushr.o)
+    0x08000718   0x08000718   0x00000000   Code   RO         1903    .text               mc_w.l(iusefp.o)
+    0x08000718   0x08000718   0x000000ba   Code   RO         1905    .text               mf_w.l(depilogue.o)
+    0x080007d2   0x080007d2   0x00000030   Code   RO         1909    .text               mf_w.l(dfixul.o)
     0x08000802   0x08000802   0x00000002   PAD
-    0x08000804   0x08000804   0x00000024   Code   RO         1910    .text               mc_w.l(init.o)
+    0x08000804   0x08000804   0x00000024   Code   RO         1911    .text               mc_w.l(init.o)
     0x08000828   0x08000828   0x00000002   Code   RO           17    i.BusFault_Handler  stm32f7xx_it.o
     0x0800082a   0x0800082a   0x00000002   Code   RO           18    i.DebugMon_Handler  stm32f7xx_it.o
-    0x0800082c   0x0800082c   0x00000028   Code   RO          374    i.HAL_Delay         stm32f7xx_hal.o
-    0x08000854   0x08000854   0x0000023c   Code   RO          299    i.HAL_GPIO_Init     stm32f7xx_hal_gpio.o
-    0x08000a90   0x08000a90   0x0000000c   Code   RO          382    i.HAL_GetTick       stm32f7xx_hal.o
-    0x08000a9c   0x08000a9c   0x00000012   Code   RO          388    i.HAL_IncTick       stm32f7xx_hal.o
-    0x08000aae   0x08000aae   0x0000002e   Code   RO          389    i.HAL_Init          stm32f7xx_hal.o
-    0x08000adc   0x08000adc   0x00000042   Code   RO          390    i.HAL_InitTick      stm32f7xx_hal.o
+    0x0800082c   0x0800082c   0x00000028   Code   RO          375    i.HAL_Delay         stm32f7xx_hal.o
+    0x08000854   0x08000854   0x0000023c   Code   RO          300    i.HAL_GPIO_Init     stm32f7xx_hal_gpio.o
+    0x08000a90   0x08000a90   0x0000000c   Code   RO          383    i.HAL_GetTick       stm32f7xx_hal.o
+    0x08000a9c   0x08000a9c   0x00000012   Code   RO          389    i.HAL_IncTick       stm32f7xx_hal.o
+    0x08000aae   0x08000aae   0x0000002e   Code   RO          390    i.HAL_Init          stm32f7xx_hal.o
+    0x08000adc   0x08000adc   0x00000042   Code   RO          391    i.HAL_InitTick      stm32f7xx_hal.o
     0x08000b1e   0x08000b1e   0x00000046   Code   RO           30    i.HAL_MspInit       stm32f7xx_hal_msp.o
-    0x08000b64   0x08000b64   0x0000001e   Code   RO          147    i.HAL_NVIC_EnableIRQ  stm32f7xx_hal_cortex.o
-    0x08000b82   0x08000b82   0x00000062   Code   RO          153    i.HAL_NVIC_SetPriority  stm32f7xx_hal_cortex.o
-    0x08000be4   0x08000be4   0x00000024   Code   RO          154    i.HAL_NVIC_SetPriorityGrouping  stm32f7xx_hal_cortex.o
-    0x08000c08   0x08000c08   0x00000080   Code   RO          361    i.HAL_PWREx_EnableOverDrive  stm32f7xx_hal_pwr_ex.o
-    0x08000c88   0x08000c88   0x000005a8   Code   RO          268    i.HAL_RCCEx_PeriphCLKConfig  stm32f7xx_hal_rcc_ex.o
-    0x08001230   0x08001230   0x000001e0   Code   RO          246    i.HAL_RCC_ClockConfig  stm32f7xx_hal_rcc.o
-    0x08001410   0x08001410   0x00000026   Code   RO          253    i.HAL_RCC_GetPCLK1Freq  stm32f7xx_hal_rcc.o
-    0x08001436   0x08001436   0x00000026   Code   RO          254    i.HAL_RCC_GetPCLK2Freq  stm32f7xx_hal_rcc.o
-    0x0800145c   0x0800145c   0x0000007a   Code   RO          255    i.HAL_RCC_GetSysClockFreq  stm32f7xx_hal_rcc.o
+    0x08000b64   0x08000b64   0x0000001e   Code   RO          148    i.HAL_NVIC_EnableIRQ  stm32f7xx_hal_cortex.o
+    0x08000b82   0x08000b82   0x00000062   Code   RO          154    i.HAL_NVIC_SetPriority  stm32f7xx_hal_cortex.o
+    0x08000be4   0x08000be4   0x00000024   Code   RO          155    i.HAL_NVIC_SetPriorityGrouping  stm32f7xx_hal_cortex.o
+    0x08000c08   0x08000c08   0x00000080   Code   RO          362    i.HAL_PWREx_EnableOverDrive  stm32f7xx_hal_pwr_ex.o
+    0x08000c88   0x08000c88   0x000005a8   Code   RO          269    i.HAL_RCCEx_PeriphCLKConfig  stm32f7xx_hal_rcc_ex.o
+    0x08001230   0x08001230   0x000001e0   Code   RO          247    i.HAL_RCC_ClockConfig  stm32f7xx_hal_rcc.o
+    0x08001410   0x08001410   0x00000026   Code   RO          254    i.HAL_RCC_GetPCLK1Freq  stm32f7xx_hal_rcc.o
+    0x08001436   0x08001436   0x00000026   Code   RO          255    i.HAL_RCC_GetPCLK2Freq  stm32f7xx_hal_rcc.o
+    0x0800145c   0x0800145c   0x0000007a   Code   RO          256    i.HAL_RCC_GetSysClockFreq  stm32f7xx_hal_rcc.o
     0x080014d6   0x080014d6   0x00000002   PAD
-    0x080014d8   0x080014d8   0x0000041a   Code   RO          258    i.HAL_RCC_OscConfig  stm32f7xx_hal_rcc.o
-    0x080018f2   0x080018f2   0x0000002a   Code   RO          158    i.HAL_SYSTICK_Config  stm32f7xx_hal_cortex.o
-    0x0800191c   0x0800191c   0x0000006a   Code   RO          198    i.HAL_UART_Init     stm32f7xx_hal_uart.o
+    0x080014d8   0x080014d8   0x0000041a   Code   RO          259    i.HAL_RCC_OscConfig  stm32f7xx_hal_rcc.o
+    0x080018f2   0x080018f2   0x0000002a   Code   RO          159    i.HAL_SYSTICK_Config  stm32f7xx_hal_cortex.o
+    0x0800191c   0x0800191c   0x0000006a   Code   RO          199    i.HAL_UART_Init     stm32f7xx_hal_uart.o
     0x08001986   0x08001986   0x0000009a   Code   RO           32    i.HAL_UART_MspInit  stm32f7xx_hal_msp.o
-    0x08001a20   0x08001a20   0x000000c6   Code   RO          207    i.HAL_UART_Transmit  stm32f7xx_hal_uart.o
+    0x08001a20   0x08001a20   0x000000c6   Code   RO          208    i.HAL_UART_Transmit  stm32f7xx_hal_uart.o
     0x08001ae6   0x08001ae6   0x00000002   Code   RO           19    i.HardFault_Handler  stm32f7xx_it.o
     0x08001ae8   0x08001ae8   0x00000002   Code   RO           20    i.MemManage_Handler  stm32f7xx_it.o
     0x08001aea   0x08001aea   0x00000002   Code   RO           21    i.NMI_Handler       stm32f7xx_it.o
@@ -4359,78 +4371,84 @@ Memory Map of the image
     0x08001af0   0x08001af0   0x00000002   Code   RO           24    i.SVC_Handler       stm32f7xx_it.o
     0x08001af2   0x08001af2   0x00000004   Code   RO           25    i.SysTick_Handler   stm32f7xx_it.o
     0x08001af6   0x08001af6   0x000000ba   Code   RO            9    i.SystemClock_Config  main.o
-    0x08001bb0   0x08001bb0   0x00000012   Code   RO          135    i.SystemInit        system_stm32f7xx.o
-    0x08001bc2   0x08001bc2   0x000000da   Code   RO          212    i.UART_AdvFeatureConfig  stm32f7xx_hal_uart.o
-    0x08001c9c   0x08001c9c   0x00000044   Code   RO          213    i.UART_CheckIdleState  stm32f7xx_hal_uart.o
-    0x08001ce0   0x08001ce0   0x0000024a   Code   RO          226    i.UART_SetConfig    stm32f7xx_hal_uart.o
+    0x08001bb0   0x08001bb0   0x00000012   Code   RO          136    i.SystemInit        system_stm32f7xx.o
+    0x08001bc2   0x08001bc2   0x000000da   Code   RO          213    i.UART_AdvFeatureConfig  stm32f7xx_hal_uart.o
+    0x08001c9c   0x08001c9c   0x00000044   Code   RO          214    i.UART_CheckIdleState  stm32f7xx_hal_uart.o
+    0x08001ce0   0x08001ce0   0x0000024a   Code   RO          227    i.UART_SetConfig    stm32f7xx_hal_uart.o
     0x08001f2a   0x08001f2a   0x00000002   PAD
-    0x08001f2c   0x08001f2c   0x000000c2   Code   RO          231    i.UART_WaitOnFlagUntilTimeout  stm32f7xx_hal_uart.o
+    0x08001f2c   0x08001f2c   0x000000c2   Code   RO          232    i.UART_WaitOnFlagUntilTimeout  stm32f7xx_hal_uart.o
     0x08001fee   0x08001fee   0x00000002   Code   RO           26    i.UsageFault_Handler  stm32f7xx_it.o
-    0x08001ff0   0x08001ff0   0x00000020   Code   RO         1840    i.__0printf         mc_w.l(printfa.o)
-    0x08002010   0x08002010   0x0000000e   Code   RO         1913    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x0800201e   0x0800201e   0x00000002   Code   RO         1914    i.__scatterload_null  mc_w.l(handlers.o)
-    0x08002020   0x08002020   0x0000000e   Code   RO         1915    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x08001ff0   0x08001ff0   0x00000020   Code   RO         1841    i.__0printf         mc_w.l(printfa.o)
+    0x08002010   0x08002010   0x0000000e   Code   RO         1914    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x0800201e   0x0800201e   0x00000002   Code   RO         1915    i.__scatterload_null  mc_w.l(handlers.o)
+    0x08002020   0x08002020   0x0000000e   Code   RO         1916    i.__scatterload_zeroinit  mc_w.l(handlers.o)
     0x0800202e   0x0800202e   0x00000002   PAD
-    0x08002030   0x08002030   0x00000184   Code   RO         1847    i._fp_digits        mc_w.l(printfa.o)
-    0x080021b4   0x080021b4   0x000006dc   Code   RO         1848    i._printf_core      mc_w.l(printfa.o)
-    0x08002890   0x08002890   0x00000024   Code   RO         1849    i._printf_post_padding  mc_w.l(printfa.o)
-    0x080028b4   0x080028b4   0x0000002e   Code   RO         1850    i._printf_pre_padding  mc_w.l(printfa.o)
-    0x080028e2   0x080028e2   0x00000004   Code   RO         1578    i.arm_avgpool_s8_get_buffer_size  arm_avgpool_s8.o
+    0x08002030   0x08002030   0x00000184   Code   RO         1848    i._fp_digits        mc_w.l(printfa.o)
+    0x080021b4   0x080021b4   0x000006dc   Code   RO         1849    i._printf_core      mc_w.l(printfa.o)
+    0x08002890   0x08002890   0x00000024   Code   RO         1850    i._printf_post_padding  mc_w.l(printfa.o)
+    0x080028b4   0x080028b4   0x0000002e   Code   RO         1851    i._printf_pre_padding  mc_w.l(printfa.o)
+    0x080028e2   0x080028e2   0x00000004   Code   RO         1579    i.arm_avgpool_s8_get_buffer_size  arm_avgpool_s8.o
     0x080028e6   0x080028e6   0x00000002   PAD
-    0x080028e8   0x080028e8   0x0000037e   Code   RO         1390    i.arm_convolve_s8   arm_convolve_s8.o
+    0x080028e8   0x080028e8   0x0000037e   Code   RO         1391    i.arm_convolve_s8   arm_convolve_s8.o
     0x08002c66   0x08002c66   0x00000002   PAD
-    0x08002c68   0x08002c68   0x00000914   Code   RO         1413    i.arm_depthwise_conv_s8  arm_depthwise_conv_s8.o
-    0x0800357c   0x0800357c   0x0000062e   Code   RO           97    i.arm_elementwise_add_s8_with_neg  arm_elementwise_add_s8_with_neg.o
-    0x08003baa   0x08003baa   0x00000002   PAD
-    0x08003bac   0x08003bac   0x0000006e   Code   RO         1488    i.arm_fully_connected_s8  arm_fully_connected_s8.o
-    0x08003c1a   0x08003c1a   0x00000002   PAD
-    0x08003c1c   0x08003c1c   0x000003be   Code   RO          109    i.arm_layernorm_s8  arm_layernorm_s8.o
-    0x08003fda   0x08003fda   0x00000002   PAD
-    0x08003fdc   0x08003fdc   0x00000262   Code   RO           93    i.arm_maxpool_s8_with_quantization  arm_pool_s8_with_quantization.o
-    0x0800423e   0x0800423e   0x0000007e   Code   RO           73    i.arm_nn_batch_mat_mult_nt_t_s8  arm_nn_batch_mat_mult_nt_t_s8.o
-    0x080042bc   0x080042bc   0x00000088   Code   RO           78    i.arm_nn_batch_mat_mult_s8  arm_nn_batch_mat_mult_s8.o
-    0x08004344   0x08004344   0x0000045e   Code   RO         1451    i.arm_nn_mat_mult_kernel_s8_s16  arm_nn_mat_mult_kernel_s8_s16.o
-    0x080047a2   0x080047a2   0x00000002   PAD
-    0x080047a4   0x080047a4   0x00000ede   Code   RO           88    i.arm_nn_softmax_common_s8  arm_nn_softmax_common_s8.o
-    0x08005682   0x08005682   0x00000066   Code   RO          105    i.arm_nn_transpose_bhwc_to_bwhc_q7  arm_nn_transpose_bhwc_to_bwhc_q7.o
-    0x080056e8   0x080056e8   0x0000021a   Code   RO           79    i.arm_nn_vec_mat_mult_s8_rhs_offset  arm_nn_batch_mat_mult_s8.o
-    0x08005902   0x08005902   0x00000002   PAD
-    0x08005904   0x08005904   0x000002de   Code   RO         1537    i.arm_nn_vec_mat_mult_t_s8  arm_nn_vec_mat_mult_t_s8.o
-    0x08005be2   0x08005be2   0x00000002   PAD
-    0x08005be4   0x08005be4   0x000002ec   Code   RO           74    i.arm_nn_vec_mat_mult_t_s8_rhs_offset  arm_nn_batch_mat_mult_nt_t_s8.o
-    0x08005ed0   0x08005ed0   0x0000008e   Code   RO         1568    i.arm_q7_to_q15_with_offset  arm_q7_to_q15_with_offset.o
-    0x08005f5e   0x08005f5e   0x0000001a   Code   RO         1619    i.arm_softmax_s8    arm_softmax_s8.o
-    0x08005f78   0x08005f78   0x00000016   Code   RO         1636    i.fputc             retarget_io.o
-    0x08005f8e   0x08005f8e   0x00000002   PAD
-    0x08005f90   0x08005f90   0x00000116   Code   RO           10    i.main              main.o
-    0x080060a6   0x080060a6   0x00000002   PAD
-    0x080060a8   0x080060a8   0x00001952   Code   RO           36    i.quantization_inference  quantization_inference.o
-    0x080079fa   0x080079fa   0x0000050e   Code   RO           43    i.result_check_statistics  result_check.o
-    0x08007f08   0x08007f08   0x0000001a   Code   RO           11    i.stdout_putchar    main.o
-    0x08007f22   0x08007f22   0x00000002   PAD
-    0x08007f24   0x08007f24   0x000ecdfc   Data   RO           38    .constdata          quantization_inference.o
-    0x080f4d20   0x080f4d20   0x00000100   Data   RO          110    .constdata          arm_layernorm_s8.o
-    0x080f4e20   0x080f4e20   0x00000010   Data   RO          136    .constdata          system_stm32f7xx.o
-    0x080f4e30   0x080f4e30   0x00000008   Data   RO          137    .constdata          system_stm32f7xx.o
-    0x080f4e38   0x080f4e38   0x00000017   Data   RO           13    .conststring        main.o
-    0x080f4e4f   0x080f4e4f   0x00000001   PAD
-    0x080f4e50   0x080f4e50   0x000000ec   Data   RO           39    .conststring        quantization_inference.o
-    0x080f4f3c   0x080f4f3c   0x000001f0   Data   RO           44    .conststring        result_check.o
-    0x080f512c   0x080f512c   0x00000020   Data   RO         1911    Region$$Table       anon$$obj.o
-    0x080f514c   0x080f514c   0x00000009   Data   RO          232    c.UART_SetConfig.00000198  stm32f7xx_hal_uart.o
-    0x080f5155   0x080f5155   0x00000009   Data   RO          233    c.UART_SetConfig.000001be  stm32f7xx_hal_uart.o
+    0x08002c68   0x08002c68   0x000005f8   Code   RO          115    i.arm_convolve_s8_sparse_1x1_CHW  arm_convolve_s8_sparse_chw.o
+    0x08003260   0x08003260   0x0000000c   Code   RO           56    i.arm_convolve_s8_sparse_get_buffer_size  arm_convolve_s8_sparse.o
+    0x0800326c   0x0800326c   0x00000914   Code   RO         1414    i.arm_depthwise_conv_s8  arm_depthwise_conv_s8.o
+    0x08003b80   0x08003b80   0x0000058c   Code   RO          121    i.arm_depthwise_conv_s8_sparse_1x1_CHW  arm_depthwise_conv_s8_sparse_chw.o
+    0x0800410c   0x0800410c   0x0000062e   Code   RO           98    i.arm_elementwise_add_s8_with_neg  arm_elementwise_add_s8_with_neg.o
+    0x0800473a   0x0800473a   0x00000002   PAD
+    0x0800473c   0x0800473c   0x0000006e   Code   RO         1489    i.arm_fully_connected_s8  arm_fully_connected_s8.o
+    0x080047aa   0x080047aa   0x00000002   PAD
+    0x080047ac   0x080047ac   0x000004ec   Code   RO           69    i.arm_fully_connected_s8_sparse  arm_fully_connected_s8_sparse.o
+    0x08004c98   0x08004c98   0x000004bc   Code   RO          127    i.arm_fully_connected_s8_sparse_CHW  arm_fully_connected_s8_sparse_chw.o
+    0x08005154   0x08005154   0x000003be   Code   RO          110    i.arm_layernorm_s8  arm_layernorm_s8.o
+    0x08005512   0x08005512   0x00000002   PAD
+    0x08005514   0x08005514   0x00000262   Code   RO           94    i.arm_maxpool_s8_with_quantization  arm_pool_s8_with_quantization.o
+    0x08005776   0x08005776   0x0000007e   Code   RO           74    i.arm_nn_batch_mat_mult_nt_t_s8  arm_nn_batch_mat_mult_nt_t_s8.o
+    0x080057f4   0x080057f4   0x00000088   Code   RO           79    i.arm_nn_batch_mat_mult_s8  arm_nn_batch_mat_mult_s8.o
+    0x0800587c   0x0800587c   0x0000045e   Code   RO         1452    i.arm_nn_mat_mult_kernel_s8_s16  arm_nn_mat_mult_kernel_s8_s16.o
+    0x08005cda   0x08005cda   0x00000002   PAD
+    0x08005cdc   0x08005cdc   0x00000276   Code   RO           85    i.arm_nn_output_per_channel_CHW  arm_nn_output_per_channel.o
+    0x08005f52   0x08005f52   0x00000066   Code   RO          106    i.arm_nn_transpose_bhwc_to_bwhc_q7  arm_nn_transpose_bhwc_to_bwhc_q7.o
+    0x08005fb8   0x08005fb8   0x0000021a   Code   RO           80    i.arm_nn_vec_mat_mult_s8_rhs_offset  arm_nn_batch_mat_mult_s8.o
+    0x080061d2   0x080061d2   0x00000002   PAD
+    0x080061d4   0x080061d4   0x000002de   Code   RO         1538    i.arm_nn_vec_mat_mult_t_s8  arm_nn_vec_mat_mult_t_s8.o
+    0x080064b2   0x080064b2   0x00000002   PAD
+    0x080064b4   0x080064b4   0x000002ec   Code   RO           75    i.arm_nn_vec_mat_mult_t_s8_rhs_offset  arm_nn_batch_mat_mult_nt_t_s8.o
+    0x080067a0   0x080067a0   0x0000008e   Code   RO         1569    i.arm_q7_to_q15_with_offset  arm_q7_to_q15_with_offset.o
+    0x0800682e   0x0800682e   0x00000002   PAD
+    0x08006830   0x08006830   0x00000bca   Code   RO          102    i.arm_softmax_s8_fast  arm_softmax_s8_fast.o
+    0x080073fa   0x080073fa   0x00000016   Code   RO         1637    i.fputc             retarget_io.o
+    0x08007410   0x08007410   0x00000116   Code   RO           10    i.main              main.o
+    0x08007526   0x08007526   0x00000002   PAD
+    0x08007528   0x08007528   0x00002164   Code   RO           36    i.quantization_inference  quantization_inference.o
+    0x0800968c   0x0800968c   0x0000050e   Code   RO           43    i.result_check_statistics  result_check.o
+    0x08009b9a   0x08009b9a   0x0000001a   Code   RO           11    i.stdout_putchar    main.o
+    0x08009bb4   0x08009bb4   0x000b9884   Data   RO           38    .constdata          quantization_inference.o
+    0x080c3438   0x080c3438   0x00000100   Data   RO          111    .constdata          arm_layernorm_s8.o
+    0x080c3538   0x080c3538   0x00000010   Data   RO          137    .constdata          system_stm32f7xx.o
+    0x080c3548   0x080c3548   0x00000008   Data   RO          138    .constdata          system_stm32f7xx.o
+    0x080c3550   0x080c3550   0x00000017   Data   RO           13    .conststring        main.o
+    0x080c3567   0x080c3567   0x00000001   PAD
+    0x080c3568   0x080c3568   0x000000ec   Data   RO           39    .conststring        quantization_inference.o
+    0x080c3654   0x080c3654   0x000001f0   Data   RO           44    .conststring        result_check.o
+    0x080c3844   0x080c3844   0x00000017   Data   RO           70    .conststring        arm_fully_connected_s8_sparse.o
+    0x080c385b   0x080c385b   0x00000001   PAD
+    0x080c385c   0x080c385c   0x00000020   Data   RO         1912    Region$$Table       anon$$obj.o
+    0x080c387c   0x080c387c   0x00000009   Data   RO          233    c.UART_SetConfig.00000198  stm32f7xx_hal_uart.o
+    0x080c3885   0x080c3885   0x00000009   Data   RO          234    c.UART_SetConfig.000001be  stm32f7xx_hal_uart.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080f5160, Size: 0x00032698, Max: 0x00050000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080c3890, Size: 0x00031c98, Max: 0x00050000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x080f5160   0x00000004   Data   RW          138    .data               system_stm32f7xx.o
-    0x20000004   0x080f5164   0x0000000c   Data   RW          396    .data               stm32f7xx_hal.o
-    0x20000010   0x080f5170   0x00000004   Data   RW         1712    .data               mc_w.l(stdout.o)
+    0x20000000   0x080c3890   0x00000004   Data   RW          139    .data               system_stm32f7xx.o
+    0x20000004   0x080c3894   0x0000000c   Data   RW          397    .data               stm32f7xx_hal.o
+    0x20000010   0x080c38a0   0x00000004   Data   RW         1713    .data               mc_w.l(stdout.o)
     0x20000014        -       0x00000084   Zero   RW           12    .bss                main.o
-    0x20000098        -       0x00032200   Zero   RW           37    .bss                quantization_inference.o
-    0x20032298        -       0x00000400   Zero   RW            1    STACK               startup_stm32f746xx.o
+    0x20000098        -       0x00031800   Zero   RW           37    .bss                quantization_inference.o
+    0x20031898        -       0x00000400   Zero   RW            1    STACK               startup_stm32f746xx.o
 
 
 ==============================================================================
@@ -4442,21 +4460,26 @@ Image component sizes
 
          4          0          0          0          0          0   arm_avgpool_s8.o
        894          0          0          0          0          0   arm_convolve_s8.o
+        12          0          0          0          0          0   arm_convolve_s8_sparse.o
+      1528          0          0          0          0          0   arm_convolve_s8_sparse_chw.o
       2324          0          0          0          0          0   arm_depthwise_conv_s8.o
+      1420          0          0          0          0          0   arm_depthwise_conv_s8_sparse_chw.o
       1582          0          0          0          0          0   arm_elementwise_add_s8_with_neg.o
        110          0          0          0          0          0   arm_fully_connected_s8.o
+      1260          0         23          0          0          0   arm_fully_connected_s8_sparse.o
+      1212          0          0          0          0          0   arm_fully_connected_s8_sparse_chw.o
        958          0        256          0          0          0   arm_layernorm_s8.o
        874          0          0          0          0          0   arm_nn_batch_mat_mult_nt_t_s8.o
        674          0          0          0          0          0   arm_nn_batch_mat_mult_s8.o
       1118          0          0          0          0          0   arm_nn_mat_mult_kernel_s8_s16.o
-      3806          0          0          0          0          0   arm_nn_softmax_common_s8.o
+       630          0          0          0          0          0   arm_nn_output_per_channel.o
        102          0          0          0          0          0   arm_nn_transpose_bhwc_to_bwhc_q7.o
        734          0          0          0          0          0   arm_nn_vec_mat_mult_t_s8.o
        610          0          0          0          0          0   arm_pool_s8_with_quantization.o
        142          0          0          0          0          0   arm_q7_to_q15_with_offset.o
-        26          0          0          0          0          0   arm_softmax_s8.o
+      3018          0          0          0          0          0   arm_softmax_s8_fast.o
        490          0         23          0        132          0   main.o
-      6482          0     970472          0     205312          0   quantization_inference.o
+      8548          0     760176          0     202752          0   quantization_inference.o
       1294          0        496          0          0          0   result_check.o
         22          0          0          0          0          0   retarget_io.o
         36          8        456          0       1024          0   startup_stm32f746xx.o
@@ -4472,9 +4495,9 @@ Image component sizes
         18          0         24          4          0          0   system_stm32f7xx.o
 
     ----------------------------------------------------------------------
-     28206          8     971780         16     206468          0   Object Totals
+     35518          8     761508         16     203908          0   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-        26          0          3          0          0          0   (incl. Padding)
+        24          0          4          0          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -4530,15 +4553,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     32092        114     971780         20     206468          0   Grand Totals
-     32092        114     971780         20     206468          0   ELF Image Totals
-     32092        114     971780         20          0          0   ROM Totals
+     39404        114     761508         20     203908          0   Grand Totals
+     39404        114     761508         20     203908          0   ELF Image Totals
+     39404        114     761508         20          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)              1003872 ( 980.34kB)
-    Total RW  Size (RW Data + ZI Data)            206488 ( 201.65kB)
-    Total ROM Size (Code + RO Data + RW Data)    1003892 ( 980.36kB)
+    Total RO  Size (Code + RO Data)               800912 ( 782.14kB)
+    Total RW  Size (RW Data + ZI Data)            203928 ( 199.15kB)
+    Total ROM Size (Code + RO Data + RW Data)     800932 ( 782.16kB)
 
 ==============================================================================
 

@@ -32,7 +32,7 @@ arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
     // used for SIMD acceleration in conv
     q31_t input_15x2, kernel_15x2;
     q31_t offset_q15x2 = __PKHBT(in_offset, in_offset, 16);
-    const q7_t *filter_ptr, *in_ptr_0, *in_ptr_1, *end_ptr;
+    const q7_t *in_ptr_0, *in_ptr_1, *end_ptr;
     q7_t *out_ptr;
 
     // used for decode and storage
@@ -41,7 +41,6 @@ arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
     int32_t last_out_ch = 0, cur_out_ch = 0;
     int32_t last_in_ch = 0, cur_in_ch = 0;
     int32_t mat_flag = 0;
-
     // used for output and requant
     int32_t mult = quant_params->multiplier;
     int32_t shift = quant_params->shift;
@@ -58,25 +57,23 @@ arm_status arm_fully_connected_s8_sparse_CHW (const cmsis_nn_context *ctx,
     mat_flag = 0;
     block_cnt = 0;
 
-    filter_ptr = filter_data;
-    end_ptr = filter_ptr + input_count;
+    filter_data = filter_data;
+    end_ptr = filter_data + input_count;
 
-    while (filter_ptr < end_ptr) {
+    while (filter_data < end_ptr) {
         // decode procedure
         cur_out_ch = last_out_ch;
         if (block_cnt == 0) {
-            cur_in_ch = (*filter_ptr++) + last_in_ch + 128;
-            cur_val = *filter_ptr++;
+            cur_in_ch = (*filter_data++) + last_in_ch + 128;
+            cur_val = *filter_data++;
 
             if (cur_val == 0) {
                 block_cnt = block - 1;
             }
         } else {
             cur_in_ch = last_in_ch + 1;
-            cur_val = (*filter_ptr++);
+            cur_val = (*filter_data++);
         }
-
-        cur_val = *filter_ptr++;
 
         if (++block_cnt >= block) {
             block_cnt = 0;

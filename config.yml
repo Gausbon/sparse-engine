@@ -8,7 +8,7 @@ image_class: 3
 # sparse_choice == 0: force dense
 # sparse_choice == 1: force sparse
 # sparse_choice == 2: self adoption
-sparse_choice: 0
+sparse_choice: 2
 
 # constant part
 # full tensor path: ../TinySPOS/{tensor_path}
