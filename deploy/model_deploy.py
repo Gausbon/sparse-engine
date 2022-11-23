@@ -665,7 +665,7 @@ class Model_deployer(Layer_deployer):
         
         self.file_writer.writeln('printf("classifier finished\\r\\n");', 'func')
         
-        self.file_writer.write_end(self.image_class, self.max_buf_size, self.max_quant_size)
+        self.file_writer.write_end(self.image_class, (self.max_buf_size+64), self.max_quant_size)
 
         print('-'*70)
         print('Model deploy completed')

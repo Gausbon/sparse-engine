@@ -1,6 +1,8 @@
 #include "func.h"
 #include "arm_nnfunctions.h"
 #include "arm_nnsupportfunctions.h"
+#include "stdio.h"
+
 int32_t arm_convolve_s8_sparse_get_buffer_size (const cmsis_nn_dims *output_dims)
 {
     return sizeof(q31_t) * (output_dims->w) * (output_dims->h);
@@ -152,6 +154,7 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
         return ARM_MATH_ARGUMENT_ERROR;
     }
     
+    // assert block == 2 or block == 4
     // conv information
     
     const int32_t batch = input_dims->n;
@@ -171,150 +174,96 @@ arm_status arm_convolve_s8_sparse (const cmsis_nn_context *ctx,
     const int32_t act_max = conv_params->activation.max;
     
     q31_t *buffer = (q31_t *)(ctx->buf);
+    q31_t *dec_buf = buffer + (arm_convolve_s8_sparse_get_buffer_size(output_dims) >> 2);
+    q31_t *dec_end_ptr, *dec_ptr = dec_buf;
+    q31_t *dec_buf_end = buffer + ((ctx->size) >> 2);
 
-    int32_t double_flag = 0;
     q7_t last_val = 0, cur_val = 0;
-    int32_t last_out_ch = 0, cur_out_ch = 0;
-    int32_t last_h = 0, cur_h = 0;
-    int32_t last_w = 0, cur_w = 0;
-    int32_t last_in_ch = 0, cur_in_ch = 0;
-    int32_t mat_flag = 0;
+    int32_t last_pos[4] = {0};
+    int32_t cur_pos[4] = {0};
 
     q31_t *mult_ptr = quant_params->multiplier;
     q31_t *shift_ptr = quant_params->shift;
 
-    int32_t output_count = output_x * output_y;
+    int32_t output_size = output_x * output_y;
     int32_t stride_y_size = stride_y * input_x * input_ch;
     int32_t stride_x_size = stride_x * input_ch;
     
     int32_t block_cnt = 0;
+    int32_t res = 0;
 
     for (int32_t i_batch = 0; i_batch < batch; ++i_batch) {
-        memset(buffer, 0, sizeof(q31_t) * output_count);
+        memset(buffer, 0, sizeof(q31_t) * output_size);
         
         const q7_t *filter_ptr = filter_data;
         const q7_t *end_ptr = filter_ptr + input_count;
         const q7_t *in_ptr = &input_data[i_batch * input_x * input_y * input_ch];
         q7_t *out_ptr = &output_data[i_batch * output_x * output_y * output_ch];
 
-        last_val = 0;
-        last_out_ch = 0;
-        last_in_ch = 0;
-        last_h = 0;
-        last_w = 0;
-
-        double_flag = 0;
-        mat_flag = 0;
         block_cnt = 0;
         
-        while (filter_ptr < end_ptr) {
+        while (1) {
             // decode procedure
-            cur_out_ch = last_out_ch;
-            cur_h = last_h;
-            cur_w = last_w;
-            if (block_cnt == 0) {
-                cur_in_ch = (*filter_ptr++) + last_in_ch + 128;
-                cur_val = (*filter_ptr++);
-
-                if (cur_val == 0) {
-                    block_cnt = block - 1;
-                }
-
-                while (cur_in_ch >= input_ch) {
-                    ++cur_w;
-                    cur_in_ch -= input_ch;
-                    while (cur_w >= kernel_x) {
-                        ++cur_h;
-                        cur_w -= kernel_x;
-                        while (cur_h >= kernel_y) {
-                            ++cur_out_ch;
-                            cur_h -= kernel_y;
-                            mat_flag = 1;
-                        }
+// decode procedure
+            if (dec_ptr < dec_end_ptr) {
+                if (block_cnt == 0) {
+                    memcpy(last_pos, dec_ptr, 16);
+                    dec_ptr += 4;
+                    last_val = (q7_t) (*dec_ptr++);
+                    if (cur_pos[3] != last_pos[3]) {
+                        arm_nn_output_per_channel ( cur_pos[3], last_pos[3], out_offset, output_size,
+                            output_ch, act_min, act_max, bias_data, mult_ptr, shift_ptr, buffer,
+                            out_ptr);
                     }
+                    memcpy(cur_pos, last_pos, 16);
+                    ++cur_pos[0];
+                    cur_val = (q7_t) (*dec_ptr++);
+
+                    block_cnt = (block_cnt + 2) % block;
+                } else {
+                    last_pos[0] += 2;
+                    last_val = (q7_t) (*dec_ptr++);
+
+                    cur_pos[0] += 2;
+                    cur_val = (q7_t) (*dec_ptr++);
+
+                    block_cnt = (block_cnt + 2) % block;
                 }
             } else {
-                cur_in_ch = last_in_ch + 1;
-                cur_val = (*filter_ptr++);
-            }
-
-            if (++block_cnt >= block) {
-                block_cnt = 0;
-            }
-            
-            if (mat_flag) {   
-                // change the output channel, last output channel conv is done
-                if (double_flag == 1 && last_val != 0) {
-                    // remain one val to conv (last_val)
-                    arm_nn_convolve_s8_single_sparse(conv_params,
-                        stride_x_size, stride_y_size,
-                        in_ptr,
-                        input_x, input_y,
-                        output_x, output_y,
-                        input_ch,
-                        last_in_ch, last_h,
-                        last_w, last_val,
-                        buffer);
+                dec_ptr = dec_buf;
+                //printf("start\r\n");
+                dec_end_ptr = arm_nn_decode_4d (dec_buf, dec_buf_end,
+                        &filter_ptr, end_ptr,
+                        cur_pos, &res,
+                        input_ch, kernel_x,
+                        kernel_y, block);
+                if (dec_end_ptr == dec_buf) {
+                    break;
                 }
-                double_flag = 0;
-
-                // start to output
-                arm_nn_output_per_channel ( last_out_ch, cur_out_ch, out_offset, output_count,
-                        output_ch, act_min, act_max, bias_data, mult_ptr, shift_ptr, buffer,
-                        out_ptr);
-                
-                // reset the buffer and flag
-                buffer = (q31_t *)(ctx->buf);
-                memset(buffer, 0, sizeof(q31_t) * output_count);
-                mat_flag = 0;
-            }
-
-            if (double_flag && !(last_val == 0 && cur_val == 0)) {
-                // use SIMD instructions to compute two val (last and cur val)
-                
-                arm_nn_convolve_s8_double_sparse(conv_params,
-                        stride_x_size, stride_y_size,
-                        in_ptr,
-                        input_x, input_y,
-                        output_x, output_y,
-                        input_ch,
-                        last_in_ch, last_h,
-                        last_w, last_val,
-                        cur_in_ch, cur_h,
-                        cur_w, cur_val,
-                        buffer);
+                continue;
             }
             
-            double_flag = 1 - double_flag;                
-            last_out_ch = cur_out_ch;
-            last_h = cur_h;
-            last_w = cur_w;
-            last_in_ch = cur_in_ch;
-            last_val = cur_val;
+
+            arm_nn_convolve_s8_double_sparse(conv_params,
+                    stride_x_size, stride_y_size,
+                    in_ptr,
+                    input_x, input_y,
+                    output_x, output_y,
+                    input_ch,
+                    last_pos[0], last_pos[1],
+                    last_pos[2], last_val,
+                    cur_pos[0], cur_pos[1],
+                    cur_pos[2], cur_val,
+                    buffer);
         }
-        
-        if (double_flag) {
-            // remain one val to conv (cur_val)
-            arm_nn_convolve_s8_single_sparse(conv_params,
-                        stride_x_size, stride_y_size,
-                        in_ptr,
-                        input_x, input_y,
-                        output_x, output_y,
-                        input_ch,
-                        cur_in_ch, cur_h,
-                        cur_w, cur_val,
-                        buffer);
-        }
-        
-        double_flag = 0;
 
         // start to output finally  
-        arm_nn_output_per_channel ( cur_out_ch, output_ch, out_offset, output_count,
+        arm_nn_output_per_channel ( cur_pos[3], output_ch, out_offset, output_size,
                     output_ch, act_min, act_max, bias_data, mult_ptr, shift_ptr, buffer,
                     out_ptr);
 
         buffer = (q31_t *)(ctx->buf);
-        memset(buffer, 0, sizeof(q31_t) * output_count);
+        memset(buffer, 0, sizeof(q31_t) * output_size);
     }
 
     return ARM_MATH_SUCCESS;

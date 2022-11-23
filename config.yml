@@ -1,5 +1,5 @@
 # full model_config_path: ../TinySPOS/configs/{model_config_path}/quant_dmtp_single.yml
-model_config_path: 'kserhfg7_Ii5Xv/5tzib08c_tCGwn'
+model_config_path: 'r312lhj6_vq84Q/qen19s8p_iQkBi'
 
 # input image info
 image_path: 'input/3.npy'
@@ -13,6 +13,9 @@ sparse_choice: 2
 # constant part
 # full tensor path: ../TinySPOS/{tensor_path}
 tensor_path: 'tensor/'
+
+# softmax opt
+softmax_opt: False
 
 # full memory_list path: ../TinySPOS/{memory_list}
 memory_list: 'statistic.yml'

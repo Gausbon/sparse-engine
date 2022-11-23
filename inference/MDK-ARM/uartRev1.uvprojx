@@ -507,6 +507,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\cmsis_append\arm_layernorm_fp64.c</FilePath>
             </File>
+            <File>
+              <FileName>arm_nn_decode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\cmsis_append\arm_nn_decode.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

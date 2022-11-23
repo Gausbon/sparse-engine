@@ -29,7 +29,8 @@ class Layer_deployer():
         self.counter = 0
 
         self.sparse_choice = self.config['sparse_choice']
-        
+        self.softmax_opt = self.config['softmax_opt']
+
         # dynamic size
         self.max_quant_size = 0
         self.max_buf_size = 0
@@ -475,7 +476,10 @@ class Layer_deployer():
             in_addr:int, out_addr:int):
 
         # init
-        param_list = ['&ctx', get_addr_str(in_addr), dim_b, dim_c]
+        param_list = []
+        if self.softmax_opt:
+            param_list.append('&ctx')
+        param_list = [get_addr_str(in_addr), dim_b, dim_c]
 
         # input quant
         qi_scale = block_dict[name + 'qi.scale']
@@ -489,7 +493,9 @@ class Layer_deployer():
 
         param_list.extend([qi_mult, qi_shift, -248, 
                 get_addr_str(out_addr)])
-        self.file_writer.write_func_call('arm_softmax_s8_fast', param_list)
-
+        if self.softmax_opt:
+            self.file_writer.write_func_call('arm_softmax_s8_fast', param_list)
+        else:
+            self.file_writer.write_func_call('arm_softmax_s8', param_list)
         self.file_writer.write_extime('softmax')
 

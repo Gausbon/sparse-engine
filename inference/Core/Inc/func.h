@@ -115,6 +115,18 @@ arm_cmsis_nn_status arm_nn_transpose_bhwc_to_bwhc_q7(
                                             const q7_t *input_section, 
                                             q7_t *output_section);
 
+q31_t *arm_nn_decode_4d (q31_t *dec_buf,
+                        q31_t *dec_buf_end,
+                        const q7_t **filter_ptr,
+                        const q7_t *end_ptr,
+                        int32_t *last_pos,
+                        int32_t *res_out,
+                        const int32_t input_ch,
+                        const int32_t kernel_x,
+                        const int32_t kernel_y,
+                        const int32_t block)  ;
+
+
 void arm_softmax_s8_fast(const cmsis_nn_context *ctx,
                     const int8_t *input,
                     const int32_t num_rows,

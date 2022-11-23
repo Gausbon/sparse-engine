@@ -22,6 +22,7 @@
 "uartrev1\arm_depthwise_conv_s8_sparse_chw.o"
 "uartrev1\arm_fully_connected_s8_sparse_chw.o"
 "uartrev1\arm_layernorm_fp64.o"
+"uartrev1\arm_nn_decode.o"
 "uartrev1\system_stm32f7xx.o"
 "uartrev1\stm32f7xx_hal_cortex.o"
 "uartrev1\stm32f7xx_hal_tim.o"

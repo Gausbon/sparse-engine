@@ -44,6 +44,26 @@ def conv_data_to_sparse(input, block, sparse_choice):
 # encode using algorithm 1
 def conv_data_to_sparse_encode_1(input, block):
     filter_list = []
+    input_f = input.flatten()
+    last_pos = 0
+    block_cnt = 0
+    for i in range(0, len(input_f)):
+        if (block_cnt != 0):
+            filter_list.append(input_f[i])
+            block_cnt = (block_cnt + 1) % block
+            if (block_cnt == 0):
+                last_pos = i
+        else:
+            if (input_f[i] == 0):
+                continue
+            else:
+                col_dis = i - last_pos
+                while (col_dis >= 256):
+                    col_dis -= 255
+                    filter_list.extend([127, 0])
+                filter_list.extend([col_dis-128, input_f[i]])
+                block_cnt = (block_cnt + 1) % block
+    '''
     if (len(input.shape) == 4):
         info_list = [0, 0, 0, 0]
         third_dim_count = input.shape[3]
@@ -115,6 +135,7 @@ def conv_data_to_sparse_encode_1(input, block):
 
     else:
         print('wrong filter shape! ' + str(input.shape))
+    '''
     return np.array(filter_list)
 
 
