@@ -479,7 +479,7 @@ class Layer_deployer():
         param_list = []
         if self.softmax_opt:
             param_list.append('&ctx')
-        param_list = [get_addr_str(in_addr), dim_b, dim_c]
+        param_list.extend([get_addr_str(in_addr), dim_b, dim_c])
 
         # input quant
         qi_scale = block_dict[name + 'qi.scale']
